@@ -18,7 +18,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
 
 The script creates an isolated Python 3.11 environment, installs dependencies, downloads pinned model versions, runs core tests and starts the service. The first installation needs internet access. Models and the environment use several GB, with additional space needed for download caches. Speech generation and recording processing run locally.
 
-Open the [WebUI](http://127.0.0.1:8961/). For later sessions, use `启动语音平台.cmd` to start and `停止语音平台.cmd` to stop, or use the CLI commands in the [installation guide](docs/INSTALL.en.md). Closing the browser does not cancel background tasks.
+Open the [WebUI](http://127.0.0.1:8961/). For later sessions, use `start-voice.cmd` to start and `stop-voice.cmd` to stop, or use the CLI commands in the [installation guide](docs/INSTALL.en.md). Closing the browser does not cancel background tasks.
 
 The public repository contains no model weights, reference recordings, personal voices, databases or preinstalled environments.
 
@@ -42,7 +42,7 @@ Controllable cloning combines a reference voice with a style description. Hi-Fi 
 
 Import TXT or Markdown in UTF-8, UTF-16, GB2312, GBK or GB18030. Chapters are detected and text is split into segments, including text with no headings or line breaks.
 
-Pause and resume work, retry failed segments, review chapter audio and export chapters or a whole book. Content is paginated. Import and indexing checks for very large texts do not mean a whole book has been generated as audio; generation time depends on text length, model and hardware. The [long-form guide](docs/LONGFORM.md) is in Chinese.
+Pause and resume work, retry failed segments, review chapter audio and export chapters or a whole book. Content is paginated. Import and indexing checks for very large texts do not mean a whole book has been generated as audio; generation time depends on text length, model and hardware. See the [long-form guide](docs/LONGFORM.en.md).
 
 ## CLI and API
 
@@ -55,14 +55,18 @@ bin\voice.cmd health
 
 [Global commands and MCP](docs/INSTALL.en.md#global-commands-and-mcp) are optional. The WebUI works without Codex, and the API works without a browser. [OpenAPI documentation](http://127.0.0.1:8961/docs) is available while the service is running.
 
+## Guides
+
+[Long-form narration](docs/LONGFORM.en.md) · [Reference audio](docs/REFERENCE_PREPROCESSING.en.md) · [Audio processing](docs/AUDIO_RESTORATION.en.md) · [Maintenance](docs/MAINTENANCE.en.md)
+
 ## Files and maintenance
 
 Models are stored in `models/`, assets and databases in `data/`, and caches and logs in `runtime/`. Paths are configured in `config/platform.json`. Exports are saved separately; post-processing does not overwrite original audio.
 
 Finished tasks are archived after 7 days by default, or manually in batches. Deleted items from management pages go to a recoverable recycle bin and do not immediately free disk space. The following detailed guides are in Chinese:
 
-- [Maintenance and backups](docs/MAINTENANCE.md) · [API](docs/API.md) · [Architecture](docs/ARCHITECTURE.md) · [Modules](docs/MODULES.md)
-- [Reference audio](docs/REFERENCE_PREPROCESSING.md) · [Audio processing](docs/AUDIO_RESTORATION.md) · [Interface languages](docs/LOCALIZATION.md)
+- [API](docs/API.md) · [Architecture](docs/ARCHITECTURE.md) · [Modules](docs/MODULES.md)
+- [Interface languages](docs/LOCALIZATION.md)
 - [Testing and validation scope](docs/TESTING.md) · [Source publication](docs/PUBLISHING.md)
 
 ## License

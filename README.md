@@ -18,7 +18,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
 
 脚本会建立独立的 Python 3.11 环境，安装依赖，下载固定版本的模型，运行核心测试并启动服务。第一次安装需要联网；模型和运行环境占用数 GB，下载缓存还需额外空间。配音和录音处理在本机完成。
 
-安装后打开 [WebUI](http://127.0.0.1:8961/)。以后双击 `启动语音平台.cmd`，停止用 `停止语音平台.cmd`。关掉网页不会取消后台任务。详细步骤见 [安装说明](docs/INSTALL.md)。
+安装后打开 [WebUI](http://127.0.0.1:8961/)。以后双击 `start-voice.cmd`，停止用 `stop-voice.cmd`。关掉网页不会取消后台任务。详细步骤见 [安装说明](docs/INSTALL.md)。
 
 公开仓库不包含模型权重、参考录音、个人音色、数据库或预装环境。
 
@@ -55,6 +55,10 @@ bin\voice.cmd health
 
 [全局命令与 MCP](docs/INSTALL.md#全局命令与-mcp)为可选配置。WebUI 不依赖 Codex，API 不依赖浏览器。启动服务后可查看 [OpenAPI 文档](http://127.0.0.1:8961/docs)。
 
+## 使用说明
+
+[长文配音](docs/LONGFORM.md) · [参考音频](docs/REFERENCE_PREPROCESSING.md) · [音频处理](docs/AUDIO_RESTORATION.md) · [维护说明](docs/MAINTENANCE.md)
+
 ## 文件与维护
 
 模型保存在 `models/`，资产和数据库在 `data/`，缓存与日志在 `runtime/`。路径统一在 `config/platform.json` 配置。导出另存文件，后处理不覆盖原始音频。
@@ -62,7 +66,7 @@ bin\voice.cmd health
 已结束任务默认 7 天后归档，也可手动批量归档。管理页删除的内容进入可恢复的回收站，不会立即释放磁盘空间。备份与恢复见 [维护说明](docs/MAINTENANCE.md)。
 
 - [API](docs/API.md) · [架构](docs/ARCHITECTURE.md) · [模块导航](docs/MODULES.md)
-- [参考音频](docs/REFERENCE_PREPROCESSING.md) · [音频处理](docs/AUDIO_RESTORATION.md) · [界面语言](docs/LOCALIZATION.md)
+- [界面语言](docs/LOCALIZATION.md)
 - [测试与验证范围](docs/TESTING.md) · [源码发布](docs/PUBLISHING.md)
 
 ## 许可

@@ -37,7 +37,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -SkipModels -NoSt
 
 ## 일상적인 사용
 
-루트의 `启动语音平台.cmd`(시작), `停止语音平台.cmd`(종료), `健康检查.cmd`(상태 확인)를 사용하거나 설치 폴더에서 다음 명령을 실행합니다.
+루트의 `start-voice.cmd`(시작), `stop-voice.cmd`(종료), `check-health.cmd`(상태 확인)를 사용하거나 설치 폴더에서 다음 명령을 실행합니다.
 
 ~~~powershell
 bin\voice.cmd start
@@ -66,4 +66,4 @@ powershell -ExecutionPolicy Bypass -File .\scripts\register-global.ps1
 
 기본 수신 주소는 `127.0.0.1`입니다. 원격 접속에는 `host`, `allowed_hosts`를 명시하고 `token_env`가 지정한 서비스 환경 변수에 토큰을 설정해야 합니다. 토큰이 없으면 원격 시작을 거부합니다. HTTP는 Bearer 인증을 사용하며 WebUI는 토큰 입력 후 세션을 만듭니다. 인터넷에 노출하려면 신뢰할 수 있는 TLS 역방향 프록시도 필요합니다. 인증 정보를 소스에 적거나 커밋하지 마세요.
 
-백업과 복구는 [유지 관리 안내](MAINTENANCE.md)(중국어)를 참고하세요.
+백업과 복구는 [유지 관리 안내](MAINTENANCE.ko.md)를 참고하세요.

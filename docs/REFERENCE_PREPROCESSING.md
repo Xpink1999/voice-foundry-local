@@ -1,6 +1,8 @@
-# 参考录音预处理与多参考人物
+**简体中文** | [English](REFERENCE_PREPROCESSING.en.md) | [日本語](REFERENCE_PREPROCESSING.ja.md) | [한국어](REFERENCE_PREPROCESSING.ko.md)
 
-版本 0.2.0。入口为 WebUI「声音设计与音色库」，也可使用 API、CLI 或 MCP。分析与生成全程在本机完成，音频不会发往第三方服务。
+# 参考音频准备
+
+入口为 WebUI「声音设计与音色库」，也可使用 API、CLI 或 MCP。分析与生成全程在本机完成，音频不会发往第三方服务。
 
 ## 操作流程
 
@@ -43,12 +45,17 @@ VoxCPM2 的 Hi-Fi 沿用片段演绎，禁用额外声音描述，并保留人�
 
 ## CLI / MCP
 
-```powershell
-voice upload-reference .\访谈.wav --source "本人录音" --authorization "已获得指定用途授权" --rights-confirmed
+以下示例在注册全局 CLI 后使用。将 ID 字符串替换为服务返回的实际 ID，按需单独执行；授权选项只在确有使用权时填写。
+
+~~~powershell
+$voiceId = "VOICE_ID"
+$referenceId = "REFERENCE_ID"
+$recordingId = "RECORDING_ID"
+voice upload-reference .\recording.wav --source "My recording" --authorization "Permission for this use" --rights-confirmed
 voice recordings
-voice recording <录音UUID>
-voice generate --text "故事从这里开始。" --voice-id <人物UUID> --reference-id <片段UUID> --clone-mode hifi --wait
-```
+voice recording $recordingId
+voice generate --text "This is a voice sample." --voice-id $voiceId --reference-id $referenceId --clone-mode hifi --wait
+~~~
 
 `upload-reference` 默认执行自动预处理，返回录音任务 UUID；`--direct` 保留旧的短参考直接上传路径。CLI 保存片段、比较等暂通过 REST 或 MCP 调用。
 
@@ -57,3 +64,7 @@ MCP 新增 `voice_upload_recording`、`voice_recording`、`voice_save_reference_
 ## 验证
 
 核心测试使用临时数据库和测试引擎，真实模型验证需要单独执行。公开版不附带历史录音或运行截图；验证方法见 [测试说明](TESTING.md)。
+
+## 相关说明
+
+[README](../README.md) · [安装说明](INSTALL.md) · [长文配音](LONGFORM.md) · [音频处理](AUDIO_RESTORATION.md) · [维护说明](MAINTENANCE.md)

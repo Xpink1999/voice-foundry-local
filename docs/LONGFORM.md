@@ -1,4 +1,6 @@
-# 长文配音与资产整理（0.4）
+**简体中文** | [English](LONGFORM.en.md) | [日本語](LONGFORM.ja.md) | [한국어](LONGFORM.ko.md)
+
+# 长文配音
 
 ## 使用顺序
 
@@ -70,21 +72,24 @@
 
 ## CLI / MCP / API
 
-```powershell
-voice import-book "D:\稿件\整本小说.txt" --encoding auto --voice-id <人物UUID>
-voice book <作品UUID> --chapters
-voice book-resume <作品UUID>
-voice book-pause <作品UUID>
-voice book-retry-failed <作品UUID>
-voice book-segments <作品UUID> 1 --limit 25
-voice book-export <作品UUID> --mode chapters --draft
-voice book-export-status <导出UUID>
-voice book-download <导出UUID> --dest "D:\输出"
-voice assets --kind results
-voice delete-assets --kind results --ids <结果UUID>         # 默认只预览
-voice delete-assets --kind results --ids <结果UUID> --apply # 可恢复删除
-voice restore-asset-batch <删除批次UUID>
-```
+以下示例在注册全局 CLI 后使用。将 ID 字符串替换为服务返回的实际 ID，按需单独执行；授权选项只在确有使用权时填写。
+
+~~~powershell
+$voiceId = "VOICE_ID"
+$bookId = "BOOK_ID"
+$exportId = "EXPORT_ID"
+voice import-book .\book.txt --encoding auto --voice-id $voiceId
+voice book $bookId --chapters
+voice book-resume $bookId
+voice book-pause $bookId
+voice book-retry-failed $bookId
+voice book-segments $bookId 1 --limit 25
+voice book-export $bookId --mode chapters --draft
+voice book-export-status $exportId
+voice book-download $exportId --dest .\output
+~~~
+
+`voice delete-assets` 默认只预览；显式加 `--apply` 后移入回收站。用删除批次 ID 调用 `voice restore-asset-batch` 可恢复整批。
 
 长文 REST 前缀 /api/v1/longform，资产管理前缀 /api/v1/assets；在线 /docs 提供完整契约。MCP 新增长文导入、分页、续作、导出和资产管理工具，仍不提供代替用户试听批准的工具。新的 MCP 连接可发现 33 个工具；当前已连接的 Codex 需要重连，不必重复安装模型。
 
@@ -93,3 +98,7 @@ voice restore-asset-batch <删除批次UUID>
 config/platform.json 的 longform 集中管理 max_source_bytes、segment_chars、fallback_chapter_chars、import_batch_segments、pause_ms、block_frames。只影响新作品的配置快照。数据库以增量表/列增加功能，不删除旧实体；正常在线备份包含长文索引和回收站元数据，完整恢复还必须备份整个 data/longform 以及原有录音/音频目录。
 
 原始文件、规范化文本、每次生成和导出目录均保留。没有实现释放磁盘的不可恢复清理，也没有宣称完成千万字符全量语音的设备/听感验收。规模测试、真实生成和人工审核的区别见 [测试说明](TESTING.md)。
+
+## 相关说明
+
+[README](../README.md) · [安装说明](INSTALL.md) · [参考音频](REFERENCE_PREPROCESSING.md) · [音频处理](AUDIO_RESTORATION.md) · [维护说明](MAINTENANCE.md)

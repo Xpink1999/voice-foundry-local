@@ -1,6 +1,10 @@
+**简体中文** | [English](MAINTENANCE.en.md) | [日本語](MAINTENANCE.ja.md) | [한국어](MAINTENANCE.ko.md)
+
 # 维护、恢复与更新
 
 ## 日常运行
+
+在安装目录双击 `start-voice.cmd`、`stop-voice.cmd` 或 `check-health.cmd`。启动脚本也会打开 WebUI。
 
 - `voice start / health / stop`；没有注册系统服务或开机任务。
 - `voice unload` 释放本平台模型；空闲默认 300 秒自动卸载。不终止其他软件。
@@ -10,7 +14,15 @@
 
 ## 备份
 
-`voice backup` 通过 SQLite 在线备份机制保存一致数据库与配置，位置 data/backups/<UUID>。这不等于完整音频备份。完整备份需额外保存 data/references、data/recordings、data/reference-comparisons、data/audio-processing、data/originals、data/exports、models 下各模型的 provenance.json 和源码/依赖锁；大权重可凭固定版本重下。
+在安装目录执行：
+
+~~~powershell
+bin\voice.cmd backup
+~~~
+
+该命令通过 SQLite 在线备份机制保存一致数据库与配置，位置 data/backups/<UUID>。这不等于完整音频备份。完整备份需额外保存 data/references、data/recordings、data/reference-comparisons、data/audio-processing、data/originals、data/exports、models 下各模型的 provenance.json 和源码/依赖锁；大权重可凭固定版本重下。
+
+完整复制数据目录期间应停止服务，以保持数据库和文件一致；替换前先另存当前数据。
 
 全局注册前的用户 PATH 和 Codex 配置备份在 data/backups/global-<时间>。备份可能包含私有配置，不上传、不贴到日志。
 
@@ -48,3 +60,7 @@
 回收站用于整理和恢复，不释放磁盘。删除章节/分段后统计重新计算，受影响章节需要重审；恢复整批保留关联，恢复章节不会复活此前单独删除的段。没有不可恢复清空按钮。当前源字节上限、分段/自动分章/块大小统一在 longform 配置。
 
 大文件验证脚本 scripts/verify_longform_scale.py 使用独立 8962 服务和 runtime/longform-scale，结束后关闭自己的服务；大样本文本不写入用户作品库。该目录是验证材料，不作为正式声音或用户内容。
+
+## 相关说明
+
+[README](../README.md) · [安装说明](INSTALL.md) · [长文配音](LONGFORM.md) · [参考音频](REFERENCE_PREPROCESSING.md) · [音频处理](AUDIO_RESTORATION.md)

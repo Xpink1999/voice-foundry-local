@@ -18,7 +18,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
 
 スクリプトは専用の Python 3.11 環境を作成し、依存関係と指定バージョンのモデルを取得して、コアテスト後にサービスを起動します。初回はインターネット接続が必要です。モデルと環境に数 GB、ダウンロードキャッシュに追加の容量を使用します。音声生成と録音処理はローカルで行います。
 
-[WebUI](http://127.0.0.1:8961/) を開きます。次回からは `启动语音平台.cmd` で起動、`停止语音平台.cmd` で停止できます。[インストール手順](docs/INSTALL.ja.md)には CLI での操作も記載しています。ブラウザーを閉じてもバックグラウンドのタスクは中止されません。
+[WebUI](http://127.0.0.1:8961/) を開きます。次回からは `start-voice.cmd` で起動、`stop-voice.cmd` で停止できます。[インストール手順](docs/INSTALL.ja.md)には CLI での操作も記載しています。ブラウザーを閉じてもバックグラウンドのタスクは中止されません。
 
 公開リポジトリにモデルの重み、参照録音、個人の音色、データベース、構築済み環境は含まれません。
 
@@ -42,7 +42,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
 
 TXT、Markdown と UTF-8、UTF-16、GB2312、GBK、GB18030 に対応します。取り込み時に章を検出して分割します。見出しや改行のない文章も自動分割できます。
 
-一時停止と再開、失敗した区間の再試行、章ごとの試聴・審査、章単位または全巻の書き出しに対応します。内容はページ単位で読み込みます。大容量テキストの取り込み・索引作成の検証は、全巻の音声生成完了を意味しません。生成時間は文章量、モデル、ハードウェアによって変わります。[長文ガイド](docs/LONGFORM.md)は中国語です。
+一時停止と再開、失敗した区間の再試行、章ごとの試聴・審査、章単位または全巻の書き出しに対応します。内容はページ単位で読み込みます。大容量テキストの取り込み・索引作成の検証は、全巻の音声生成完了を意味しません。生成時間は文章量、モデル、ハードウェアによって変わります。[長文ガイド](docs/LONGFORM.ja.md)を参照してください。
 
 ## CLI と API
 
@@ -55,14 +55,18 @@ bin\voice.cmd health
 
 [グローバルコマンドと MCP](docs/INSTALL.ja.md#グローバルコマンドと-mcp)は任意の設定です。WebUI は Codex なしで、API はブラウザーなしで使用できます。サービス起動中は [OpenAPI ドキュメント](http://127.0.0.1:8961/docs)を参照できます。
 
+## 利用ガイド
+
+[長文の音声化](docs/LONGFORM.ja.md) · [参照音声](docs/REFERENCE_PREPROCESSING.ja.md) · [音声処理](docs/AUDIO_RESTORATION.ja.md) · [保守](docs/MAINTENANCE.ja.md)
+
 ## ファイルと保守
 
 モデルは `models/`、素材とデータベースは `data/`、キャッシュとログは `runtime/` に保存します。パスは `config/platform.json` で設定します。書き出しは別ファイルに保存し、後処理で元の音声を上書きしません。
 
 終了済みタスクは標準で 7 日後にアーカイブされ、手動での一括アーカイブも可能です。管理画面で削除した項目は復元可能なごみ箱へ移動し、直ちにディスク容量が空くわけではありません。以下の詳細資料は中国語です。
 
-- [保守とバックアップ](docs/MAINTENANCE.md) · [API](docs/API.md) · [構成](docs/ARCHITECTURE.md) · [モジュール](docs/MODULES.md)
-- [参照音声](docs/REFERENCE_PREPROCESSING.md) · [音声処理](docs/AUDIO_RESTORATION.md) · [画面の言語](docs/LOCALIZATION.md)
+- [API](docs/API.md) · [構成](docs/ARCHITECTURE.md) · [モジュール](docs/MODULES.md)
+- [画面の言語](docs/LOCALIZATION.md)
 - [テストと検証範囲](docs/TESTING.md) · [ソース公開](docs/PUBLISHING.md)
 
 ## ライセンス

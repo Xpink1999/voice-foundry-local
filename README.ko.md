@@ -18,7 +18,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
 
 스크립트는 독립된 Python 3.11 환경을 만들고 의존성과 고정 버전 모델을 설치한 뒤 코어 테스트를 실행하고 서비스를 시작합니다. 처음 설치할 때는 인터넷 연결이 필요합니다. 모델과 환경에 수 GB, 다운로드 캐시에 추가 공간이 필요합니다. 음성 생성과 녹음 처리는 로컬에서 실행됩니다.
 
-[WebUI](http://127.0.0.1:8961/)를 엽니다. 다음부터는 `启动语音平台.cmd`로 시작하고 `停止语音平台.cmd`로 종료합니다. CLI 사용법은 [설치 안내](docs/INSTALL.ko.md)에 있습니다. 브라우저를 닫아도 백그라운드 작업은 취소되지 않습니다.
+[WebUI](http://127.0.0.1:8961/)를 엽니다. 다음부터는 `start-voice.cmd`로 시작하고 `stop-voice.cmd`로 종료합니다. CLI 사용법은 [설치 안내](docs/INSTALL.ko.md)에 있습니다. 브라우저를 닫아도 백그라운드 작업은 취소되지 않습니다.
 
 공개 저장소에는 모델 가중치, 참조 녹음, 개인 목소리, 데이터베이스, 설치된 실행 환경이 포함되지 않습니다.
 
@@ -42,7 +42,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
 
 TXT, Markdown과 UTF-8, UTF-16, GB2312, GBK, GB18030 인코딩을 지원합니다. 가져올 때 장을 인식하고 구간을 나눕니다. 제목이나 줄바꿈이 없는 텍스트도 자동 분할합니다.
 
-일시 정지와 이어서 작업, 실패 구간 재시도, 장별 재생·검토, 장별 또는 전체 내보내기를 지원합니다. 내용은 페이지 단위로 읽습니다. 대용량 텍스트의 가져오기·색인 검증이 전체 음성 생성 완료를 뜻하지는 않습니다. 생성 시간은 텍스트 길이, 모델, 하드웨어에 따라 달라집니다. [장문 안내](docs/LONGFORM.md)는 중국어입니다.
+일시 정지와 이어서 작업, 실패 구간 재시도, 장별 재생·검토, 장별 또는 전체 내보내기를 지원합니다. 내용은 페이지 단위로 읽습니다. 대용량 텍스트의 가져오기·색인 검증이 전체 음성 생성 완료를 뜻하지는 않습니다. 생성 시간은 텍스트 길이, 모델, 하드웨어에 따라 달라집니다. [장문 안내](docs/LONGFORM.ko.md)를 참고하세요.
 
 ## CLI와 API
 
@@ -55,14 +55,18 @@ bin\voice.cmd health
 
 [전역 명령과 MCP](docs/INSTALL.ko.md#전역-명령과-mcp)는 선택 사항입니다. WebUI는 Codex 없이, API는 브라우저 없이 사용할 수 있습니다. 서비스가 실행 중일 때 [OpenAPI 문서](http://127.0.0.1:8961/docs)를 확인할 수 있습니다.
 
+## 사용 안내
+
+[장문 음성 제작](docs/LONGFORM.ko.md) · [참조 오디오](docs/REFERENCE_PREPROCESSING.ko.md) · [오디오 처리](docs/AUDIO_RESTORATION.ko.md) · [유지 관리](docs/MAINTENANCE.ko.md)
+
 ## 파일과 유지 관리
 
 모델은 `models/`, 에셋과 데이터베이스는 `data/`, 캐시와 로그는 `runtime/`에 저장합니다. 경로는 `config/platform.json`에서 설정합니다. 내보내기는 별도 파일로 저장하며 후처리가 원본 음성을 덮어쓰지 않습니다.
 
 완료된 작업은 기본적으로 7일 뒤 보관되며 수동 일괄 보관도 가능합니다. 관리 화면에서 삭제한 항목은 복구 가능한 휴지통으로 이동하며 디스크 공간이 즉시 확보되지는 않습니다. 아래 상세 문서는 중국어입니다.
 
-- [유지 관리와 백업](docs/MAINTENANCE.md) · [API](docs/API.md) · [구조](docs/ARCHITECTURE.md) · [모듈](docs/MODULES.md)
-- [참조 오디오](docs/REFERENCE_PREPROCESSING.md) · [오디오 처리](docs/AUDIO_RESTORATION.md) · [화면 언어](docs/LOCALIZATION.md)
+- [API](docs/API.md) · [구조](docs/ARCHITECTURE.md) · [모듈](docs/MODULES.md)
+- [화면 언어](docs/LOCALIZATION.md)
 - [테스트와 검증 범위](docs/TESTING.md) · [소스 공개](docs/PUBLISHING.md)
 
 ## 라이선스

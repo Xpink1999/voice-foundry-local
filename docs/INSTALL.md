@@ -37,7 +37,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -SkipModels -NoSt
 
 ## 日常操作
 
-双击根目录的 `启动语音平台.cmd`、`停止语音平台.cmd` 或 `健康检查.cmd`，也可以在安装目录使用以下命令：
+双击根目录的 `start-voice.cmd`、`stop-voice.cmd` 或 `check-health.cmd`，也可以在安装目录使用以下命令：
 
 ~~~powershell
 bin\voice.cmd start

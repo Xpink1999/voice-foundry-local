@@ -37,7 +37,7 @@ This is useful for inspecting source and running core tests. Actual speech gener
 
 ## Daily use
 
-Use the root launchers `启动语音平台.cmd` (start), `停止语音平台.cmd` (stop) and `健康检查.cmd` (health), or run these commands from the installation directory:
+Use the root launchers `start-voice.cmd` (start), `stop-voice.cmd` (stop) and `check-health.cmd` (health), or run these commands from the installation directory:
 
 ~~~powershell
 bin\voice.cmd start
@@ -66,4 +66,4 @@ Paths, models, queue and service settings are in `config/platform.json`. Relativ
 
 The default listener is `127.0.0.1`. Remote access requires explicit `host` and `allowed_hosts` settings and a token in the service environment variable named by `token_env`. Remote startup is rejected without a token. HTTP uses Bearer authentication; the WebUI creates a session after token entry. Internet-facing access also needs a trusted TLS reverse proxy. Do not put credentials in source files or commit them.
 
-The [maintenance guide](MAINTENANCE.md), covering backups and recovery, is in Chinese.
+See the [maintenance guide](MAINTENANCE.en.md) for backups and recovery.

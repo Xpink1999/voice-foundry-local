@@ -22,6 +22,11 @@
       "sha256": "f3da5eeeea8b46a1152163777f3e5fb6b2a1d7961a82250651340b98e5c6dece"
     },
     {
+      "path": "check-health.cmd",
+      "bytes": 93,
+      "sha256": "1b8a61c927484e365c20ef8fc513ea114a646ba783484de17faa4f71a3aeba40"
+    },
+    {
       "path": "config/model-sources.json",
       "bytes": 5715,
       "sha256": "73c2024129729b4a8d989737dc1cf82100b7e4d1d3cae99868381fcff17ce827"
@@ -42,29 +47,44 @@
       "sha256": "d251e6f4b028086628d8776de2ea6dc56f6288bbd0bee7e8addfb9d8e6c6c589"
     },
     {
+      "path": "docs/AUDIO_RESTORATION.en.md",
+      "bytes": 7732,
+      "sha256": "c8c6440aa5df0af4c2eae1d9443c6853d642f653d1d80f1230498cb4bad2e220"
+    },
+    {
+      "path": "docs/AUDIO_RESTORATION.ja.md",
+      "bytes": 8098,
+      "sha256": "3ed61a996a4f8d2cb34e4e12ce6cc1fdec2e14c1513155f6fbff52d3c5a00317"
+    },
+    {
+      "path": "docs/AUDIO_RESTORATION.ko.md",
+      "bytes": 7866,
+      "sha256": "1af577453c7cece74dfc36fd57b3a75b2975947070d4657e92c625080efa3a9f"
+    },
+    {
       "path": "docs/AUDIO_RESTORATION.md",
-      "bytes": 6250,
-      "sha256": "33d5ca1eeb31a012ce87d96e190057f4a8e9b942a6c8c84d33f33e9ed1c26187"
+      "bytes": 6706,
+      "sha256": "3a153a2abae2b6baa8fd53f13c0e024c1f52cc525d28ae4a06fc338bf5a1d588"
     },
     {
       "path": "docs/INSTALL.en.md",
-      "bytes": 4423,
-      "sha256": "e4634c7712d52989e19e6e24555d63100b6f238be09126b7c8cf20db3a01d5c3"
+      "bytes": 4394,
+      "sha256": "56676e1714180856037d6108cc9f6b49a0398799a8c75e5c2cd3a509afe18448"
     },
     {
       "path": "docs/INSTALL.ja.md",
-      "bytes": 5557,
-      "sha256": "aa58e953ce34517fa7173b052097e38e8db986470984a777d600de5e3f37e190"
+      "bytes": 5530,
+      "sha256": "38ae2b57ae9cf7cd2a7ec97cc4df7947444e6b635e62008f7b22abcfaf0dea2b"
     },
     {
       "path": "docs/INSTALL.ko.md",
-      "bytes": 5093,
-      "sha256": "90d0910e1b0b3f9f416a0bd88eb2612bbab8b9f99f5e6e634bf36c13e49b3152"
+      "bytes": 5070,
+      "sha256": "cdf680760393202aebb58317bcebdfd8c0e58288d1cdbbc1759df10dbff6963a"
     },
     {
       "path": "docs/INSTALL.md",
-      "bytes": 3841,
-      "sha256": "9c9d4a49c0993e4c21394c77903560621a15aa8a3c37449f0039ae0f39420bca"
+      "bytes": 3826,
+      "sha256": "6080533de52b7dd933dfe0b931de7e08e66e90236839c9803079c262e389d624"
     },
     {
       "path": "docs/LOCALIZATION.md",
@@ -72,14 +92,44 @@
       "sha256": "d4a8c147f88f7ea8ad701284e75de587665556760132d8949ac18dd425a400ed"
     },
     {
+      "path": "docs/LONGFORM.en.md",
+      "bytes": 9453,
+      "sha256": "9cb331daf9c7047a6d26af94bddbf9faeb6bff0fcb37568b7196d6f0bdc682c4"
+    },
+    {
+      "path": "docs/LONGFORM.ja.md",
+      "bytes": 10772,
+      "sha256": "15a8194ddc3e0c13054d53f4bd3a2e6cc6db1c617a39df3c126f23aa0f516d33"
+    },
+    {
+      "path": "docs/LONGFORM.ko.md",
+      "bytes": 10732,
+      "sha256": "a88898ba9ed42ab9fa268a493b931c71da2fe6df578875622f7bdd2fee785619"
+    },
+    {
       "path": "docs/LONGFORM.md",
-      "bytes": 9363,
-      "sha256": "0894777d4686f7cf22221e4b19bc8cb90f9544bc68fe2d165b438b21aad81ea1"
+      "bytes": 9727,
+      "sha256": "9bf8c3e2526ff1e66cbd15fad6ca8e3b4475585afaf832829c2b1a77d4857a9c"
+    },
+    {
+      "path": "docs/MAINTENANCE.en.md",
+      "bytes": 6627,
+      "sha256": "059380c20b986e87ce5bb6562e20d05f49e59ce98a8178ab3336989d4e173ec0"
+    },
+    {
+      "path": "docs/MAINTENANCE.ja.md",
+      "bytes": 7500,
+      "sha256": "f8fd811e36daa8366df987a453bb811ac53452291291edb6938f6569277029a3"
+    },
+    {
+      "path": "docs/MAINTENANCE.ko.md",
+      "bytes": 7310,
+      "sha256": "21678acbd1eb6ec7f838e8e2cd97057c13eefcecaea71e531eb9709ac7e1332b"
     },
     {
       "path": "docs/MAINTENANCE.md",
-      "bytes": 4992,
-      "sha256": "25ea1863b84f4f29db81cfa8e3afeb106b007adb4ae39a5e3dd4817003be4699"
+      "bytes": 5543,
+      "sha256": "f6aacbd547e2ce10ed61a458cbdd7a5fb53c01b497916b02146c0cd294f21017"
     },
     {
       "path": "docs/MODULES.md",
@@ -92,9 +142,24 @@
       "sha256": "3e6d4afc709a835736b8d0594900ae86d10cdaa1adb45fb5d5b8eff6370bad59"
     },
     {
+      "path": "docs/REFERENCE_PREPROCESSING.en.md",
+      "bytes": 8132,
+      "sha256": "f623cd689394ebdef68f4bf5a04fb4e65c36674cb2acb8b6cc65dab009535967"
+    },
+    {
+      "path": "docs/REFERENCE_PREPROCESSING.ja.md",
+      "bytes": 8956,
+      "sha256": "e083ad1248c7a3242e63dfecf63076b706a3b2a0c5bffcfd1bf2e9d208dc4f1f"
+    },
+    {
+      "path": "docs/REFERENCE_PREPROCESSING.ko.md",
+      "bytes": 8739,
+      "sha256": "a3996b97cff2c702fd78b2f1f972b4eece9cc7251faa11298c4dfeee0a4bcefc"
+    },
+    {
       "path": "docs/REFERENCE_PREPROCESSING.md",
-      "bytes": 7278,
-      "sha256": "61951a05ea90282c9ff201d93afb8d57faeef31499fcec7ca49a4193421f8510"
+      "bytes": 7750,
+      "sha256": "19e7b50a655df07a1a5ffe6bc74e3b6173884cd36f942046ce3e70490de80095"
     },
     {
       "path": "docs/TESTING.md",
@@ -968,23 +1033,23 @@
     },
     {
       "path": "README.en.md",
-      "bytes": 5637,
-      "sha256": "8bdd09e5456f7166d86d3713230b6f2df89d5972e94dcc4cf04fa3e9a75e0b53"
+      "bytes": 5667,
+      "sha256": "ee64b985d9b5dff9c1b76ef732e19b6f2d3027d155eae2494a8e0e3299e71391"
     },
     {
       "path": "README.ja.md",
-      "bytes": 6778,
-      "sha256": "3ca1125273f722d7df0e5bb0e6281b4ff1bed9457b46e148621f43ab51696609"
+      "bytes": 6826,
+      "sha256": "67e8d59c036ca76c28166c715f4279ce817aed2df253cbd49810bb9ca0df3d0c"
     },
     {
       "path": "README.ko.md",
-      "bytes": 6496,
-      "sha256": "0d84ac0f07e2bbf4e4407c4b441a4094a579f0aae3ab18e1209b1a2ca44d2483"
+      "bytes": 6543,
+      "sha256": "eadd0e4f1cb4555b24c5c617233b63b2bc149bfb17ba774597d4d29780d1f0ba"
     },
     {
       "path": "README.md",
-      "bytes": 4680,
-      "sha256": "8592b2210905dc07c9015df3ca8ce1ccc8945bdb8b7aed9722827e4110d390d3"
+      "bytes": 4755,
+      "sha256": "8c49d5708c3e454719c24dc35d5bfb2e257e4c7c891426870cec0187c7270752"
     },
     {
       "path": "requirements-inference.txt",
@@ -1033,8 +1098,8 @@
     },
     {
       "path": "scripts/package_public.py",
-      "bytes": 3745,
-      "sha256": "da1d6d94fb2cf633cd9cd096d8fa477caeae916fc5b1a88614ff5b1fa87339ce"
+      "bytes": 3730,
+      "sha256": "be1a544494d73142d12430a4f45f9aa8e818b116f2fcc2da173232e5c4439a06"
     },
     {
       "path": "scripts/register-global.ps1",
@@ -1202,6 +1267,16 @@
       "sha256": "f010204e56281c9bea1f640e82d68ca1cc2754eb4ad79888f69255ddb6afb118"
     },
     {
+      "path": "start-voice.cmd",
+      "bytes": 105,
+      "sha256": "c4fac47e1f7603c49e7babf3a4b19a31cbed890836a516302f1eb2638354f7bc"
+    },
+    {
+      "path": "stop-voice.cmd",
+      "bytes": 85,
+      "sha256": "216bca123c800f349a9e6271139a8bb76e3b808ec4eebdd66ce72b4a359e8a0f"
+    },
+    {
       "path": "tests/__init__.py",
       "bytes": 0,
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -1360,21 +1435,6 @@
       "path": "web/voice-workspace.js",
       "bytes": 35755,
       "sha256": "483a46f4da927222636c506ab49d5b576e1f9978557e7dfc29b368faa6b0a37a"
-    },
-    {
-      "path": "停止语音平台.cmd",
-      "bytes": 85,
-      "sha256": "216bca123c800f349a9e6271139a8bb76e3b808ec4eebdd66ce72b4a359e8a0f"
-    },
-    {
-      "path": "健康检查.cmd",
-      "bytes": 93,
-      "sha256": "1b8a61c927484e365c20ef8fc513ea114a646ba783484de17faa4f71a3aeba40"
-    },
-    {
-      "path": "启动语音平台.cmd",
-      "bytes": 105,
-      "sha256": "c4fac47e1f7603c49e7babf3a4b19a31cbed890836a516302f1eb2638354f7bc"
     }
   ]
 }

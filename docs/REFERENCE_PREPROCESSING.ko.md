@@ -1,0 +1,78 @@
+[简体中文](REFERENCE_PREPROCESSING.md) | [English](REFERENCE_PREPROCESSING.en.md) | [日本語](REFERENCE_PREPROCESSING.ja.md) | **한국어**
+
+# 참조 오디오 준비
+
+녹음 분석과 생성은 로컬에서 실행합니다. 오디오를 제삼자 서비스로 전송하지 않습니다.
+
+## 작업 순서
+
+1. 사용 권한이 있는 녹음을 올리고 출처와 허용 범위를 입력합니다. 브라우저에서 길이를 확인하며 서버는 원본 바이트와 SHA-256을 보관하고 16 kHz 모노 분석 사본을 만듭니다. 파일당 200 MB, 길이는 0.5~1,800초입니다.
+2. 별도 CPU 큐에서 음성 구간 탐지, 근사적인 화자 그룹화, 음악·잡음 분류, 전사를 실행합니다. 권장 참조는 5~30초입니다. 기본 후보는 최대 약 20초, 최대 24개이며 긴 유효 구간을 우선합니다. 원본은 재생·다운로드할 수 있습니다.
+3. S1/S2 같은 녹음 내 임시 화자 라벨로 거르고 들어 본 뒤 저장할 구간을 고릅니다. 각 파일은 연속된 한 시간 구간입니다. 짧은 쉼은 남기고 긴 무음과 목소리 변화에서 나눕니다. 떨어진 구간은 연결하지 않으며 선택하지 않은 후보는 참조 라이브러리에 넣지 않습니다.
+4. 자동 전사문은 수정할 수 있고 버전 이력을 남깁니다. 실제 교정한 뒤에만 확인 표시를 하세요. 미확인 전사문으로 Hi-Fi 미리보기를 생성할 수 있지만 메타데이터에는 초안 표시가 남습니다.
+5. 목소리를 만들고 기본 참조와 장면 라벨이 있는 추가 참조를 선택합니다. 생성은 기본 참조나 선택한 한 구간만 사용하며 여러 참조를 연결하지 않습니다.
+6. 같은 인물의 저장된 참조 두 개 이상을 비교합니다. 같은 문장을 기본 시드 42/84로 복제하고 참조 유사도, 시드 간 일관성, ASR 문자 오류, 원본 품질로 순위를 표시합니다. 추천 적용을 직접 선택해야 새 목소리 초안 버전을 만듭니다. 다른 참조와 장면 라벨은 유지됩니다. 비교 도중 목소리가 수정되면 이전 추천 적용을 거부합니다.
+
+비교 샘플과 Hi-Fi 결과도 검토 대기입니다. 점수나 추천이 청취 승인을 대신하지 않습니다.
+
+Hi-Fi는 참조의 표현을 따르며 추가 스타일 설명을 사용하지 않습니다. 저장된 목소리 설명은 reference 모드용으로 유지합니다. `prompt_text` 뒤에 설명을 붙이면 읽어 버릴 수 있어 Hi-Fi의 명시적 `style`은 거부합니다. 기본 설명을 무시한 이유는 메타데이터에 남깁니다. 감정·속도를 추가로 유도하려면 reference 모드를 사용하며 효과는 근사적입니다.
+
+## 분석 도구
+
+| 기능 | 로컬 구현·출처 | 라이선스와 한계 |
+|---|---|---|
+| 음성 경계 | [Silero VAD](https://github.com/snakers4/silero-vad) 6.2.3, ONNX | MIT. 음악 등을 잘못 탐지할 수 있습니다. |
+| 전사 | [Faster-Whisper](https://github.com/SYSTRAN/faster-whisper) 1.2.1 + [small](https://huggingface.co/Systran/faster-whisper-small) | MIT. CPU int8, 다국어. 짧거나 시끄러운 구간에서 잘못된 문장이 나올 수 있습니다. |
+| 음악·잡음 탐지 | [AST AudioSet](https://huggingface.co/MIT/ast-finetuned-audioset-10-10-0.4593) | BSD-3-Clause. 10초 창과 후보별로 확인합니다. sigmoid 점수는 보정된 확률이 아닙니다. |
+| 화자 그룹화 | [Resemblyzer](https://github.com/resemble-ai/Resemblyzer) | Apache-2.0. 코사인 군집화, 1~2.5초 음성 창. S1은 해당 녹음 안에서만 쓰는 라벨입니다. |
+| 무음·구간·순위 | Voice Foundry | 20 ms RMS, −50 dBFS 무음 기준이며 의미 분석이 아닙니다. 공식은 reference_analysis.py. |
+
+화자 그룹화는 순서대로 나타나는 목소리 변화에 기반하며 신원 확인이 아닙니다. 감정, 발화, 언어 변화로 한 사람이 여러 그룹이 되거나 비슷한 목소리를 혼동할 수 있습니다. 빠른 작업 흐름에서는 두 화자 겹침 분리, 음악 제거, 잡음 제거도 수행하며 원본 후보를 비교용으로 남깁니다. [오디오 처리](AUDIO_RESTORATION.ko.md)를 참고하세요. 출력은 익명 트랙이며 다른 목소리 혼입, 잔여 소리, 왜곡이 생길 수 있습니다. 경고가 없다고 깨끗한 음질을 보장하지 않습니다.
+
+참조 비교 점수:
+
+`0.45 × 참조 코사인 유사도 + 0.25 × (1 − 범위를 제한한 문자 오류율) + 0.20 × 시드 간 코사인 유사도 + 0.10 × 원본 품질`
+
+짧은 문장에서는 ASR 변동이 크며 중국어 이외의 언어, 억양, 전문 용어도 순위에 영향을 줍니다. 청취 후보를 줄이는 지표이며 범용 성문 판별이나 품질 인증이 아닙니다.
+
+문자 비교는 문장 부호, 대소문자, 전각·반각, 간체·번체를 통일합니다. [OpenCC Python](https://github.com/yichen0831/opencc-python) 0.1.7(Apache-2.0)을 사용하며 원문과 원래 전사문은 변경하지 않습니다.
+
+## 파일과 설정
+
+원본은 `data/recordings/<UUID>/original.<확장자>`에 저장합니다. 시도마다 `analysis-*` 폴더에 요청, 진행 상황, 로그, 결과를 보관합니다. 실패·취소해도 원본은 남고 재시도는 새 폴더를 만듭니다.
+
+현재 후보 WAV는 16 kHz 모노 분석 사본을 사용합니다. 원본 바이트와 샘플은 그대로입니다. 미리 잘라 둔 참조의 대역폭을 유지하려면 0.5~90초 음성을 `upload-reference --direct`로 올리세요. Hi-Fi는 복제 모드 이름이며 자동 대역폭 복원이 아닙니다.
+
+저장한 `references`는 독립 WAV를 가리키며 녹음 UUID·시간 범위, SHA-256, 허가 정보, 전사 이력, 품질, 고정 모델 출처를 남깁니다. 목소리 버전은 참조 모음을 저장하고 생성 결과는 실제 사용한 단일 참조를 고정합니다.
+
+공유 모델은 `models/faster-whisper-small`, `models/AST-AudioSet`, `models/Resemblyzer`에 있습니다. `provenance.json`은 리비전, 라이선스, 파일 해시를 기록합니다. Resemblyzer 소스는 `vendor/Resemblyzer`의 고정 커밋이며 Silero ONNX는 독립 환경의 패키지에 포함됩니다. 설치 스크립트는 `scripts/download_reference_models.py`로 고정 모델을 받으며 의존성은 플랫폼 `.venv`에 설치합니다.
+
+`config/platform.json`의 `reference_preprocessing`에서 모델 경로, CPU 스레드, 큐, 시간 제한, 구간 길이, 화자·탐지 임계값을 설정합니다. 변경 전 설정과 DB를 백업하고 변경 후 서비스를 다시 시작하세요.
+
+분석은 CPU 하위 프로세스로 실행하며 완료 시 종료하고 CUDA VRAM을 사용하지 않습니다. TTS는 별도 GPU 큐를 사용합니다. 오디오 처리 안내의 분리·정리 단계는 GPU를 사용합니다. 서비스 종료 시 분석도 멈추며 재시작 후 중단된 분석은 실패로 표시하고 재시도할 수 있습니다.
+
+## CLI와 MCP
+
+선택 사항인 전역 CLI 등록 후 사용합니다. ID를 반환된 값으로 바꾸고 필요한 명령만 실행하세요. 실제 사용 권한이 있을 때만 권리 확인 옵션을 지정합니다.
+
+~~~powershell
+$voiceId = "VOICE_ID"
+$referenceId = "REFERENCE_ID"
+$recordingId = "RECORDING_ID"
+voice upload-reference .\recording.wav --source "My recording" --authorization "Permission for this use" --rights-confirmed
+voice recordings
+voice recording $recordingId
+voice generate --text "This is a voice sample." --voice-id $voiceId --reference-id $referenceId --clone-mode hifi --wait
+~~~
+
+`upload-reference`는 기본적으로 자동 처리하고 녹음 작업 ID를 반환합니다. `--analyze-only`는 분석만 하며 `--direct`는 준비한 짧은 참조를 직접 등록합니다. 구간 저장과 비교는 WebUI, REST, MCP를 사용합니다.
+
+MCP는 `voice_upload_recording`, `voice_recording`, `voice_save_reference_clips`, `voice_compare_references`, `voice_reference_comparison`을 제공합니다. 생성은 `reference_id`와 `clone_mode`, 목소리는 `reference_ids`와 `reference_scenarios`를 지원합니다. 업데이트 후 재연결하고 추천 적용과 승인은 WebUI에서 직접 수행합니다.
+
+## 검증 범위
+
+코어 테스트는 임시 DB와 테스트 엔진을 사용합니다. 실제 모델 검증은 별도로 실행합니다. 공개판에는 이전 녹음이나 스크린샷을 넣지 않습니다. [검증 범위](TESTING.md)는 중국어입니다.
+
+## 관련 안내
+
+[README](../README.ko.md) · [설치](INSTALL.ko.md) · [장문 음성 제작](LONGFORM.ko.md) · [오디오 처리](AUDIO_RESTORATION.ko.md) · [유지 관리](MAINTENANCE.ko.md)

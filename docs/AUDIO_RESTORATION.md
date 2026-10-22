@@ -1,4 +1,6 @@
-# 自动创建参考与音频修复（0.3）
+**简体中文** | [English](AUDIO_RESTORATION.en.md) | [日本語](AUDIO_RESTORATION.ja.md) | [한국어](AUDIO_RESTORATION.ko.md)
+
+# 音频处理与快速参考
 
 ## 日常操作
 
@@ -55,10 +57,18 @@ Windows 进度文件可能短暂被读取进程占用。进度写入采用短重
 - GET /{id}/before 及 /{id}/outputs/{output_id}；POST /{id}/analyze-output：output_id。
 - POST /reference-voices：reference_id 加 name 创建草稿人物；或 voice_id、scenario 添加到已有的人物。
 
-```powershell
-voice upload-reference .\录音.wav --source "自己的录音" --authorization "拥有配音用途授权" --rights-confirmed
-voice process-audio <录音UUID> --operations remove_music separate denoise
-voice processing <处理任务UUID>
-```
+以下示例在注册全局 CLI 后使用。将 ID 字符串替换为服务返回的实际 ID，按需单独执行；授权选项只在确有使用权时填写。
+
+~~~powershell
+$recordingId = "RECORDING_ID"
+$processingId = "PROCESSING_ID"
+voice upload-reference .\recording.wav --source "My recording" --authorization "Permission for this use" --rights-confirmed
+voice process-audio $recordingId --operations remove_music separate denoise
+voice processing $processingId
+~~~
 
 具体 CLI 参数以 voice <命令> --help 为准。MCP 提供 voice_upload_recording、voice_process_recording、voice_audio_processing、voice_create_from_reference；只通过本机 HTTP 调用，任意工作目录共用安装。更新后需重新连接 MCP 才能发现新增工具。
+
+## 相关说明
+
+[README](../README.md) · [安装说明](INSTALL.md) · [长文配音](LONGFORM.md) · [参考音频](REFERENCE_PREPROCESSING.md) · [维护说明](MAINTENANCE.md)

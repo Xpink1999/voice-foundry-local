@@ -37,7 +37,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -SkipModels -NoSt
 
 ## 日常の操作
 
-ルートの `启动语音平台.cmd`（起動）、`停止语音平台.cmd`（停止）、`健康检查.cmd`（状態確認）を使用するか、インストール先で次のコマンドを実行します。
+ルートの `start-voice.cmd`（起動）、`stop-voice.cmd`（停止）、`check-health.cmd`（状態確認）を使用するか、インストール先で次のコマンドを実行します。
 
 ~~~powershell
 bin\voice.cmd start
@@ -66,4 +66,4 @@ powershell -ExecutionPolicy Bypass -File .\scripts\register-global.ps1
 
 標準の待受先は `127.0.0.1` です。リモート利用には `host`、`allowed_hosts` を明示し、`token_env` が指定するサービス環境変数にトークンを設定します。トークンがなければリモート起動を拒否します。HTTP は Bearer 認証を使い、WebUI はトークン入力後にセッションを作成します。インターネット経由の利用には、信頼できる TLS リバースプロキシも必要です。認証情報をソースやコミットに含めないでください。
 
-バックアップと復元は[保守ガイド](MAINTENANCE.md)（中国語）を参照してください。
+バックアップと復元は[保守ガイド](MAINTENANCE.ja.md)を参照してください。
