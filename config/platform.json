@@ -1,0 +1,74 @@
+{
+  "host": "127.0.0.1",
+  "port": 8961,
+  "allowed_hosts": [
+    "127.0.0.1",
+    "localhost",
+    "::1"
+  ],
+  "token_env": "VOICE_PLATFORM_TOKEN",
+  "data_dir": "data",
+  "model_dir": "models/VoxCPM2",
+  "log_dir": "runtime/logs",
+  "ffmpeg": "ffmpeg",
+  "device": "cuda:0",
+  "idle_unload_seconds": 300,
+  "segment_chars": 160,
+  "segment_pause_ms": 180,
+  "max_text_chars": 60000,
+  "max_pending_jobs": 500,
+  "task_archive_after_days": 7,
+  "max_upload_mb": 200,
+  "audio_processing": {
+    "enabled": true,
+    "device": "cuda:0",
+    "cpu_threads": 4,
+    "max_pending": 10,
+    "worker_timeout_seconds": 7200,
+    "speech_window_seconds": 8,
+    "music_window_seconds": 8,
+    "separation_dir": "models/MossFormer2_SS_16K",
+    "enhancement_dir": "models/MossFormer2_SE_48K",
+    "music_dir": "models/MelBandRoformer"
+  },
+  "reference_preprocessing": {
+    "enabled": true,
+    "max_recording_seconds": 1800,
+    "sample_rate": 16000,
+    "recommended_min_seconds": 5,
+    "recommended_max_seconds": 30,
+    "target_clip_seconds": 20,
+    "max_candidates": 24,
+    "max_pending_recordings": 10,
+    "speech_merge_gap_seconds": 0.8,
+    "long_silence_seconds": 2.0,
+    "music_threshold": 0.2,
+    "noise_threshold": 0.2,
+    "speaker_similarity_threshold": 0.72,
+    "cpu_threads": 4,
+    "worker_timeout_seconds": 3600,
+    "whisper_dir": "models/faster-whisper-small",
+    "classifier_dir": "models/AST-AudioSet",
+    "speaker_dir": "models/Resemblyzer"
+  },
+  "default_engine": "voxcpm2",
+  "engines": {
+    "voxcpm2": {
+      "adapter": "voice_platform.engines.voxcpm:VoxEngine",
+      "label": "VoxCPM2 · 本地 CUDA"
+    }
+  },
+  "export_adapters": {
+    "standard": "voice_platform.exports:StandardExport",
+    "game_audio": "voice_platform.exports:GameAudioExport",
+    "media_dubbing": "voice_platform.exports:MediaExport"
+  },
+  "longform": {
+    "max_source_bytes": 2147483648,
+    "segment_chars": 160,
+    "fallback_chapter_chars": 30000,
+    "import_batch_segments": 1000,
+    "pause_ms": 180,
+    "block_frames": 65536
+  }
+}

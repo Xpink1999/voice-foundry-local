@@ -1,0 +1,11 @@
+Voice Foundry Local / 声场
+Copyright 2026 Xpink1999 and contributors
+
+Original platform code and documentation are licensed under Apache-2.0.
+Third-party software, model weights, trademarks, recordings, user texts and
+generated assets are not relicensed by this project. Their respective owners
+retain their rights. See THIRD_PARTY_NOTICES.md and LICENSES/.
+
+The public source distribution contains no pretrained model weights, recorded
+voices, production database, user configuration backups or bundled runtime.
+No endorsement by upstream model authors or tool maintainers is implied.

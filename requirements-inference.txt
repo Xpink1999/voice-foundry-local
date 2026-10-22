@@ -1,0 +1,17 @@
+# Windows inference profile. Official demo/training/denoiser/normalizer extras are optional.
+librosa>=0.11,<0.12
+einops>=0.8,<0.9
+transformers>=4.45,<4.58
+safetensors>=0.6,<1
+huggingface-hub>=0.34,<1
+sentencepiece>=0.2,<0.3
+pytest>=8,<10
+faster-whisper>=1.2.1,<2
+silero-vad>=6.2.3,<7
+webrtcvad-wheels>=2.0.14,<3
+opencc-python-reimplemented==0.1.7
+
+torchinfo==1.8.0
+rotary-embedding-torch==0.8.3
+beartype==0.14.1
+pydub==0.25.1

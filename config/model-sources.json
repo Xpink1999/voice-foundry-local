@@ -1,0 +1,200 @@
+{
+  "MIT/ast-finetuned-audioset-10-10-0.4593": {
+    "sha": "f826b80d28226b62986cc218e5cec390b1096902",
+    "cardData": {
+      "license": "bsd-3-clause"
+    },
+    "siblings": [
+      {
+        "rfilename": "README.md",
+        "blobId": "fc4ece98b629cab4731db057bebdc4240fda9239",
+        "size": 1165
+      },
+      {
+        "rfilename": "config.json",
+        "blobId": "9b822c630bc1a61312ac702cca4d8fb5a524e729",
+        "size": 26763
+      },
+      {
+        "rfilename": "model.safetensors",
+        "blobId": "a6e9d047f6cfa26e74738362a75d97ee5e5fde0e",
+        "size": 346404948,
+        "lfs": {
+          "sha256": "ae0c1e2ad4e1381d851fa9bf298ba13ebc9c5a914cdee2dbe427a6583869924d",
+          "size": 346404948,
+          "pointerSize": 134
+        }
+      },
+      {
+        "rfilename": "preprocessor_config.json",
+        "blobId": "d93e9e561c374604096fd5868c97e08130638f72",
+        "size": 297
+      }
+    ]
+  },
+  "Systran/faster-whisper-small": {
+    "sha": "536b0662742c02347bc0e980a01041f333bce120",
+    "cardData": {
+      "license": "mit"
+    },
+    "siblings": [
+      {
+        "rfilename": "README.md",
+        "blobId": "16511f6106ead2fbc3a1480957a217c2661a5a98",
+        "size": 1998
+      },
+      {
+        "rfilename": "config.json",
+        "blobId": "e5047537059bd8f182d9ca64c470201585015187",
+        "size": 2370
+      },
+      {
+        "rfilename": "model.bin",
+        "blobId": "504a7fe023f19460564a623887a9f77ea53ac708",
+        "size": 483546902,
+        "lfs": {
+          "sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "size": 483546902,
+          "pointerSize": 134
+        }
+      },
+      {
+        "rfilename": "tokenizer.json",
+        "blobId": "7818adb6de9fa3064d3ff81226fdd675be1f6344",
+        "size": 2203239
+      },
+      {
+        "rfilename": "vocabulary.txt",
+        "blobId": "c9074644d9d1205686f16d411564729461324b75",
+        "size": 459861
+      }
+    ]
+  },
+  "KimberleyJSN/melbandroformer": {
+    "sha": "ac9b0614ab3cd7f77219e18ba494dfd93956c348",
+    "cardData": {
+      "license": "mit"
+    },
+    "siblings": [
+      {
+        "rfilename": "MelBandRoformer.ckpt",
+        "blobId": "e9269937826d8cedf1855096bc9c1d49298bb4f8",
+        "size": 913106900,
+        "lfs": {
+          "sha256": "87201f4d31afb5bc79993230fc49446918425574db48c01c405e44f365c7559e",
+          "size": 913106900,
+          "pointerSize": 134
+        }
+      },
+      {
+        "rfilename": "README.md",
+        "blobId": "acb132c8f50ba394d4f63c298904c290319877a2",
+        "size": 20
+      }
+    ]
+  },
+  "alibabasglab/MossFormer2_SE_48K": {
+    "sha": "eff8c97925c8bec812af707814b3e5d777fd4503",
+    "cardData": {
+      "license": "apache-2.0"
+    },
+    "siblings": [
+      {
+        "rfilename": "README.md",
+        "blobId": "3bd127640b52490ba6eda7c91738d5f3b826863b",
+        "size": 2176
+      },
+      {
+        "rfilename": "last_best_checkpoint.pt",
+        "blobId": "8fd037f31a765a5ec8a1c71c54ebb460d1712fb5",
+        "size": 221552019,
+        "lfs": {
+          "sha256": "03692b9f773bbd6bb43b9c5a41f96b1e28affd66e13796b7bec66ad3d8b227c6",
+          "size": 221552019,
+          "pointerSize": 134
+        }
+      }
+    ]
+  },
+  "alibabasglab/MossFormer2_SS_16K": {
+    "sha": "407cb030cd66340918ebb6c8cc63b18f8592cdbe",
+    "cardData": {
+      "license": "apache-2.0"
+    },
+    "siblings": [
+      {
+        "rfilename": "README.md",
+        "blobId": "5e4cb37744faefd9d9a6ff4a48c5108c323ee107",
+        "size": 345
+      },
+      {
+        "rfilename": "last_best_checkpoint.pt",
+        "blobId": "e41d7ce28a13546151fc1525b37fa63c65b95426",
+        "size": 670353271,
+        "lfs": {
+          "sha256": "00a3a48bda492db1e829b85dd443f8f43a43039a3e90f1a24962ea9caf14a11a",
+          "size": 670353271,
+          "pointerSize": 134
+        }
+      }
+    ]
+  },
+  "openbmb/VoxCPM2": {
+    "sha": "32279effe8c19989596f05d353d1447f51d9e915",
+    "cardData": {
+      "license": "apache-2.0"
+    },
+    "siblings": [
+      {
+        "rfilename": "README.md",
+        "blobId": "14573f986536306e3d9d65f988a3fc4b863b895c",
+        "size": 7939
+      },
+      {
+        "rfilename": "audiovae.pth",
+        "blobId": "036ef0b5ced85736b842e31d35bd39606845d830",
+        "size": 376951122,
+        "lfs": {
+          "sha256": "94b5d51e107e0507d4acc976cfdadb64edd6fd06d1f751dadbf2fd1594274bf1",
+          "size": 376951122,
+          "pointerSize": 134
+        }
+      },
+      {
+        "rfilename": "config.json",
+        "blobId": "792f1c223ed607f9e508c0a0deb15dd9532483be",
+        "size": 4336
+      },
+      {
+        "rfilename": "model.safetensors",
+        "blobId": "d53929032ba7405f13a6236df11cd12da17d995a",
+        "size": 4580080592,
+        "lfs": {
+          "sha256": "f7f964cfa9da23653baec6e6f7750719977ad944ed9f95fe52fe3a620506891d",
+          "size": 4580080592,
+          "pointerSize": 135
+        }
+      },
+      {
+        "rfilename": "special_tokens_map.json",
+        "blobId": "8619dda6f3eb6d60d0a1bb274820054e46f41699",
+        "size": 1632
+      },
+      {
+        "rfilename": "tokenization_voxcpm2.py",
+        "blobId": "e7d768677298d058fa6ef8b160e3ca4430997fad",
+        "size": 2895
+      },
+      {
+        "rfilename": "tokenizer.json",
+        "blobId": "41a5c2a8dba4058dd1ad73fb898abf5e4f64f0f9",
+        "size": 3676772
+      },
+      {
+        "rfilename": "tokenizer_config.json",
+        "blobId": "fecf4cdae73b57053cac2ad34c67febbe4e4f08b",
+        "size": 5059
+      }
+    ]
+  }
+}
