@@ -47,9 +47,24 @@
       "sha256": "33d5ca1eeb31a012ce87d96e190057f4a8e9b942a6c8c84d33f33e9ed1c26187"
     },
     {
+      "path": "docs/INSTALL.en.md",
+      "bytes": 4423,
+      "sha256": "e4634c7712d52989e19e6e24555d63100b6f238be09126b7c8cf20db3a01d5c3"
+    },
+    {
+      "path": "docs/INSTALL.ja.md",
+      "bytes": 5557,
+      "sha256": "aa58e953ce34517fa7173b052097e38e8db986470984a777d600de5e3f37e190"
+    },
+    {
+      "path": "docs/INSTALL.ko.md",
+      "bytes": 5093,
+      "sha256": "90d0910e1b0b3f9f416a0bd88eb2612bbab8b9f99f5e6e634bf36c13e49b3152"
+    },
+    {
       "path": "docs/INSTALL.md",
-      "bytes": 3364,
-      "sha256": "8964051ecb4f6149a9c9bd1d6b70f9d095dfd99e9c06dfed2625106d18f82945"
+      "bytes": 3841,
+      "sha256": "9c9d4a49c0993e4c21394c77903560621a15aa8a3c37449f0039ae0f39420bca"
     },
     {
       "path": "docs/LOCALIZATION.md",
@@ -952,9 +967,24 @@
       "sha256": "5b438f3945d46ddcfc0c58a1fffa9b4aad4a19a53af04274030f457c8bdb5a7f"
     },
     {
+      "path": "README.en.md",
+      "bytes": 5637,
+      "sha256": "8bdd09e5456f7166d86d3713230b6f2df89d5972e94dcc4cf04fa3e9a75e0b53"
+    },
+    {
+      "path": "README.ja.md",
+      "bytes": 6778,
+      "sha256": "3ca1125273f722d7df0e5bb0e6281b4ff1bed9457b46e148621f43ab51696609"
+    },
+    {
+      "path": "README.ko.md",
+      "bytes": 6496,
+      "sha256": "0d84ac0f07e2bbf4e4407c4b441a4094a579f0aae3ab18e1209b1a2ca44d2483"
+    },
+    {
       "path": "README.md",
-      "bytes": 5119,
-      "sha256": "f05d9b8f9e531c81804e031bd533e9dc139549f6020adae5e3810985471dd053"
+      "bytes": 4680,
+      "sha256": "8592b2210905dc07c9015df3ca8ce1ccc8945bdb8b7aed9722827e4110d390d3"
     },
     {
       "path": "requirements-inference.txt",
@@ -1003,8 +1033,8 @@
     },
     {
       "path": "scripts/package_public.py",
-      "bytes": 3669,
-      "sha256": "6f681a258b9fcfbdc7f47878f7020a8380a9ae8b95bef9fa6b2e246977a1c9bb"
+      "bytes": 3745,
+      "sha256": "da1d6d94fb2cf633cd9cd096d8fa477caeae916fc5b1a88614ff5b1fa87339ce"
     },
     {
       "path": "scripts/register-global.ps1",
