@@ -1,0 +1,80 @@
+{
+  "checked_on": "2026-10-22",
+  "sources": [
+    {
+      "path": "LICENSE",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "LICENSES/upstream/VoxCPM/LICENSE",
+      "url": "https://raw.githubusercontent.com/OpenBMB/VoxCPM/cce58a5b59303c9bd63d12f23afe6a49a4a80c59/LICENSE",
+      "sha256": "4f10acc209addacfad28293315c74c4cd648f771ee1263a748f1781d1e0265e4"
+    },
+    {
+      "path": "LICENSES/upstream/ClearerVoice-Studio/LICENSE",
+      "url": "https://raw.githubusercontent.com/modelscope/ClearerVoice-Studio/6b3774dc79c46ae8bed2a4fa5f706f0ac8c75c61/LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "LICENSES/upstream/Music-Source-Separation-Training/LICENSE",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/6fdad13686bb7e84d029ec66f9dbe76e65c93ebf/LICENSE",
+      "sha256": "3282dc057695ef5b9a64909a7092ca40b2c292c232580fc6ace6e5d665cc0207"
+    },
+    {
+      "path": "LICENSES/upstream/Resemblyzer/LICENSE",
+      "url": "https://raw.githubusercontent.com/resemble-ai/Resemblyzer/15d828edebe06bc72b9cabc8ef8ca5ab2cb457ce/LICENSE",
+      "sha256": "ec4426669c4e3e73157121200b772a68ff9c4c7af3feb298ea99b6411a119e05"
+    },
+    {
+      "path": "LICENSES/models/MIT--ast-finetuned-audioset-10-10-0.4593/MODEL_CARD.md",
+      "url": "https://huggingface.co/MIT/ast-finetuned-audioset-10-10-0.4593/raw/f826b80d28226b62986cc218e5cec390b1096902/README.md",
+      "sha256": "dbc8ce1fc5abd1635d073640d8cb032901bfe264a5e06507f363f10a6112cfc8"
+    },
+    {
+      "path": "LICENSES/models/Systran--faster-whisper-small/MODEL_CARD.md",
+      "url": "https://huggingface.co/Systran/faster-whisper-small/raw/536b0662742c02347bc0e980a01041f333bce120/README.md",
+      "sha256": "329373481008c7c38654aff8ecdcf0163c211557cc7ba8e2ef6f2f84b4f75ec8"
+    },
+    {
+      "path": "LICENSES/models/KimberleyJSN--melbandroformer/MODEL_CARD.md",
+      "url": "https://huggingface.co/KimberleyJSN/melbandroformer/raw/ac9b0614ab3cd7f77219e18ba494dfd93956c348/README.md",
+      "sha256": "5c1b3fd193f37b9dcdd947a12e566189f1c9d2664f4e5e95548e6a4b9fc7adab"
+    },
+    {
+      "path": "LICENSES/models/alibabasglab--MossFormer2_SE_48K/MODEL_CARD.md",
+      "url": "https://huggingface.co/alibabasglab/MossFormer2_SE_48K/raw/eff8c97925c8bec812af707814b3e5d777fd4503/README.md",
+      "sha256": "62c405e115b2f3f948730fc2574c9a0019da3c12a0efef32c7d3873b16ac460e"
+    },
+    {
+      "path": "LICENSES/models/alibabasglab--MossFormer2_SS_16K/MODEL_CARD.md",
+      "url": "https://huggingface.co/alibabasglab/MossFormer2_SS_16K/raw/407cb030cd66340918ebb6c8cc63b18f8592cdbe/README.md",
+      "sha256": "f43ca6b52db24028a287e44f38525929ec97bce7c0036af9ef9e836d9c9b90a1"
+    },
+    {
+      "path": "LICENSES/models/openbmb--VoxCPM2/MODEL_CARD.md",
+      "url": "https://huggingface.co/openbmb/VoxCPM2/raw/32279effe8c19989596f05d353d1447f51d9e915/README.md",
+      "sha256": "c18d2ffbfb2f0aec770481c967842aee6c200cde65f6b033efd892a849986fda"
+    },
+    {
+      "path": "LICENSES/python/ctranslate2/UPSTREAM_LICENSE",
+      "url": "https://raw.githubusercontent.com/OpenNMT/CTranslate2/v4.8.3/LICENSE",
+      "sha256": "54aa79d9fe3c09e67a16dcd95b9e88676405a6ec174efda31036983cf7672ecb"
+    },
+    {
+      "path": "LICENSES/python/flatbuffers/UPSTREAM_LICENSE",
+      "url": "https://raw.githubusercontent.com/google/flatbuffers/v25.12.19/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "LICENSES/python/sentencepiece/UPSTREAM_LICENSE",
+      "url": "https://raw.githubusercontent.com/google/sentencepiece/v0.2.2/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "LICENSES/python/tokenizers/UPSTREAM_LICENSE",
+      "url": "https://raw.githubusercontent.com/huggingface/tokenizers/v0.22.2/LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    }
+  ]
+}
