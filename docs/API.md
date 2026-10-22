@@ -103,3 +103,5 @@ MCP 工具名称以 voice_ 开头。接口不依赖 Codex；其他 MCP 客户端
 长文上传不受普通 GenerationInput 的 6 万字符字段限制，接收保护默认 2 GiB 源字节。章/段管理 ID 为「作品 UUID:章节号/全局段号」。删除是可恢复标记，不清空文件；忙碌状态/参考绑定会阻止整批执行。原路径保持可用于审计和恢复；不能把回收站当作不可恢复的数据擦除。
 
 普通和长文克隆使用现有 clone_mode=reference / hifi，与“可控声音克隆 / 极致克隆”界面名称对应。新 MCP 连接共 33 工具，包含整本导入、分页、续作、导出、资产预览删除和恢复；没有批准音频的 MCP 工具。CLI 与详细流程见 [LONGFORM.md](LONGFORM.md)。
+
+章节目录支持 `limit`、`offset`，也可用 `after=<章号>` 获取该章之后仍有效的章节。`after` 与 `offset` 可组合；下一章可请求 `chapters?after=当前章号&limit=1`，避免假定章号连续。

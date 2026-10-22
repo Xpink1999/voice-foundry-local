@@ -27,6 +27,9 @@
 | client.py/cli.py | 跨目录客户端与服务启动、显式目标导出 |
 | mcp_server.py | 独立 MCP 工具，仅通过 HTTP 使用平台 |
 | web/ | 中英日韩静态 WebUI，无外部字体或翻译服务依赖 |
+| web/workflow.js | 无 DOM 的批量解析、项目范围校验、编码、地址与选择范围规则 |
+| web/workflow-ui.js / workflow.css | 工作位置、同标签草稿、跨工作区衔接、分页、设置保护和删除撤销 |
+| web/batch-ui.js | 人物名称匹配、角色分配、提交前预览和批量错误提示 |
 | web/i18n.js、locales/、translations.js | 浏览器语言识别、手动切换、草稿恢复及四语言离线词条 |
 | scripts/build_i18n.py | 词条完整性与占位符检查，生成浏览器词条包 |
 | web/theme.js、themes.css | 系统/浏览器配色监听、手动选择记忆、双配色与真实波形重绘 |

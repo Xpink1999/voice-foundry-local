@@ -28,6 +28,17 @@ def complete(client,identity):
     r=client.post(f'{BASE}/books/{identity}/resume',json={});assert r.status_code==200,r.text
     return wait(client,f'{BASE}/books/{identity}',lambda b:b['state'] in {'completed','attention'})
 
+def test_chapter_cursor_advances_past_deleted_chapters(client):
+    identity,_=upload(client,'第一章 开始\n第一段内容。\n第二章 中间\n第二段内容。\n第三章 结尾\n第三段内容。')
+    deleted=client.post('/api/v1/assets/delete',json={'items':[{'kind':'longform_chapters','id':identity+':2'}]})
+    assert deleted.status_code==200,deleted.text
+    next_page=client.get(f'{BASE}/books/{identity}/chapters?after=1&limit=1').json()
+    assert next_page['total']==1 and next_page['items'][0]['no']==3
+    assert client.get(f'{BASE}/books/{identity}/chapters?after=3&limit=1').json()['items']==[]
+    assert client.get(f'{BASE}/books/{identity}/chapters?limit=1').json()['items'][0]['no']==1
+    assert client.get(f'{BASE}/books/{identity}/chapters?after=-1').status_code==422
+    assert client.get(f'{BASE}/books/missing/chapters?after=1').status_code==404
+
 @pytest.mark.parametrize('encoding,selection',[('utf-8','auto'),('utf-16','auto'),('gb2312','auto'),('gbk','gbk'),('gb2312','gb2312')])
 def test_encoding_chapters_and_source_offsets(client,encoding,selection):
     text='\n第一章 开始\n夜色渐深。故事从这里开始。\n\n第二章 归来\n回到家里，灯光依旧温暖。\n'

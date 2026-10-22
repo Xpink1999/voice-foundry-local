@@ -68,8 +68,12 @@ class LongformStore:
         for item in items:
             if item.get('take'):item['take']=json.loads(item['take'])
         return dict(items=items,total=total,limit=limit,offset=offset)
-    def chapters(self,identity,limit=50,offset=0):
-        self.book(identity);return self.rows('lf_chapters','book_id=?',[identity],limit=limit,offset=offset)
+    def chapters(self,identity,limit=50,offset=0,after=None):
+        self.book(identity)
+        where,args='book_id=?',[identity]
+        if after is not None:
+            where+=' AND no>?';args.append(after)
+        return self.rows('lf_chapters',where,args,limit=limit,offset=offset)
     def chapter(self,identity,number):
         result=self.rows('lf_chapters','book_id=? AND no=?',[identity,number],limit=1)
         if not result['items']:raise KeyError('章节不存在')

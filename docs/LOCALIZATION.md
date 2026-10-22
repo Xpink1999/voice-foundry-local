@@ -6,13 +6,15 @@
 
 正文、项目名称、人物名称、转写、原始日志和来源记录保留原文。界面翻译不会改写已有资产。模型的语言能力仍以能力声明为准。
 
+普通刷新和语言切换都能恢复同标签页的配音草稿。草稿保存在浏览器会话中，24 小时过期，也可手动清除；不发送到翻译服务。人物映射、筛选和结果选择可以恢复，文件、令牌、授权勾选和试听确认不恢复。长文章节和资产视图通过地址栏保留位置。
+
 翻译位于 `web/locales/zh-CN.json`、`en.json`、`ja.json` 和 `ko.json`。中文原句作为稳定消息键，显示文案可单独精简。变量使用 `{0}`、`{1}`，不要改动数量或编号。
 
 修改后构建离线词条包并验证：
 
 ```powershell
 .venv/Scripts/python.exe scripts/build_i18n.py
-node --test tests/i18n.test.cjs tests/theme.test.cjs
+node --test tests/workflow.test.cjs tests/i18n.test.cjs tests/theme.test.cjs
 ```
 
 `web/translations.js` 是构建产物，随源码分发。浏览器无需连接翻译服务。新增界面文案需在四份词条文件中同时添加；诊断信息未匹配到词条时显示原文，便于排查。

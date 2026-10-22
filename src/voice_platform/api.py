@@ -126,7 +126,7 @@ def create_app(config=None):
     def retry_book_import(identity:str,request:LongformImportRetry):return platform.longform.retry_import(identity,request.encoding)
 
     @app.get('/api/v1/longform/books/{identity}/chapters')
-    def book_chapters(identity:str,limit:int=Query(50,ge=1,le=100),offset:int=Query(0,ge=0)):return platform.longform.db.chapters(identity,limit,offset)
+    def book_chapters(identity:str,limit:int=Query(50,ge=1,le=100),offset:int=Query(0,ge=0),after:int|None=Query(None,ge=0)):return platform.longform.db.chapters(identity,limit,offset,after)
 
     @app.get('/api/v1/longform/books/{identity}/chapters/{chapter}')
     def book_chapter(identity:str,chapter:int):return platform.longform.db.chapter(identity,chapter)

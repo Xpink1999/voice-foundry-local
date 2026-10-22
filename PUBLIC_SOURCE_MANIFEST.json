@@ -38,8 +38,8 @@
     },
     {
       "path": "docs/API.md",
-      "bytes": 9316,
-      "sha256": "71e77d8cc03f722c4029959618a2a894c0cfad31e47ee02b269e664379d16a12"
+      "bytes": 9545,
+      "sha256": "9fd7a6e4c575de5a924d7378d26ae5d2dbc5d86486fdfc5469db05c80bd66e2f"
     },
     {
       "path": "docs/ARCHITECTURE.md",
@@ -88,8 +88,8 @@
     },
     {
       "path": "docs/LOCALIZATION.md",
-      "bytes": 1186,
-      "sha256": "d4a8c147f88f7ea8ad701284e75de587665556760132d8949ac18dd425a400ed"
+      "bytes": 1548,
+      "sha256": "b1b0e3deab0928049b6e446cc9df17c5e1e25f4cc5807421e7fa4f010065d701"
     },
     {
       "path": "docs/LONGFORM.en.md",
@@ -133,8 +133,8 @@
     },
     {
       "path": "docs/MODULES.md",
-      "bytes": 3968,
-      "sha256": "afd994c359fbe30582fb37ea2a8cb4062488ef9ab35b8e063d447fc1a631c8e1"
+      "bytes": 4300,
+      "sha256": "f327a4e9226b9b4939c3d7a7881fec8b64fe4f928639a919b9ecb6cd9d3c939f"
     },
     {
       "path": "docs/PUBLISHING.md",
@@ -165,6 +165,11 @@
       "path": "docs/TESTING.md",
       "bytes": 1538,
       "sha256": "c1bc011b0d87bd6ca41710390bd110727201bbc2736c64f9dd5c3bb9b32cc403"
+    },
+    {
+      "path": "docs/UX_REVIEW.md",
+      "bytes": 7118,
+      "sha256": "7fa2990504392a3e928ecf5613c2f4369849a0da49bbe83e3ac8e24d641bf076"
     },
     {
       "path": "LICENSE",
@@ -1028,8 +1033,8 @@
     },
     {
       "path": "pyproject.toml",
-      "bytes": 722,
-      "sha256": "5b438f3945d46ddcfc0c58a1fffa9b4aad4a19a53af04274030f457c8bdb5a7f"
+      "bytes": 749,
+      "sha256": "f5207cb954c71586e97053021b1eeb522580ab5a2ae3808b9a6bce1bf6692064"
     },
     {
       "path": "README.en.md",
@@ -1148,8 +1153,8 @@
     },
     {
       "path": "src/voice_platform/api.py",
-      "bytes": 25282,
-      "sha256": "9157a766230840238fbae6b5e61eaaa0176c456c057544c9c0e4a2a7cb6b73f0"
+      "bytes": 25320,
+      "sha256": "b2df85b237e4d634a97514b327554b2c187e01fbeeba4a6a3ad1896ebd600297"
     },
     {
       "path": "src/voice_platform/assets.py",
@@ -1208,8 +1213,8 @@
     },
     {
       "path": "src/voice_platform/longform_store.py",
-      "bytes": 7054,
-      "sha256": "ca9c311695b784ad5d188a00f3d04b02d953641f7269e9de284e5fe4f9255afb"
+      "bytes": 7187,
+      "sha256": "a1527631d6a3e06638d097459050d37995434271cc1ab9c757411954ecc88899"
     },
     {
       "path": "src/voice_platform/mcp_server.py",
@@ -1308,13 +1313,13 @@
     },
     {
       "path": "tests/test_i18n.py",
-      "bytes": 1257,
-      "sha256": "4f85388af3649b628b2d38849a5a778e1a7e8feb9865610a4d4b87312f8e5424"
+      "bytes": 1772,
+      "sha256": "2931943b4fc37100bbbce9d642a74ce54946cf83b8b1245d30872e45f4fa890f"
     },
     {
       "path": "tests/test_longform.py",
-      "bytes": 9974,
-      "sha256": "f08d09112a1189e51b0e9abb89e28ce9fb986f15df8a2756d79ab5d6329f165e"
+      "bytes": 10867,
+      "sha256": "8d02f9aeb6540f6def9ad0fc6c6b740768932df30a38cd8501e719f9db75901d"
     },
     {
       "path": "tests/test_platform.py",
@@ -1342,19 +1347,29 @@
       "sha256": "9a29355193d189a8023ecdf623de11e9c70b5485b418d76ab49bfc3b9125b983"
     },
     {
+      "path": "tests/workflow.test.cjs",
+      "bytes": 5170,
+      "sha256": "4953e11090b36921a6060ed46fa48a1d39eee6cdcd659cdb74d0dfeb87baf0da"
+    },
+    {
       "path": "THIRD_PARTY_NOTICES.md",
       "bytes": 6455,
       "sha256": "83c37aea9f9b445942c656d452727caa7370d898db39eec9e6c3b30d02c67437"
     },
     {
       "path": "web/app.js",
-      "bytes": 36209,
-      "sha256": "f3495dd4a4d39c5163e9592c459f0af3e1819cbb1fef5b50989802b441734307"
+      "bytes": 39886,
+      "sha256": "2f6796cf1a7f66d69d1cc844778e30a2187a68adf374a20906c8a0c949b9add7"
     },
     {
       "path": "web/assets-ui.js",
-      "bytes": 12119,
-      "sha256": "c34820d4e0fea3b6a1a1b365890b61c3ca1d285afdac3b68b405f748cf098313"
+      "bytes": 12739,
+      "sha256": "a563ef1d1e7883e7f6d5505aee89a7bf8194c5ddb7a7a6c958db5644c70b7459"
+    },
+    {
+      "path": "web/batch-ui.js",
+      "bytes": 6266,
+      "sha256": "ab53c8510ef5adc6ae2bc22b6f2ffb64f35e46dd770d396ee3034ded4931b66a"
     },
     {
       "path": "web/i18n.js",
@@ -1363,8 +1378,8 @@
     },
     {
       "path": "web/index.html",
-      "bytes": 27183,
-      "sha256": "893a14b12b5fa7135781a94297f8d5043db0cde05b3f1204242d6cd9f2c1b663"
+      "bytes": 27358,
+      "sha256": "02a6fdf2c3c2fa6e70071f7d1702d1f93cebe44d22955affa2a1769fbc4f6e1d"
     },
     {
       "path": "web/jobs-ui.js",
@@ -1373,28 +1388,28 @@
     },
     {
       "path": "web/locales/en.json",
-      "bytes": 52548,
-      "sha256": "3cc8d43b13bc7ab7aca7fa6b5794eb110b0eaa379d28d11b685d65ee29f9eb65"
+      "bytes": 58519,
+      "sha256": "a7cc5aadd8f0ac98fda72ab0e86bc5099713d6bbd75a60a09b3433dcb378f442"
     },
     {
       "path": "web/locales/ja.json",
-      "bytes": 59320,
-      "sha256": "2e24ec53722bd285fdd9d2fa0268831b8fb6d705ef104f60f8e629067cc3b1ba"
+      "bytes": 66439,
+      "sha256": "74dc54c6fa0e1f3a3b445c5565b27d56344a8ecdee84e35188b3aee24df9efe9"
     },
     {
       "path": "web/locales/ko.json",
-      "bytes": 58003,
-      "sha256": "573b63f92e353f71f5effd1618b65def4b24f9bf752431a9f38363f06634a839"
+      "bytes": 64914,
+      "sha256": "0913a30269b1e798d841a07bb9a2d7c48b79526160d5f47dcc1f7fdd996939ba"
     },
     {
       "path": "web/locales/zh-CN.json",
-      "bytes": 52404,
-      "sha256": "d8a75598bd83839c2f0eec44be797205ac1d25b10ae6ccfe4146ce43ae50423f"
+      "bytes": 58137,
+      "sha256": "1f47ab2352a3e56646695af7fd44c1746bfab8c2388cf58e5d8e31ea285650a3"
     },
     {
       "path": "web/longform-ui.js",
-      "bytes": 23576,
-      "sha256": "d2dca4cd5f03bb624805cb6f3ec45087596ead229ef99f9b1960ee8880004a8b"
+      "bytes": 27251,
+      "sha256": "c626f0d21bf37290bbdafbc6134ffdd12ad7e9a17837ce2430a8be8e9d0fe978"
     },
     {
       "path": "web/longform.css",
@@ -1403,13 +1418,13 @@
     },
     {
       "path": "web/references-ui.js",
-      "bytes": 6228,
-      "sha256": "3caf4aa4f347abeda59c79d176c96c3f12700cb86a65da29716e5b86421fc712"
+      "bytes": 6540,
+      "sha256": "8e6d4f3d97872e5721bf455303589aebfb14418573eb72223df3ec72a99dc208"
     },
     {
       "path": "web/review-export-ui.js",
-      "bytes": 4671,
-      "sha256": "6a27b889c9d6c22b7071ad86d2d74b542809f77e523de1d50a70d96e916bcc3e"
+      "bytes": 10788,
+      "sha256": "f184eda4e3f1ec3f3871d58b66d958bf0fa03901f88eb0b373d15a02df745908"
     },
     {
       "path": "web/style.css",
@@ -1428,13 +1443,28 @@
     },
     {
       "path": "web/translations.js",
-      "bytes": 209844,
-      "sha256": "52da8ac2f7b202d128db8bb23d27e3ce80949d915f3600aa5e9719b6282b6dd3"
+      "bytes": 234394,
+      "sha256": "0c0ac23b5696aa0918c094036f06bef8f868552bdc5b5871a22baa630eecabab"
     },
     {
       "path": "web/voice-workspace.js",
-      "bytes": 35755,
-      "sha256": "483a46f4da927222636c506ab49d5b576e1f9978557e7dfc29b368faa6b0a37a"
+      "bytes": 36659,
+      "sha256": "7943423cc7bd74d6c8098d34b242258d0af92663b110427d8b024fe955fe8a47"
+    },
+    {
+      "path": "web/workflow-ui.js",
+      "bytes": 17808,
+      "sha256": "bae5c3ee7207066aea7ef3f0cecca934d94be2336ea96a734b2e933d66725237"
+    },
+    {
+      "path": "web/workflow.css",
+      "bytes": 2572,
+      "sha256": "bea8f5053efcde3a975e974303e77337eb42e76ea06fbaa969282cdcc3c6bc74"
+    },
+    {
+      "path": "web/workflow.js",
+      "bytes": 5863,
+      "sha256": "4e2eeb7f52275a0e22fd1b011a0ca0295f4d4c112af34488942f7f07e7085542"
     }
   ]
 }

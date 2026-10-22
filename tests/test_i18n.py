@@ -1,10 +1,22 @@
 import importlib.util
+import ast
 import json
+import re
 import shutil
 from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_literal_messages_in_all_browser_modules_have_translations():
+    catalog = json.loads((ROOT/'web/locales/zh-CN.json').read_text(encoding='utf-8'))
+    pattern = r'''\btr\(("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')'''
+    for source in (ROOT/'web').glob('*.js'):
+        if source.name == 'translations.js':
+            continue
+        for literal in re.findall(pattern, source.read_text(encoding='utf-8')):
+            assert ast.literal_eval(literal) in catalog, (source.name, literal)
 
 
 def test_browser_bundle_matches_editable_catalogs(tmp_path):
