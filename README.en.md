@@ -1,6 +1,6 @@
 [简体中文](README.md) | **English** | [日本語](README.ja.md) | [한국어](README.ko.md)
 
-# Voice Foundry Local
+# Voice Foundry
 
 Design voices, clone voices from recordings and produce narration for dialogue, video or books on Windows. The WebUI, CLI, REST API and MCP share one model installation and voice library across projects.
 

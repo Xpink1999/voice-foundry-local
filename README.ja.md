@@ -1,6 +1,6 @@
 [简体中文](README.md) | [English](README.en.md) | **日本語** | [한국어](README.ko.md)
 
-# Voice Foundry Local
+# Voice Foundry
 
 Windows 上で音声をデザインし、録音から音色を作り、台詞・動画・書籍を音声化するローカルサービスです。WebUI、CLI、REST API、MCP が同じモデルと音色ライブラリを使用するため、プロジェクトごとの再インストールは不要です。
 

@@ -42,7 +42,7 @@ def download_book_export(client,identity,destination):
     return dict(id=identity,path=str(target),sha256=item['sha256'],bytes=target.stat().st_size)
 
 def parser():
-    p = argparse.ArgumentParser(description="声场：全局本地语音平台，所有目录使用同一服务与模型")
+    p = argparse.ArgumentParser(description="Voice Foundry：本地语音平台，所有目录使用同一服务与模型")
     commands = p.add_subparsers(dest="command", required=True)
     for name in ("start", "ui", "stop", "health", "models", "unload", "settings", "backup", "voices", "projects", "jobs", "results", "exports", "recordings"):
         commands.add_parser(name)

@@ -1033,23 +1033,23 @@
     },
     {
       "path": "README.en.md",
-      "bytes": 5667,
-      "sha256": "ee64b985d9b5dff9c1b76ef732e19b6f2d3027d155eae2494a8e0e3299e71391"
+      "bytes": 5661,
+      "sha256": "1f42f88395f9a49211bd1ad62386c037c0f84991a62dbf666aabd0ccba0cba44"
     },
     {
       "path": "README.ja.md",
-      "bytes": 6826,
-      "sha256": "67e8d59c036ca76c28166c715f4279ce817aed2df253cbd49810bb9ca0df3d0c"
+      "bytes": 6820,
+      "sha256": "d687345af070f7a76b20355d35ee2b95169cb77b8d898e7a37acf377ea0d568a"
     },
     {
       "path": "README.ko.md",
-      "bytes": 6543,
-      "sha256": "eadd0e4f1cb4555b24c5c617233b63b2bc149bfb17ba774597d4d29780d1f0ba"
+      "bytes": 6537,
+      "sha256": "ae4e5b5d45cb9cf49189b3742af7dbb9b9e781debad8ec23ee47be2707f46692"
     },
     {
       "path": "README.md",
-      "bytes": 4755,
-      "sha256": "8c49d5708c3e454719c24dc35d5bfb2e257e4c7c891426870cec0187c7270752"
+      "bytes": 4749,
+      "sha256": "2a8772e7a42c220c98694bcdb04a10cd9656dde22869bd0a63c024e1efe159b8"
     },
     {
       "path": "requirements-inference.txt",
@@ -1148,8 +1148,8 @@
     },
     {
       "path": "src/voice_platform/api.py",
-      "bytes": 25303,
-      "sha256": "f7538527e995502661a5be940131a700e31a544b3a235494d24f712a2c50ad40"
+      "bytes": 25282,
+      "sha256": "9157a766230840238fbae6b5e61eaaa0176c456c057544c9c0e4a2a7cb6b73f0"
     },
     {
       "path": "src/voice_platform/assets.py",
@@ -1163,8 +1163,8 @@
     },
     {
       "path": "src/voice_platform/cli.py",
-      "bytes": 14254,
-      "sha256": "b17fa55b0e826fa1c6e6d26cfffe218652976c8fb2c28b21a77729009cf15ade"
+      "bytes": 14255,
+      "sha256": "addbfb95d6da70298591b48a2d054737818d27657434f1e5ed67b3746671885e"
     },
     {
       "path": "src/voice_platform/client.py",
@@ -1363,8 +1363,8 @@
     },
     {
       "path": "web/index.html",
-      "bytes": 27195,
-      "sha256": "f5b8cecb36a3aacd4d495a0496b9b48a530ab8e49792574659b0c64a8a470f7e"
+      "bytes": 27183,
+      "sha256": "893a14b12b5fa7135781a94297f8d5043db0cde05b3f1204242d6cd9f2c1b663"
     },
     {
       "path": "web/jobs-ui.js",
@@ -1373,23 +1373,23 @@
     },
     {
       "path": "web/locales/en.json",
-      "bytes": 52571,
-      "sha256": "2f7ca1205069e3a19664e85c78c36eeac782cb2c4372c4258d5dcc2e28142d50"
+      "bytes": 52548,
+      "sha256": "3cc8d43b13bc7ab7aca7fa6b5794eb110b0eaa379d28d11b685d65ee29f9eb65"
     },
     {
       "path": "web/locales/ja.json",
-      "bytes": 59345,
-      "sha256": "93b8126b58761cb025825f4546eaccc749e6bf3c1fe3e9585011b25a88509dc7"
+      "bytes": 59320,
+      "sha256": "2e24ec53722bd285fdd9d2fa0268831b8fb6d705ef104f60f8e629067cc3b1ba"
     },
     {
       "path": "web/locales/ko.json",
-      "bytes": 58024,
-      "sha256": "809d7292a5c36d45822a370fb2697e740b8e7542beaa3fc476e10896dc037bd6"
+      "bytes": 58003,
+      "sha256": "573b63f92e353f71f5effd1618b65def4b24f9bf752431a9f38363f06634a839"
     },
     {
       "path": "web/locales/zh-CN.json",
-      "bytes": 52406,
-      "sha256": "c9029689b38281c6b7a0ec01679d8d32e5b3fce6ddf4a8a00d26cd868faa9c0e"
+      "bytes": 52404,
+      "sha256": "d8a75598bd83839c2f0eec44be797205ac1d25b10ae6ccfe4146ce43ae50423f"
     },
     {
       "path": "web/longform-ui.js",
@@ -1428,8 +1428,8 @@
     },
     {
       "path": "web/translations.js",
-      "bytes": 209915,
-      "sha256": "3e37f2f65578cad7f41b2304615f0ba983e6254368fa282795398c4ab4e93c13"
+      "bytes": 209844,
+      "sha256": "52da8ac2f7b202d128db8bb23d27e3ce80949d915f3600aa5e9719b6282b6dd3"
     },
     {
       "path": "web/voice-workspace.js",

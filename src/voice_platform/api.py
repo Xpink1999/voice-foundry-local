@@ -49,7 +49,7 @@ def create_app(config=None):
             logging.getLogger("voice_platform").removeHandler(handler)
             handler.close()
 
-    app = FastAPI(title="声场 · 全局语音生产平台", version="1.0.0", lifespan=lifespan,
+    app = FastAPI(title="Voice Foundry", version="1.0.0", lifespan=lifespan,
                   description="独立于游戏引擎和 Codex。异步生成、音色版本、人工审核、无损原件与可追溯导出。")
     app.state.platform = platform
 

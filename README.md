@@ -1,6 +1,6 @@
 **简体中文** | [English](README.en.md) | [日本語](README.ja.md) | [한국어](README.ko.md)
 
-# 声场 · Voice Foundry Local
+# 声场 · Voice Foundry
 
 在 Windows 本机设计声音、克隆音色，为台词、视频或整本书配音。WebUI、CLI、REST API 和 MCP 共用模型与音色库，不需要按项目重复安装。
 

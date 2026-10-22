@@ -1,6 +1,6 @@
 [简体中文](README.md) | [English](README.en.md) | [日本語](README.ja.md) | **한국어**
 
-# Voice Foundry Local
+# Voice Foundry
 
 Windows에서 목소리를 디자인하고 녹음으로 음성을 복제해 대사, 영상, 책의 음성을 제작하는 로컬 서비스입니다. WebUI, CLI, REST API, MCP가 같은 모델과 목소리 라이브러리를 사용하므로 프로젝트마다 다시 설치할 필요가 없습니다.
 
