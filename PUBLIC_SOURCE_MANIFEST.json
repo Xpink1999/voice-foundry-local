@@ -52,6 +52,11 @@
       "sha256": "8964051ecb4f6149a9c9bd1d6b70f9d095dfd99e9c06dfed2625106d18f82945"
     },
     {
+      "path": "docs/LOCALIZATION.md",
+      "bytes": 1186,
+      "sha256": "d4a8c147f88f7ea8ad701284e75de587665556760132d8949ac18dd425a400ed"
+    },
+    {
       "path": "docs/LONGFORM.md",
       "bytes": 9363,
       "sha256": "0894777d4686f7cf22221e4b19bc8cb90f9544bc68fe2d165b438b21aad81ea1"
@@ -63,8 +68,8 @@
     },
     {
       "path": "docs/MODULES.md",
-      "bytes": 3790,
-      "sha256": "1f074dc8fb4503a0a206eb70dab005528300dfd4bd90ee6b90fd010ef9f21fd8"
+      "bytes": 3968,
+      "sha256": "afd994c359fbe30582fb37ea2a8cb4062488ef9ab35b8e063d447fc1a631c8e1"
     },
     {
       "path": "docs/PUBLISHING.md",
@@ -78,8 +83,8 @@
     },
     {
       "path": "docs/TESTING.md",
-      "bytes": 1316,
-      "sha256": "914935e39fc5459fee53fb2babece08e6689f323bba7b008dee08acc40c01c79"
+      "bytes": 1538,
+      "sha256": "c1bc011b0d87bd6ca41710390bd110727201bbc2736c64f9dd5c3bb9b32cc403"
     },
     {
       "path": "LICENSE",
@@ -948,8 +953,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 4998,
-      "sha256": "82162511e91e28e2cf3f0d98ae0b567c94c49d0a1cab3e661a34830818ccc83a"
+      "bytes": 5119,
+      "sha256": "f05d9b8f9e531c81804e031bd533e9dc139549f6020adae5e3810985471dd053"
     },
     {
       "path": "requirements-inference.txt",
@@ -960,6 +965,11 @@
       "path": "requirements.lock.txt",
       "bytes": 1780,
       "sha256": "6b9b64aa95bc86706c7a90c9028ce256ad469f56c1789fb4237e6a08db0dd79d"
+    },
+    {
+      "path": "scripts/build_i18n.py",
+      "bytes": 1264,
+      "sha256": "0f221a7a6f0541cdcc9777abddd1fbb1af5d813f69ca46c3b8403084751f490f"
     },
     {
       "path": "scripts/collect_python_licenses.py",
@@ -1177,6 +1187,11 @@
       "sha256": "105637eface5b6551c2a8648b78c0d7ac05f9a91f02e7b654cfd736798c726e8"
     },
     {
+      "path": "tests/i18n.test.cjs",
+      "bytes": 5143,
+      "sha256": "ce3731e451129001849128d3d2b67759357a23db0fa27ab05e9c6d467bb7ce74"
+    },
+    {
       "path": "tests/test_archive.py",
       "bytes": 5705,
       "sha256": "3b1caf27a1d4a3e470dacf92b3ede79962b29ed7bb35d04007f8125a9742b786"
@@ -1185,6 +1200,11 @@
       "path": "tests/test_assets.py",
       "bytes": 8950,
       "sha256": "8f21901d2cd874ea8b1d4ae53a8d65325c10778ba51f6dcd3aa7b2e240cfedf6"
+    },
+    {
+      "path": "tests/test_i18n.py",
+      "bytes": 1257,
+      "sha256": "4f85388af3649b628b2d38849a5a778e1a7e8feb9865610a4d4b87312f8e5424"
     },
     {
       "path": "tests/test_longform.py",
@@ -1223,28 +1243,53 @@
     },
     {
       "path": "web/app.js",
-      "bytes": 35100,
-      "sha256": "3561821873682a9be5e8cee73f00f8888b68bfd5939fd0ba249c06cf3152510f"
+      "bytes": 36209,
+      "sha256": "f3495dd4a4d39c5163e9592c459f0af3e1819cbb1fef5b50989802b441734307"
     },
     {
       "path": "web/assets-ui.js",
-      "bytes": 11763,
-      "sha256": "697de081c52a7c4c5de1f20da63b9a27c2239578151de2053758b37aa7ca3b23"
+      "bytes": 12119,
+      "sha256": "c34820d4e0fea3b6a1a1b365890b61c3ca1d285afdac3b68b405f748cf098313"
+    },
+    {
+      "path": "web/i18n.js",
+      "bytes": 6341,
+      "sha256": "049cdfa5a75e5760e73b9656bfe35a23b711613a414d21463158e2723fd4c4f0"
     },
     {
       "path": "web/index.html",
-      "bytes": 18556,
-      "sha256": "6cbaaf0c92e340029ddd642c34fa24df9538c61a7acaa47ec16260ac0f7b2802"
+      "bytes": 27195,
+      "sha256": "f5b8cecb36a3aacd4d495a0496b9b48a530ab8e49792574659b0c64a8a470f7e"
     },
     {
       "path": "web/jobs-ui.js",
-      "bytes": 4995,
-      "sha256": "3c101906d60235e1f2e602dbf2c2de4d65fc0ba8d99273dcde5aa4ca2802c7e9"
+      "bytes": 5191,
+      "sha256": "5cd51ecac9fac73a45019903b57c05bb6a49ec202cadb7e6996462d44dc67102"
+    },
+    {
+      "path": "web/locales/en.json",
+      "bytes": 52571,
+      "sha256": "2f7ca1205069e3a19664e85c78c36eeac782cb2c4372c4258d5dcc2e28142d50"
+    },
+    {
+      "path": "web/locales/ja.json",
+      "bytes": 59345,
+      "sha256": "93b8126b58761cb025825f4546eaccc749e6bf3c1fe3e9585011b25a88509dc7"
+    },
+    {
+      "path": "web/locales/ko.json",
+      "bytes": 58024,
+      "sha256": "809d7292a5c36d45822a370fb2697e740b8e7542beaa3fc476e10896dc037bd6"
+    },
+    {
+      "path": "web/locales/zh-CN.json",
+      "bytes": 52406,
+      "sha256": "c9029689b38281c6b7a0ec01679d8d32e5b3fce6ddf4a8a00d26cd868faa9c0e"
     },
     {
       "path": "web/longform-ui.js",
-      "bytes": 22057,
-      "sha256": "4fc23dc998be7b1c753a7cd8f04e780eca7714266a7e9aa82d9efcd098e62520"
+      "bytes": 23576,
+      "sha256": "d2dca4cd5f03bb624805cb6f3ec45087596ead229ef99f9b1960ee8880004a8b"
     },
     {
       "path": "web/longform.css",
@@ -1253,13 +1298,13 @@
     },
     {
       "path": "web/references-ui.js",
-      "bytes": 5938,
-      "sha256": "7c706dc1b67b6e808258f9a2cef14cd451f003085230e2099fa29b42f8182813"
+      "bytes": 6228,
+      "sha256": "3caf4aa4f347abeda59c79d176c96c3f12700cb86a65da29716e5b86421fc712"
     },
     {
       "path": "web/review-export-ui.js",
-      "bytes": 4637,
-      "sha256": "48ab064068d20cfc18c078a122d96d3bf5f93728e9303ceb511608d1ca8defcb"
+      "bytes": 4671,
+      "sha256": "6a27b889c9d6c22b7071ad86d2d74b542809f77e523de1d50a70d96e916bcc3e"
     },
     {
       "path": "web/style.css",
@@ -1273,13 +1318,18 @@
     },
     {
       "path": "web/themes.css",
-      "bytes": 11736,
-      "sha256": "78dd86655c2c11b3c175b077847000062d75a465a6d6cbe13619421faaa29109"
+      "bytes": 12423,
+      "sha256": "94e48d3a80cd324543bc9d1f2be5b6b4ebde794c2e42b2e7da3ea15b3d665460"
+    },
+    {
+      "path": "web/translations.js",
+      "bytes": 209915,
+      "sha256": "3e37f2f65578cad7f41b2304615f0ba983e6254368fa282795398c4ab4e93c13"
     },
     {
       "path": "web/voice-workspace.js",
-      "bytes": 34063,
-      "sha256": "60d8cd4e39fe66bea0891ecdafc2f29702badf69f38eadaac7253db34cd4c7f5"
+      "bytes": 35755,
+      "sha256": "483a46f4da927222636c506ab49d5b576e1f9978557e7dfc29b368faa6b0a37a"
     },
     {
       "path": "停止语音平台.cmd",

@@ -26,7 +26,9 @@
 | api.py/server.py | HTTP、SSE、本机边界、静态界面和服务生命周期 |
 | client.py/cli.py | 跨目录客户端与服务启动、显式目标导出 |
 | mcp_server.py | 独立 MCP 工具，仅通过 HTTP 使用平台 |
-| web/ | 中文静态 WebUI，无外部字体或图片依赖 |
+| web/ | 中英日韩静态 WebUI，无外部字体或翻译服务依赖 |
+| web/i18n.js、locales/、translations.js | 浏览器语言识别、手动切换、草稿恢复及四语言离线词条 |
+| scripts/build_i18n.py | 词条完整性与占位符检查，生成浏览器词条包 |
 | web/theme.js、themes.css | 系统/浏览器配色监听、手动选择记忆、双配色与真实波形重绘 |
 | web/references-ui.js | 生成时的单片段选择和人物多参考编辑 |
 | web/voice-workspace.js | 快速创建、人物库、声音设计、独立高级处理及 A/B 试听 |
