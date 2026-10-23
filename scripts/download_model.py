@@ -11,6 +11,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MODEL = "openbmb/VoxCPM2"
 
+def configured_path(key, section=None):
+    config = json.loads(Path(os.environ.get('VOICE_PLATFORM_CONFIG', ROOT/'config/platform.json')).read_text(encoding='utf-8-sig'))
+    value = config[section][key] if section else config[key]
+    path = Path(value)
+    return path if path.is_absolute() else ROOT/path
+
 def fetch(url):
     with urllib.request.urlopen(url, timeout=90) as response:
         return response.read()
@@ -26,8 +32,13 @@ def git_blob(path):
     data = path.read_bytes()
     return hashlib.sha1(f"blob {len(data)}\0".encode()+data).hexdigest()
 
+def prepare_partial(path, expected_size):
+    # A complete but invalid partial must not trigger an endless HTTP Range 416 retry.
+    if path.exists() and path.stat().st_size >= expected_size:
+        path.unlink()
+
 def main():
-    dest = ROOT / "models/VoxCPM2"
+    dest = configured_path('model_dir')
     dest.mkdir(parents=True, exist_ok=True)
     meta = json.loads((ROOT / "config/model-sources.json").read_text(encoding="utf-8"))[MODEL]
     revision = meta["sha"]
@@ -42,6 +53,7 @@ def main():
         partial = path.with_suffix(path.suffix + ".partial")
         for attempt in range(5):
             try:
+                prepare_partial(partial, item['size'])
                 offset = partial.stat().st_size if partial.exists() else 0
                 route = "resolve" if item.get("lfs") else "raw"
                 request = urllib.request.Request(f"https://huggingface.co/{MODEL}/{route}/{revision}/{name}", headers={"Range": f"bytes={offset}-"} if offset else {})

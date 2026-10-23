@@ -4,11 +4,12 @@ import sys
 import time
 from pathlib import Path
 import httpx
-from .config import load_config
+from .config import load_config, installation_id
 
 class Client:
     def __init__(self, auto_start=False):
         self.config = load_config()
+        self.verified = False
         self.url = os.environ.get("VOICE_PLATFORM_URL", f"http://127.0.0.1:{self.config['port']}").rstrip("/")
         token = os.environ.get(self.config["token_env"])
         self.http = httpx.Client(base_url=self.url, timeout=360, trust_env=False, headers={"Authorization": f"Bearer {token}"} if token else {})
@@ -16,6 +17,8 @@ class Client:
             self.ensure_running()
 
     def request(self, method, path, **kwargs):
+        if not self.verified and path != '/health' and 'VOICE_PLATFORM_URL' not in os.environ:
+            self.request('GET', '/health')
         response = self.http.request(method, "/api/v1"+path, **kwargs)
         if response.is_error:
             try:
@@ -23,7 +26,24 @@ class Client:
             except ValueError:
                 details = response.text
             raise ValueError(f"HTTP {response.status_code}: {details}")
-        return response.json()
+        result = response.json()
+        if path == '/health' and 'VOICE_PLATFORM_URL' not in os.environ:
+            if not isinstance(result, dict) or result.get('status') != 'ok':
+                raise ValueError('This port does not provide a healthy Voice Foundry service. Check the port in config/platform.json.')
+            identity = result.get('installation_id')
+            if identity is None:
+                # Older releases expose the data directory through settings.
+                settings = self.http.get('/api/v1/settings')
+                settings.raise_for_status()
+                directory = settings.json().get('data_dir')
+                actual = os.path.normcase(str(Path(directory).resolve())) if isinstance(directory, str) else None
+                matches = actual == os.path.normcase(str(Path(self.config['data_dir']).resolve()))
+            else:
+                matches = identity == installation_id(self.config)
+            if not matches:
+                raise ValueError('This port belongs to another installation. Stop that service or change port in config/platform.json. Use VOICE_PLATFORM_URL only when intentionally connecting to another service.')
+            self.verified = True
+        return result
 
     def ensure_running(self):
         try:

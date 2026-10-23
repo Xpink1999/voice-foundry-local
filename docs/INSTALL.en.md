@@ -8,32 +8,62 @@ Choose a permanent installation directory. Projects share the service and models
 
 ## Requirements
 
-- Windows 11, Git, [uv](https://docs.astral.sh/uv/getting-started/installation/) and a working NVIDIA driver.
+- Windows 11 x64, [Git](https://git-scm.com/download/win), [uv](https://docs.astral.sh/uv/getting-started/installation/) and a working NVIDIA driver.
 - The current inference environment uses Python 3.11.16 and PyTorch / torchaudio 2.8.0 cu128, primarily tested on an RTX 4090. The PyTorch wheel includes the CUDA runtime; a separate matching CUDA Toolkit is not required. Other GPUs and CPU inference have not received equivalent validation.
 - Install FFmpeg from a [distribution listed on its official site](https://ffmpeg.org/download.html) and add it to PATH. Format conversion, post-processing and advanced audio processing depend on it. Licenses vary by build; see the [third-party notices](../THIRD_PARTY_NOTICES.md) (Chinese).
-- Installation downloads require internet access. Allow several GB for models and the environment, plus download caches.
+- If PyTorch reports a DLL loading error, install the [Microsoft Visual C++ v14 x64 runtime](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist). This is a Windows system dependency; the platform installer does not install or change it automatically.
+- Installation downloads require internet access. Allow at least 30 GiB for a full installation.
 
 ## First installation
 
-Open PowerShell in the source directory and run:
+On GitHub, choose **Code → Download ZIP**, then use **Extract All**. Open the extracted folder containing `pyproject.toml` and `install-voice.cmd`. Do not run files inside the ZIP. Alternatively:
 
 ~~~powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
+git clone https://github.com/Xpink1999/voice-foundry-local.git
+cd voice-foundry-local
 ~~~
 
-The script installs Python in `runtime/python`, creates `.venv` and installs locked dependencies. Inference sources go in `vendor/`, models in `models/`, and download caches in `runtime/`. It then checks dependencies, runs core tests and starts the service.
+Use a permanent folder your account can write to, outside Program Files and synced folders. Moving it later requires rebuilding the virtual environment. Administrator rights, an existing Python installation, CUDA Toolkit, Codex, voices and databases are not required.
 
-Open the [WebUI](http://127.0.0.1:8961/). The first model load takes time. Speech generation and recording processing run locally.
-
-Model sources and revisions are pinned in `config/model-sources.json`. Downloaders support resuming and hash checks; each model directory has a `provenance.json` download record. Update source, license and verification records together when changing model versions.
-
-To install dependencies without downloading models or starting the service:
+Double-click `install-voice.cmd`, or open PowerShell in that folder:
 
 ~~~powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -SkipModels -NoStart
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1
 ~~~
 
-This is useful for inspecting source and running core tests. Actual speech generation needs models. The installer does not change user PATH or Codex configuration automatically.
+The full installer downloads Python 3.11.16, CUDA PyTorch, pinned inference sources and seven model sets. It checks imports and CUDA, runs core tests and starts the service. Weights total about 7.1 GiB; the PyTorch download is about 3.2 GiB. Allow at least 30 GiB for models, the environment, extraction and caches. A fresh installation has empty voice, project and task lists.
+
+Open the [WebUI](http://127.0.0.1:8961/), enter one sentence and describe a voice, then generate. The first synthesis loads the model and takes longer than opening the page. Results still require listening and approval.
+
+To inspect the interface, database and core workflows without downloading CUDA or models:
+
+~~~powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -CoreOnly -NoStart
+~~~
+
+`-CoreOnly` needs no Git, NVIDIA GPU or FFmpeg. It can open an empty interface, but cannot generate speech or process recordings. Rerun without switches to complete installation later. `-SkipModels -NoStart` still installs CUDA dependencies and inference sources, skipping only weights; it is not a lightweight installation.
+
+Python, uv state and caches stay in `runtime/`; library model caches use `cache_dir`, defaulting to `runtime/model-cache`; the environment is `.venv`. Sources go in `vendor/`, models in `models/`, and databases and assets in `data/`. The installer does not read another installation's environment, recordings or database, or change user PATH or Codex settings.
+
+Model sources and revisions are pinned in `config/model-sources.json`. Downloads verify sizes and hashes and retain `provenance.json`. Rerun after an interrupted download; valid existing files are retained.
+
+## Checks and troubleshooting
+
+- Log: `runtime/install.log`. Check report: `runtime/install-check.json`. Failures return a nonzero exit code. Fix the reported step and rerun; keep `data/`.
+- uv or Git not found: install the tool and reopen the terminal. A ZIP download still needs Git for full inference sources; CoreOnly does not.
+- Starting before installation: launchers show the install command instead of only a missing-Python error.
+- Port belongs to another installation: stop that service or change `port` in this folder's `config/platform.json`, then retry and use the new URL. Local start, stop and health commands verify installation identity.
+- CUDA unavailable: update the NVIDIA driver and retry. PyTorch supplies its CUDA runtime; installing a Toolkit does not replace the driver check. See [PyTorch version instructions](https://pytorch.org/get-started/previous-versions/).
+- FFmpeg missing: WAV text-to-speech works; recording uploads, encoded exports, trimming, loudness processing and advanced separation need FFmpeg. Reopen the terminal after installation, or set an absolute executable path in the `ffmpeg` configuration field.
+- uv version-link permission error: the installer checks the downloaded local interpreter and continues only if it works. It never falls back to system Python. Failed downloads or interpreter checks still stop installation.
+
+Recheck a full installation:
+
+~~~powershell
+.venv\Scripts\python.exe scripts\check_install.py --profile inference --models
+~~~
+
+For CoreOnly, use `--profile core`. Opening the page, passing dependency checks and generating real speech are separate checks.
 
 ## Daily use
 

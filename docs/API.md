@@ -105,3 +105,5 @@ MCP 工具名称以 voice_ 开头。接口不依赖 Codex；其他 MCP 客户端
 普通和长文克隆使用现有 clone_mode=reference / hifi，与“可控声音克隆 / 极致克隆”界面名称对应。新 MCP 连接共 33 工具，包含整本导入、分页、续作、导出、资产预览删除和恢复；没有批准音频的 MCP 工具。CLI 与详细流程见 [LONGFORM.md](LONGFORM.md)。
 
 章节目录支持 `limit`、`offset`，也可用 `after=<章号>` 获取该章之后仍有效的章节。`after` 与 `offset` 可组合；下一章可请求 `chapters?after=当前章号&limit=1`，避免假定章号连续。
+
+`GET /health` 返回 `installation_id`，由本次安装目录和数据目录生成。CLI 在本地调用前核对标识，防止误用同端口的另一份安装；连接旧版本时核对 `/settings` 的数据目录。显式设置 `VOICE_PLATFORM_URL` 表示主动选择服务，按该 URL 调用。运行库缓存由配置中的 `cache_dir` 管理，默认 `runtime/model-cache`。

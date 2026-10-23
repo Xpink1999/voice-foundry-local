@@ -8,19 +8,19 @@ Windows에서 목소리를 디자인하고 녹음으로 음성을 복제해 대�
 
 ## 설치
 
-주요 검증 환경은 Windows 11과 RTX 4090입니다. Git, [uv](https://docs.astral.sh/uv/getting-started/installation/), 정상 작동하는 NVIDIA 드라이버가 필요합니다. 형식 변환, 후처리, 고급 오디오 처리에는 [FFmpeg](https://ffmpeg.org/download.html)를 별도로 설치하세요.
+전체 음성 생성에는 Windows 11, Git, [uv](https://docs.astral.sh/uv/getting-started/installation/), 작동하는 NVIDIA 드라이버가 필요하며 주로 RTX 4090에서 검증했습니다. 녹음 업로드와 처리에는 [FFmpeg](https://ffmpeg.org/download.html)도 필요합니다. Python이나 Codex를 미리 설치할 필요는 없습니다.
 
-소스를 내려받은 뒤 프로젝트 폴더에서 실행합니다.
+GitHub에서 **Code → Download ZIP**을 선택해 모두 압축 해제한 뒤 `install-voice.cmd`가 있는 폴더에서 해당 파일을 실행하세요. PowerShell에서도 실행할 수 있습니다.
 
 ~~~powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1
 ~~~
 
-스크립트는 독립된 Python 3.11 환경을 만들고 의존성과 고정 버전 모델을 설치한 뒤 코어 테스트를 실행하고 서비스를 시작합니다. 처음 설치할 때는 인터넷 연결이 필요합니다. 모델과 환경에 수 GB, 다운로드 캐시에 추가 공간이 필요합니다. 음성 생성과 녹음 처리는 로컬에서 실행됩니다.
+전체 설치는 독립 환경, 고정된 소스와 모델을 내려받고 검사 후 서비스를 시작합니다. 30 GiB 이상 여유 공간을 권장합니다. 화면만 확인하려면 `-CoreOnly -NoStart`를 추가하세요. CUDA와 모델을 받지 않으며 음성 생성은 할 수 없습니다.
 
-[WebUI](http://127.0.0.1:8961/)를 엽니다. 다음부터는 `start-voice.cmd`로 시작하고 `stop-voice.cmd`로 종료합니다. CLI 사용법은 [설치 안내](docs/INSTALL.ko.md)에 있습니다. 브라우저를 닫아도 백그라운드 작업은 취소되지 않습니다.
+[WebUI](http://127.0.0.1:8961/)에서 목소리를 설명하고 한 문장을 생성할 수 있습니다. 저장된 목소리나 녹음이 없어도 됩니다. 이후에는 `start-voice.cmd`와 `stop-voice.cmd`를 사용하세요. 다운로드, 의존성, 포트 충돌과 문제 해결은 [설치 안내](docs/INSTALL.ko.md)를 참고하세요.
 
-공개 저장소에는 모델 가중치, 참조 녹음, 개인 목소리, 데이터베이스, 설치된 실행 환경이 포함되지 않습니다.
+소스 배포에는 모델 가중치, 녹음, 데이터베이스나 설치된 환경이 포함되지 않습니다.
 
 ## 생성과 검토
 

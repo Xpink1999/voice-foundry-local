@@ -10,6 +10,7 @@
   "data_dir": "data",
   "model_dir": "models/VoxCPM2",
   "log_dir": "runtime/logs",
+  "cache_dir": "runtime/model-cache",
   "ffmpeg": "ffmpeg",
   "device": "cuda:0",
   "idle_unload_seconds": 300,

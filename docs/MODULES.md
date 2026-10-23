@@ -49,3 +49,5 @@
 ## 增加项目集成
 
 导出适配器实现 folder(result) 返回相对目录，并在 export_adapters 中注册。适配器不能修改模型、任务或原始资产；具体引擎导入工具可读取 manifest.json 和逐音频 JSON。Godot、Unity、Unreal、剪辑工具均是输出消费者，不是平台核心依赖。
+
+首次安装：`install-voice.cmd` 调用 `scripts/install.ps1`。`scripts/check_install.py` 独立检查核心环境、CUDA 与模型；`requirements-cuda.txt` 固定 Windows x64 / Python 3.11 的官方 CUDA wheel 地址和哈希。

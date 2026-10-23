@@ -1,4 +1,4 @@
 @echo off
 chcp 65001 >nul
-"%~dp0.venv\Scripts\python.exe" -m voice_platform.cli health
-pause
+call "%~dp0bin\voice.cmd" health
+if errorlevel 1 pause

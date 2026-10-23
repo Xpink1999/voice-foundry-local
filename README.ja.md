@@ -8,19 +8,19 @@ Windows 上で音声をデザインし、録音から音色を作り、台詞・
 
 ## インストール
 
-主な検証環境は Windows 11 と RTX 4090 です。Git、[uv](https://docs.astral.sh/uv/getting-started/installation/)、利用可能な NVIDIA ドライバーが必要です。形式変換、後処理、高度な音声処理には [FFmpeg](https://ffmpeg.org/download.html) を別途インストールしてください。
+完全な音声生成には Windows 11、Git、[uv](https://docs.astral.sh/uv/getting-started/installation/)、利用可能な NVIDIA ドライバーが必要です。主に RTX 4090 で検証しています。録音のアップロードと処理には [FFmpeg](https://ffmpeg.org/download.html) も必要です。Python や Codex の事前導入は不要です。
 
-ソースをダウンロードし、プロジェクトのディレクトリで実行します。
+GitHub で **Code → Download ZIP** を選んですべて展開し、`install-voice.cmd` があるフォルダーで同ファイルを実行します。PowerShell でも実行できます。
 
 ~~~powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1
 ~~~
 
-スクリプトは専用の Python 3.11 環境を作成し、依存関係と指定バージョンのモデルを取得して、コアテスト後にサービスを起動します。初回はインターネット接続が必要です。モデルと環境に数 GB、ダウンロードキャッシュに追加の容量を使用します。音声生成と録音処理はローカルで行います。
+完全版は専用環境、固定版ソースとモデルを取得し、確認後に起動します。30 GiB 以上の空きを推奨します。画面だけを確認する場合は `-CoreOnly -NoStart` を付けてください。CUDA とモデルは取得せず、音声生成はできません。
 
-[WebUI](http://127.0.0.1:8961/) を開きます。次回からは `start-voice.cmd` で起動、`stop-voice.cmd` で停止できます。[インストール手順](docs/INSTALL.ja.md)には CLI での操作も記載しています。ブラウザーを閉じてもバックグラウンドのタスクは中止されません。
+[WebUI](http://127.0.0.1:8961/) で声を説明して一文を生成できます。保存済み音色や録音は不要です。以後は `start-voice.cmd` と `stop-voice.cmd` を使います。取得手順、依存関係、ポート競合、問題解決は[インストール手順](docs/INSTALL.ja.md)を参照してください。
 
-公開リポジトリにモデルの重み、参照録音、個人の音色、データベース、構築済み環境は含まれません。
+ソースの配布物にはモデルの重み、録音、データベース、インストール済み環境は含まれません。
 
 ## 生成と審査
 

@@ -97,6 +97,24 @@ class Platform:
         finally:
             self.engine_lock.release()
 
+    def load_engine(self, identity):
+        with self.engine_lock:
+            engine = self.engines[identity]
+            if self.active_engine == identity:
+                return engine
+            self.unload()
+            try:
+                engine.load()
+            except Exception:
+                try:
+                    engine.unload()
+                except Exception:
+                    log.exception('cleanup after model load failure: %s', identity)
+                raise
+            self.active_engine = identity
+            self.loaded_at = now()
+            return engine
+
     def create_project(self, request):
         return self.store.save("projects", dict(request.model_dump(), id=uid(), created_at=now()))
 
@@ -368,12 +386,7 @@ class Platform:
             raise ValueError("参考音频哈希不匹配")
         with self.engine_lock:
             self._check_cancel(job)
-            if self.active_engine != job["engine"]:
-                if self.active_engine:
-                    self.engines[self.active_engine].unload()
-                self.active_engine = job["engine"]  # allows releasing partially loaded models on failure
-                engine.load()
-                self.loaded_at = now()
+            self.load_engine(job['engine'])
             for candidate in range(request["candidates"]):
                 self._check_cancel(job)
                 result_id = uid()

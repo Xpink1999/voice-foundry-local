@@ -24,6 +24,9 @@ class VoxEngine:
 
     def load(self):
         if self.model is None:
+            root = Path(self.config['root'])
+            if not (root/'vendor/VoxCPM/src/voxcpm').is_dir() or not (Path(self.config['model_dir'])/'model.safetensors').is_file():
+                raise ValueError('VoxCPM2 is not installed. Run powershell -ExecutionPolicy Bypass -File scripts/install.ps1 from the installation directory. CoreOnly and SkipModels do not install model weights.')
             # Fixed official inference source; optional training/demo dependencies are not core dependencies.
             source = str(Path(self.config["root"]) / "vendor/VoxCPM/src")
             if source not in sys.path:
@@ -36,8 +39,8 @@ class VoxEngine:
     def unload(self):
         self.model = None
         gc.collect()
-        import torch
-        if torch.cuda.is_available():
+        torch = sys.modules.get('torch')
+        if torch is not None and torch.cuda.is_available():
             torch.cuda.empty_cache()
 
     def synthesize(self, request):

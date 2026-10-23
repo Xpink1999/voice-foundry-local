@@ -12,8 +12,8 @@ ROOT = Path(__file__).resolve().parents[1]
 FOLDERS = ('src', 'web', 'config', 'scripts', 'tests', 'docs', 'bin', 'LICENSES')
 ROOT_FILES = ('README.md', 'README.en.md', 'README.ja.md', 'README.ko.md',
               'LICENSE', 'NOTICE', 'THIRD_PARTY_NOTICES.md',
-              'pyproject.toml', 'requirements-inference.txt', 'requirements.lock.txt',
-              '.gitignore', 'start-voice.cmd', 'stop-voice.cmd', 'check-health.cmd')
+              'pyproject.toml', 'requirements-cuda.txt', 'requirements-inference.txt', 'requirements.lock.txt',
+              '.gitignore', 'install-voice.cmd', 'start-voice.cmd', 'stop-voice.cmd', 'check-health.cmd')
 EXTENSIONS = {'.py', '.js', '.cjs', '.css', '.html', '.json', '.toml', '.md', '.txt', '.ps1', '.cmd'}
 SECRETS = re.compile(r'(?:gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|sk-[A-Za-z0-9_-]{32,}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|https?://[^\s/@]+:[^\s/@]+@)')
 

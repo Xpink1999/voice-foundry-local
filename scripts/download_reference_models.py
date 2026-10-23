@@ -7,7 +7,7 @@ import subprocess
 import time
 import urllib.request
 from pathlib import Path
-from download_model import ROOT, digest, git_blob
+from download_model import ROOT, digest, git_blob, prepare_partial, configured_path
 
 SPECS=[('Systran/faster-whisper-small','whisper-small','models/faster-whisper-small',{'README.md','config.json','model.bin','tokenizer.json','vocabulary.txt'},'mit'),
        ('MIT/ast-finetuned-audioset-10-10-0.4593','ast-audioset','models/AST-AudioSet',{'README.md','config.json','model.safetensors','preprocessor_config.json'},'bsd-3-clause')]
@@ -26,6 +26,7 @@ def install(repo,slug,directory,names,license_name,evidence_dir='reference-prepr
         temp=path.with_suffix(path.suffix+'.partial')
         for attempt in range(4):
             try:
+                prepare_partial(temp, item['size'])
                 offset=temp.stat().st_size if temp.exists() else 0
                 route='resolve' if expected or attempt%2 else 'raw'
                 req=urllib.request.Request(f'https://huggingface.co/{repo}/{route}/{meta["sha"]}/{name}'+('?download=true' if attempt>=2 else ''),headers={'Range':f'bytes={offset}-'} if offset else {})
@@ -46,12 +47,14 @@ def install(repo,slug,directory,names,license_name,evidence_dir='reference-prepr
     (target/'provenance.json').write_text(json.dumps(dict(model=repo,revision=meta['sha'],license=license_name,source=f'https://huggingface.co/{repo}',files=files),ensure_ascii=False,indent=2),encoding='utf-8')
 
 def main():
+    specs = [(repo, slug, configured_path(key, 'reference_preprocessing'), names, license_name)
+             for (repo, slug, directory, names, license_name), key in zip(SPECS, ('whisper_dir', 'classifier_dir'))]
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
-        list(pool.map(lambda spec:install(*spec),SPECS))
+        list(pool.map(lambda spec:install(*spec),specs))
     repo=ROOT/'vendor/Resemblyzer'
     commit=subprocess.check_output(['git','-C',str(repo),'rev-parse','HEAD'],text=True).strip()
     assert commit=='15d828edebe06bc72b9cabc8ef8ca5ab2cb457ce'
-    target=ROOT/'models/Resemblyzer';target.mkdir(parents=True,exist_ok=True)
+    target=configured_path('speaker_dir','reference_preprocessing');target.mkdir(parents=True,exist_ok=True)
     source=repo/'resemblyzer/pretrained.pt';dest=target/'pretrained.pt'
     if not dest.exists():
         try:os.link(source,dest)

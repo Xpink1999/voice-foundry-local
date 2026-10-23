@@ -255,9 +255,7 @@ class Longform:
             while not self.platform.engine_lock.acquire(timeout=.2):self.check(identity)
             try:
                 self.check(identity);self.platform.last_use=time.monotonic()
-                if self.platform.active_engine!=snapshot['engine']:
-                    if self.platform.active_engine:self.platform.engines[self.platform.active_engine].unload()
-                    self.platform.active_engine=snapshot['engine'];engine.load();self.platform.loaded_at=now()
+                self.platform.load_engine(snapshot['engine'])
                 request=snapshot['request'];seed=(snapshot['seed']+item['no']-1+item['variant']*1000003)%2147483647
                 generation=dict(text=text,style=snapshot['style'],seed=seed,engine_options=request['engine_options'],clone_mode=request['clone_mode'],prompt_text=reference.get('transcript',{}).get('text') if reference else None,streaming=True if engine.capabilities().get('streaming') else False,reference_path=str(reference_path) if reference else None)
                 chunks=[];stream=engine.synthesize(generation)

@@ -8,32 +8,62 @@
 
 ## 准备
 
-- Windows 11、Git、[uv](https://docs.astral.sh/uv/getting-started/installation/) 和可用的 NVIDIA 驱动。
+- Windows 11 x64、[Git](https://git-scm.com/download/win)、[uv](https://docs.astral.sh/uv/getting-started/installation/) 和可用的 NVIDIA 驱动。
 - 当前推理环境为 Python 3.11.16、PyTorch / torchaudio 2.8.0 cu128，主要在 RTX 4090 上验证。CUDA 运行库随 PyTorch wheel 安装，不要求另装同版本 CUDA Toolkit。其他显卡和 CPU 推理尚未完成同等验证。
 - 从 [FFmpeg 官方列出的分发渠道](https://ffmpeg.org/download.html)安装 FFmpeg，并加入 PATH。缺少它会影响格式转换、后处理和高级音频处理。不同构建的许可可能不同，见 [第三方声明](../THIRD_PARTY_NOTICES.md)。
-- 安装下载需要联网。模型与运行环境需要数 GB 磁盘，下载缓存还需额外空间。
+- 若出现 PyTorch DLL 加载错误，安装 [Microsoft Visual C++ v14 x64 运行库](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)。它是 Windows 系统依赖；平台安装脚本不会自动安装或修改它。
+- 安装下载需要联网。完整安装建议预留至少 30 GiB。
 
 ## 第一次安装
 
-在源码目录打开 PowerShell，运行：
+在 GitHub 仓库首页选择 **Code → Download ZIP**，右键 ZIP 选择“全部解压”。进入解压后含 `pyproject.toml` 和 `install-voice.cmd` 的文件夹；不要在压缩包内直接运行。也可以用 Git：
 
 ~~~powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
+git clone https://github.com/Xpink1999/voice-foundry-local.git
+cd voice-foundry-local
 ~~~
 
-脚本将 Python 安装到 `runtime/python`，在 `.venv` 建立环境，安装锁定的依赖。推理源码放在 `vendor/`，模型放在 `models/`，下载缓存放在 `runtime/`。随后检查依赖、运行核心测试并启动服务。
+将文件夹放在长期保留、当前账户可写的位置，避免 Program Files 和同步盘。安装后不要直接移动目录，虚拟环境中的路径需要重新建立。无需管理员权限、预装 Python、CUDA Toolkit、Codex 或已有音色和数据库。
 
-打开 [WebUI](http://127.0.0.1:8961/)。首次加载模型需要等待。后续配音和录音处理在本机完成。
-
-模型来源和修订固定在 `config/model-sources.json`，下载器支持断点续传与哈希校验，各模型目录的 `provenance.json` 记录下载信息。更新模型时需同步来源、许可和校验记录。
-
-只安装依赖、跳过模型下载且不启动服务：
+双击 `install-voice.cmd`，或在这个文件夹打开 PowerShell：
 
 ~~~powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -SkipModels -NoStart
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1
 ~~~
 
-这适合检查源码和运行核心测试；没有模型时不能实际配音。安装脚本不会自动修改用户 PATH 或 Codex 配置。
+完整安装会下载 Python 3.11.16、CUDA 版 PyTorch、固定版本推理源码及 7 组模型，检查导入和 CUDA、运行核心测试，再启动服务。模型权重约 7.1 GiB，PyTorch 下载约 3.2 GiB；环境、解包和缓存还需空间，建议至少预留 30 GiB。新安装的音色、项目和任务列表为空。
+
+打开 [WebUI](http://127.0.0.1:8961/)，输入一句文本，在“声音与演绎描述”填写声音要求并生成。首次配音会加载模型，耗时长于打开网页。结果仍待人工试听审核。
+
+只检查界面、数据库和核心流程，不下载 CUDA 或模型：
+
+~~~powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -CoreOnly -NoStart
+~~~
+
+`-CoreOnly` 不要求 Git、NVIDIA 显卡或 FFmpeg，可启动空白界面，但不能配音或处理录音。之后不带参数重跑即可补全。`-SkipModels -NoStart` 则仍安装 CUDA 依赖和推理源码，只跳过权重；它不是轻量安装。
+
+Python、uv 状态和缓存放在 `runtime/`；运行库模型缓存由 `cache_dir` 指定，默认 `runtime/model-cache`，专用环境在 `.venv`。源码放 `vendor/`，模型放 `models/`，数据库和资产放 `data/`。不读取其他安装的录音、数据库或环境，不自动更改用户 PATH 或 Codex 设置。
+
+模型来源和修订在 `config/model-sources.json`；下载器校验文件大小和哈希，保留 `provenance.json`。下载中断可重跑安装命令，已有有效文件会保留。
+
+## 安装检查与常见问题
+
+- 安装日志：`runtime/install.log`。检查结果：`runtime/install-check.json`。失败会返回非零退出码；修复报错后重跑即可，不要删除 `data/`。
+- 找不到 uv 或 Git：先安装对应工具，再重新打开终端。ZIP 下载也需要 Git 来取得完整推理源码；CoreOnly 不需要。
+- 未安装就点启动：启动器会显示安装命令，不再只提示找不到 Python。
+- 端口已由另一份安装占用：停止那份服务，或修改本目录 `config/platform.json` 的 `port`，随后重试并打开新端口。启动、停止和健康检查均会核对本地安装位置。
+- CUDA 不可用：更新 NVIDIA 驱动后重试。PyTorch 自带 CUDA 运行库；不要用安装 Toolkit 代替驱动检查。参考 [PyTorch 对应版本说明](https://pytorch.org/get-started/previous-versions/)。
+- 缺少 FFmpeg：WAV 文字配音可用；上传录音、编码导出、裁剪、响度处理和高级分离需要 FFmpeg。安装后重开终端，或在配置的 `ffmpeg` 中填写可执行文件完整路径。
+- uv 版本链接权限错误：脚本会检查已经下载的项目内解释器，校验通过才继续，不会改用系统 Python。下载或解释器校验失败时仍停止。
+
+重新检查完整安装：
+
+~~~powershell
+.venv\Scripts\python.exe scripts\check_install.py --profile inference --models
+~~~
+
+CoreOnly 使用 `--profile core`。网页能打开、依赖检查通过和真实配音成功是不同检查，不能互相替代。
 
 ## 日常操作
 

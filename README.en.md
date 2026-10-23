@@ -8,19 +8,19 @@ The current engine is VoxCPM2. The interface supports Chinese, English, Japanese
 
 ## Installation
 
-Primarily tested on Windows 11 with an RTX 4090. Install Git, [uv](https://docs.astral.sh/uv/getting-started/installation/) and a working NVIDIA driver. Install [FFmpeg](https://ffmpeg.org/download.html) separately for format conversion, post-processing and advanced audio processing.
+Full speech generation needs Windows 11, Git, [uv](https://docs.astral.sh/uv/getting-started/installation/) and a working NVIDIA driver, primarily tested on an RTX 4090. Recording uploads and processing also need [FFmpeg](https://ffmpeg.org/download.html). Python and Codex do not need to be preinstalled.
 
-Download the source and run this in the project directory:
+Choose **Code → Download ZIP** on GitHub and extract everything. Open the folder containing `install-voice.cmd` and double-click it, or run:
 
 ~~~powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1
 ~~~
 
-The script creates an isolated Python 3.11 environment, installs dependencies, downloads pinned model versions, runs core tests and starts the service. The first installation needs internet access. Models and the environment use several GB, with additional space needed for download caches. Speech generation and recording processing run locally.
+The full installer downloads an isolated environment, pinned sources and models, runs checks and starts the service. Allow at least 30 GiB. For interface checks only, add `-CoreOnly -NoStart`; this skips CUDA and models and cannot generate speech.
 
-Open the [WebUI](http://127.0.0.1:8961/). For later sessions, use `start-voice.cmd` to start and `stop-voice.cmd` to stop, or use the CLI commands in the [installation guide](docs/INSTALL.en.md). Closing the browser does not cancel background tasks.
+Open the [WebUI](http://127.0.0.1:8961/). Describe a voice and generate a sentence; no saved voice or recording is needed. Later use `start-voice.cmd` and `stop-voice.cmd`. See the [installation guide](docs/INSTALL.en.md) for downloads, dependencies, port conflicts and troubleshooting.
 
-The public repository contains no model weights, reference recordings, personal voices, databases or preinstalled environments.
+Source downloads contain no model weights, recordings, database or installed environment.
 
 ## Generate and review
 

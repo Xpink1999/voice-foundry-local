@@ -8,19 +8,19 @@
 
 ## 安装
 
-主要在 Windows 11、RTX 4090 上验证。需要 Git、[uv](https://docs.astral.sh/uv/getting-started/installation/) 和可用的 NVIDIA 驱动。[FFmpeg](https://ffmpeg.org/download.html) 需单独安装，用于格式转换、后处理和高级音频处理。
+完整配音需要 Windows 11、Git、[uv](https://docs.astral.sh/uv/getting-started/installation/) 和可用的 NVIDIA 驱动，主要在 RTX 4090 上验证。录音上传和处理还需要 [FFmpeg](https://ffmpeg.org/download.html)。无需预装 Python 或 Codex。
 
-下载源码后，在项目目录运行：
+在 GitHub 选择 **Code → Download ZIP** 并全部解压，进入含 `install-voice.cmd` 的文件夹后双击它；也可在该目录运行：
 
 ~~~powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1
 ~~~
 
-脚本会建立独立的 Python 3.11 环境，安装依赖，下载固定版本的模型，运行核心测试并启动服务。第一次安装需要联网；模型和运行环境占用数 GB，下载缓存还需额外空间。配音和录音处理在本机完成。
+完整安装会下载独立环境、固定版源码和模型，运行检查后启动服务，建议预留至少 30 GiB。只想检查界面时，在命令后添加 `-CoreOnly -NoStart`，不下载 CUDA 和模型，也不能配音。
 
-安装后打开 [WebUI](http://127.0.0.1:8961/)。以后双击 `start-voice.cmd`，停止用 `stop-voice.cmd`。关掉网页不会取消后台任务。详细步骤见 [安装说明](docs/INSTALL.md)。
+打开 [WebUI](http://127.0.0.1:8961/)。首次使用可直接描述声音生成一句文本，不需要已有音色或录音。以后用 `start-voice.cmd` 和 `stop-voice.cmd`。下载、依赖、端口冲突与故障检查见[安装说明](docs/INSTALL.md)。
 
-公开仓库不包含模型权重、参考录音、个人音色、数据库或预装环境。
+源码包不含模型权重、录音、数据库或预装环境。
 
 ## 生成与审核
 

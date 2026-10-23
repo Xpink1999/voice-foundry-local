@@ -18,13 +18,13 @@
     },
     {
       "path": "bin/voice.cmd",
-      "bytes": 70,
-      "sha256": "f3da5eeeea8b46a1152163777f3e5fb6b2a1d7961a82250651340b98e5c6dece"
+      "bytes": 374,
+      "sha256": "f23186f9eb6fc75265738572efe20cbeb4d0c43372b51dae0ce55513317186e8"
     },
     {
       "path": "check-health.cmd",
-      "bytes": 93,
-      "sha256": "1b8a61c927484e365c20ef8fc513ea114a646ba783484de17faa4f71a3aeba40"
+      "bytes": 81,
+      "sha256": "0938cdd168a42616c39b723cbae0f7a548c4b5008d5a76e6ee2c4ca3f55d8524"
     },
     {
       "path": "config/model-sources.json",
@@ -33,13 +33,13 @@
     },
     {
       "path": "config/platform.json",
-      "bytes": 2125,
-      "sha256": "e2789d871736f7eaf1b68f22acb166af17bc709924aba07584a4ae197b54214a"
+      "bytes": 2164,
+      "sha256": "86cf7aeb950b22a0ef33a1682a3130b7629183370f3b63de87fa802995faaa3c"
     },
     {
       "path": "docs/API.md",
-      "bytes": 9545,
-      "sha256": "9fd7a6e4c575de5a924d7378d26ae5d2dbc5d86486fdfc5469db05c80bd66e2f"
+      "bytes": 9933,
+      "sha256": "d277e58299435b62866145128b8bb614e2d9ab4cd7e9248aa2df9851e4ec6fdb"
     },
     {
       "path": "docs/ARCHITECTURE.md",
@@ -68,23 +68,28 @@
     },
     {
       "path": "docs/INSTALL.en.md",
-      "bytes": 4394,
-      "sha256": "56676e1714180856037d6108cc9f6b49a0398799a8c75e5c2cd3a509afe18448"
+      "bytes": 7600,
+      "sha256": "ddb9be215cdc130845f429563f087c25a097f3da516aedc14bf797d9aea4c40b"
     },
     {
       "path": "docs/INSTALL.ja.md",
-      "bytes": 5530,
-      "sha256": "38ae2b57ae9cf7cd2a7ec97cc4df7947444e6b635e62008f7b22abcfaf0dea2b"
+      "bytes": 9069,
+      "sha256": "ae466268dd1cc114120f19006801466539110f6c1be6c068c8b7bd46920d61ce"
     },
     {
       "path": "docs/INSTALL.ko.md",
-      "bytes": 5070,
-      "sha256": "cdf680760393202aebb58317bcebdfd8c0e58288d1cdbbc1759df10dbff6963a"
+      "bytes": 8447,
+      "sha256": "130d798945ddab49ad15721ff42c9d84e65cabe02150e07cb873ae72e4d03409"
     },
     {
       "path": "docs/INSTALL.md",
-      "bytes": 3826,
-      "sha256": "6080533de52b7dd933dfe0b931de7e08e66e90236839c9803079c262e389d624"
+      "bytes": 6871,
+      "sha256": "8ef5e6133f2ce0757f66852097aca83288021b231651fe4595922a8c0de50212"
+    },
+    {
+      "path": "docs/INSTALLATION_REVIEW.md",
+      "bytes": 4805,
+      "sha256": "56865fff3f92d8edc896bcafb5f10db35145b63cd96d5a9c11483e251ccc8024"
     },
     {
       "path": "docs/LOCALIZATION.md",
@@ -133,8 +138,8 @@
     },
     {
       "path": "docs/MODULES.md",
-      "bytes": 4300,
-      "sha256": "f327a4e9226b9b4939c3d7a7881fec8b64fe4f928639a919b9ecb6cd9d3c939f"
+      "bytes": 4535,
+      "sha256": "d53bb156383953a7103cd998baed00df0e57287b386a118f791b2dd1b33be1bb"
     },
     {
       "path": "docs/PUBLISHING.md",
@@ -163,13 +168,18 @@
     },
     {
       "path": "docs/TESTING.md",
-      "bytes": 1538,
-      "sha256": "c1bc011b0d87bd6ca41710390bd110727201bbc2736c64f9dd5c3bb9b32cc403"
+      "bytes": 1893,
+      "sha256": "6f48ce6413967b163eeab0c9e7f5f0412f394aa56dd0cf5c803a51ef8f76fd6d"
     },
     {
       "path": "docs/UX_REVIEW.md",
       "bytes": 7118,
       "sha256": "7fa2990504392a3e928ecf5613c2f4369849a0da49bbe83e3ac8e24d641bf076"
+    },
+    {
+      "path": "install-voice.cmd",
+      "bytes": 117,
+      "sha256": "835d509243555441310c0170701516274689ebb3415731c80f3e70337e569667"
     },
     {
       "path": "LICENSE",
@@ -1038,23 +1048,28 @@
     },
     {
       "path": "README.en.md",
-      "bytes": 5661,
-      "sha256": "1f42f88395f9a49211bd1ad62386c037c0f84991a62dbf666aabd0ccba0cba44"
+      "bytes": 5677,
+      "sha256": "054670459c45075da30dfc9d229d2f331a88ecad47026786ba19aab1953ce5cf"
     },
     {
       "path": "README.ja.md",
-      "bytes": 6820,
-      "sha256": "d687345af070f7a76b20355d35ee2b95169cb77b8d898e7a37acf377ea0d568a"
+      "bytes": 6863,
+      "sha256": "b2d85ba32fdf8a5115baa59cd2d39a87396b6ab406892d385736675cf46339ff"
     },
     {
       "path": "README.ko.md",
-      "bytes": 6537,
-      "sha256": "ae4e5b5d45cb9cf49189b3742af7dbb9b9e781debad8ec23ee47be2707f46692"
+      "bytes": 6680,
+      "sha256": "e97572afeef84d53ec64314fa704416467269a752087455e993565f09b7aef67"
     },
     {
       "path": "README.md",
-      "bytes": 4749,
-      "sha256": "2a8772e7a42c220c98694bcdb04a10cd9656dde22869bd0a63c024e1efe159b8"
+      "bytes": 4869,
+      "sha256": "48c08dce790f2b49ce844733ab2b6c9aa7512b9c12de8f5ee8f476a610c6d8a1"
+    },
+    {
+      "path": "requirements-cuda.txt",
+      "bytes": 422,
+      "sha256": "7e51bcd809c2dac23d528666e11a050fcf82aba9f6f58f8d98f29291d9237f08"
     },
     {
       "path": "requirements-inference.txt",
@@ -1072,24 +1087,29 @@
       "sha256": "0f221a7a6f0541cdcc9777abddd1fbb1af5d813f69ca46c3b8403084751f490f"
     },
     {
+      "path": "scripts/check_install.py",
+      "bytes": 6062,
+      "sha256": "a1b60b356d3a72ca963b98d5c3c46cf4350b440f6882f7fb8f0a89c35b068d07"
+    },
+    {
       "path": "scripts/collect_python_licenses.py",
       "bytes": 3038,
       "sha256": "3c8471ae6dc78e41d7e6fd321bf36fb5ee0cdb2ccf5329ef1d8748c63bd458bb"
     },
     {
       "path": "scripts/download_model.py",
-      "bytes": 3572,
-      "sha256": "80b04c30447d88233879cadee22106306cdaefb6a1659957677ffed7ea09eae7"
+      "bytes": 4157,
+      "sha256": "276640edc59e51d299d7d54669653ab832c776ab31a1f27ae65c0021ae497bd7"
     },
     {
       "path": "scripts/download_processing_models.py",
-      "bytes": 1472,
-      "sha256": "00cc6ebbc0f626ffc722a2ab811dc11eb43461ed003b4918d97190ca1701af53"
+      "bytes": 1662,
+      "sha256": "7661a68a037afcc958de152fb1e45bea67bebf7d71a6bbe406bd1f42eb0b3a7b"
     },
     {
       "path": "scripts/download_reference_models.py",
-      "bytes": 4043,
-      "sha256": "5e3bfd5d07377e2e3cd870e76a956125a6eb73b6dab69815dd8184cbff4adc0b"
+      "bytes": 4373,
+      "sha256": "e0411757315b071baa6396537e9bb18672645d9ae59bee57a51331296800124d"
     },
     {
       "path": "scripts/fetch_processing_sources.py",
@@ -1098,13 +1118,13 @@
     },
     {
       "path": "scripts/install.ps1",
-      "bytes": 3290,
-      "sha256": "fc4af8c9c0e0e643af1f1d96d226ca3224f491dc5d75495c9e12820bd16eec78"
+      "bytes": 6109,
+      "sha256": "45f0821f7cf93baee38b9fe3523ecf61cca33f351bb5edb795748ccad6334b1d"
     },
     {
       "path": "scripts/package_public.py",
-      "bytes": 3730,
-      "sha256": "be1a544494d73142d12430a4f45f9aa8e818b116f2fcc2da173232e5c4439a06"
+      "bytes": 3776,
+      "sha256": "e8f2e2df6516981c09abe2a5975adfc989b316f2d13afb6e2dd22eb70782f210"
     },
     {
       "path": "scripts/register-global.ps1",
@@ -1153,8 +1173,8 @@
     },
     {
       "path": "src/voice_platform/api.py",
-      "bytes": 25320,
-      "sha256": "b2df85b237e4d634a97514b327554b2c187e01fbeeba4a6a3ad1896ebd600297"
+      "bytes": 25378,
+      "sha256": "6f87e852d3a8af845e3d471bd28abc3aacd78c8ea4cee223a9b27c1110a4da1b"
     },
     {
       "path": "src/voice_platform/assets.py",
@@ -1173,13 +1193,13 @@
     },
     {
       "path": "src/voice_platform/client.py",
-      "bytes": 2692,
-      "sha256": "e8dae84c81cf0cf017a5c853bebc481efb48fb11a4f5c44cf56f9d7035116cbe"
+      "bytes": 4089,
+      "sha256": "25d94fabc69625f4eaa43ba6d6c0bff43395c3594a41f4ed87c2016af20bec9e"
     },
     {
       "path": "src/voice_platform/config.py",
-      "bytes": 751,
-      "sha256": "620591648059e1c75db2cf85c06831bf541eadb221cf68c14186a1b0e218a526"
+      "bytes": 1424,
+      "sha256": "487cc5f16c31a9475435da43175964310e5957f3433428b51785aa7d2abfac02"
     },
     {
       "path": "src/voice_platform/engines/__init__.py",
@@ -1193,8 +1213,8 @@
     },
     {
       "path": "src/voice_platform/engines/voxcpm.py",
-      "bytes": 3455,
-      "sha256": "24653500ac43d4db21ed54b996c1b97d066ff8961d3ae7bad13faab300bfc052"
+      "bytes": 3892,
+      "sha256": "f611a32bdbd2db7855d5808589c9d05e7f194d648890475acb58fe73097f56d2"
     },
     {
       "path": "src/voice_platform/exports.py",
@@ -1203,8 +1223,8 @@
     },
     {
       "path": "src/voice_platform/longform.py",
-      "bytes": 24436,
-      "sha256": "f663929a2b08c653932117ce6cc5ad146784507652aaea4946a534a57e7a36f7"
+      "bytes": 24206,
+      "sha256": "3a1d07b3c846deebc1af6d4fde60352c40d0dba2626a8b68fc446de1f998e915"
     },
     {
       "path": "src/voice_platform/longform_export.py",
@@ -1258,8 +1278,8 @@
     },
     {
       "path": "src/voice_platform/service.py",
-      "bytes": 33183,
-      "sha256": "52ad357c572d2f6a652261475506ec4a5b5f98833b4065b553976d38a2efeecf"
+      "bytes": 33505,
+      "sha256": "c9dd1284ba88e7eee838c0227dc6cb7280f5622c1fe6356fc740cb6cdef8b553"
     },
     {
       "path": "src/voice_platform/store.py",
@@ -1273,13 +1293,13 @@
     },
     {
       "path": "start-voice.cmd",
-      "bytes": 105,
-      "sha256": "c4fac47e1f7603c49e7babf3a4b19a31cbed890836a516302f1eb2638354f7bc"
+      "bytes": 77,
+      "sha256": "b0a90c7a74fcd4d85891363be0cf79614eda20837aae3706682b3e0f12bb97b2"
     },
     {
       "path": "stop-voice.cmd",
-      "bytes": 85,
-      "sha256": "216bca123c800f349a9e6271139a8bb76e3b808ec4eebdd66ce72b4a359e8a0f"
+      "bytes": 79,
+      "sha256": "c7590b33a7b0c6adf520d3bbd7dbef0249c8e13e7e04e8d051b789ffcc400ecc"
     },
     {
       "path": "tests/__init__.py",
@@ -1315,6 +1335,11 @@
       "path": "tests/test_i18n.py",
       "bytes": 1772,
       "sha256": "2931943b4fc37100bbbce9d642a74ce54946cf83b8b1245d30872e45f4fa890f"
+    },
+    {
+      "path": "tests/test_installation.py",
+      "bytes": 6006,
+      "sha256": "798fbe21b793acc5f6ec223c43e620362486ccb437d63009fd019ac0bb9f62af"
     },
     {
       "path": "tests/test_longform.py",
@@ -1378,8 +1403,8 @@
     },
     {
       "path": "web/index.html",
-      "bytes": 27358,
-      "sha256": "02a6fdf2c3c2fa6e70071f7d1702d1f93cebe44d22955affa2a1769fbc4f6e1d"
+      "bytes": 27360,
+      "sha256": "4a801e33712f6edd88feed65bcc5dab5a6f5c704c4b4f8cb5a8ad40b69e23323"
     },
     {
       "path": "web/jobs-ui.js",
@@ -1458,8 +1483,8 @@
     },
     {
       "path": "web/workflow.css",
-      "bytes": 2572,
-      "sha256": "bea8f5053efcde3a975e974303e77337eb42e76ea06fbaa969282cdcc3c6bc74"
+      "bytes": 2688,
+      "sha256": "d1efbd3842b8effd588e6a380175b0ffadcf6a7f84687bee881fe9274871cd03"
     },
     {
       "path": "web/workflow.js",

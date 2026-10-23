@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 from fastapi import FastAPI, Request, UploadFile, File, Form, Query
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
-from .config import load_config, ROOT
+from .config import load_config, ROOT, installation_id
 from .schemas import ProjectInput, VoiceInput, GenerationInput, BatchInput, ReviewInput, ExportInput, SettingsInput,SaveClipsInput,TranscriptInput,CompareReferencesInput,ArchiveJobsInput,ProcessingInput,ResultRecordingInput,OutputRecordingInput,ReferenceVoiceInput
 from .schemas import LongformImportRetry,LongformAction,LongformExportInput,AssetBatch,ReviewBatch
 from .assets import KINDS
@@ -96,7 +96,7 @@ def create_app(config=None):
 
     @app.get("/api/v1/health")
     def health():
-        return dict(status="ok", version=__version__, process_id=os.getpid(),worker_alive=bool(platform.worker and platform.worker.is_alive()),
+        return dict(status="ok", version=__version__, installation_id=installation_id(config), process_id=os.getpid(),worker_alive=bool(platform.worker and platform.worker.is_alive()),
                     longform_workers_alive=all(t.is_alive() for t in platform.longform.threads),
                     reference_worker_alive=bool(platform.references.thread and platform.references.thread.is_alive()),
                     active_engine=platform.active_engine, loaded_at=platform.loaded_at,

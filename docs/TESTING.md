@@ -4,7 +4,7 @@
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q
-node --test tests/theme.test.cjs tests/i18n.test.cjs
+node --test tests/workflow.test.cjs tests/theme.test.cjs tests/i18n.test.cjs
 ```
 
 Python 测试检查任务、音色版本、参考音频流程、归档、长文分段、编码、审核、导出、删除与恢复。界面测试检查配色、语言识别、语言偏好、四语言词条、占位符和草稿恢复边界。测试引擎生成的是测试波形，不能据此判断模型的克隆效果。
@@ -16,3 +16,5 @@ Python 测试检查任务、音色版本、参考音频流程、归档、长文�
 公开版本不带历史录音、截图或生产数据。运行测试后应检查自己的输出，人工听感、人物授权和正式内容审核仍由使用者确认。代码检查或自动化测试通过，不会自动批准任何音频。
 
 若系统临时目录不可写，可为 pytest 指定一个尚不存在的目录：`--basetemp runtime/pytest-local-new`。每次使用新目录，避免覆盖其他测试资料。
+
+安装检查与测试分开运行：`scripts/check_install.py --profile core` 检查当前目录的专用 Python、服务导入和 WAV 读写；`--profile inference --models` 还检查 CUDA、推理源码导入及模型文件。安装日志和结果在 `runtime/install.log`、`runtime/install-check.json`，不随源码分发。

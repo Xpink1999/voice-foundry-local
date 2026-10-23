@@ -1,0 +1,3 @@
+# Windows x86-64, CPython 3.11. Official PyTorch wheels with upstream SHA-256.
+torch @ https://download.pytorch.org/whl/cu128/torch-2.8.0%2Bcu128-cp311-cp311-win_amd64.whl#sha256=34c55443aafd31046a7963b63d30bc3b628ee4a704f826796c865fdfd05bb596
+torchaudio @ https://download.pytorch.org/whl/cu128/torchaudio-2.8.0%2Bcu128-cp311-cp311-win_amd64.whl#sha256=7a1eb6154e05b8056b34c7a41495e09d57f79eb0180eb4e7f3bb2a61845ca8ea
