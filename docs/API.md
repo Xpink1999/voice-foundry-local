@@ -107,3 +107,7 @@ MCP 工具名称以 voice_ 开头。接口不依赖 Codex；其他 MCP 客户端
 章节目录支持 `limit`、`offset`，也可用 `after=<章号>` 获取该章之后仍有效的章节。`after` 与 `offset` 可组合；下一章可请求 `chapters?after=当前章号&limit=1`，避免假定章号连续。
 
 `GET /health` 返回 `installation_id`，由本次安装目录和数据目录生成。CLI 在本地调用前核对标识，防止误用同端口的另一份安装；连接旧版本时核对 `/settings` 的数据目录。显式设置 `VOICE_PLATFORM_URL` 表示主动选择服务，按该 URL 调用。运行库缓存由配置中的 `cache_dir` 管理，默认 `runtime/model-cache`。
+
+## 模型资源与关闭
+
+推理适配器默认运行于独立进程，空闲超时后退出。`POST /models/unload` 在生成空闲时结束推理进程；忙碌时返回错误，不中断任务。`GET /health` 的 `engine_process_ids` 列出本服务的推理进程。`POST /maintenance/stop` 返回关闭请求，随后停止后台工作与服务；HTTP 202 本身不表示进程已退出。CLI `voice stop` 和 MCP `voice_stop_service` 会等候退出，不自动启动服务。关闭网页不取消后台任务。

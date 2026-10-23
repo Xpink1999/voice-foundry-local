@@ -16,7 +16,7 @@ from .schemas import ProjectInput, VoiceInput, GenerationInput, BatchInput, Revi
 from .schemas import LongformImportRetry,LongformAction,LongformExportInput,AssetBatch,ReviewBatch
 from .assets import KINDS
 from .service import Platform, TERMINAL
-from .audio import sha256
+from .audio import sha256, waveform_peaks
 from . import __version__
 
 def create_app(config=None):
@@ -99,7 +99,8 @@ def create_app(config=None):
         return dict(status="ok", version=__version__, installation_id=installation_id(config), process_id=os.getpid(),worker_alive=bool(platform.worker and platform.worker.is_alive()),
                     longform_workers_alive=all(t.is_alive() for t in platform.longform.threads),
                     reference_worker_alive=bool(platform.references.thread and platform.references.thread.is_alive()),
-                    active_engine=platform.active_engine, loaded_at=platform.loaded_at,
+                    active_engine=platform.loaded_engine(), loaded_at=platform.loaded_at if platform.loaded_engine() else None,
+                    engine_process_ids=platform.engine_process_ids(),
                     queued=sum(j["status"] == "queued" for j in platform.store.list("jobs")))
 
     @app.get('/api/v1/longform/books')
@@ -410,7 +411,7 @@ def create_app(config=None):
         platform.store.get("jobs", identity)
         async def iterator():
             seen = set()
-            while not await request.is_disconnected():
+            while not platform.shutdown.is_set() and not await request.is_disconnected():
                 items = [e for e in reversed(platform.store.list("events")) if e["job_id"] == identity and e["id"] not in seen]
                 for item in items:
                     seen.add(item["id"])
@@ -442,6 +443,11 @@ def create_app(config=None):
         item = platform.store.get("results", identity)
         return FileResponse(platform.data / item["path"], media_type="audio/wav", filename=f"{identity}.wav")
 
+    @app.get('/api/v1/results/{identity}/waveform')
+    def waveform(identity: str):
+        item = platform.store.get('results', identity)
+        return waveform_peaks(platform.data / item['path'])
+
     @app.get("/api/v1/results/{identity}/subtitles")
     def subtitles(identity: str):
         item = platform.store.get("results", identity)
@@ -468,6 +474,7 @@ def create_app(config=None):
     def stop():
         # Launcher-owned servers only. A separate thread lets the HTTP response complete.
         app.state.stop_requested = True
+        platform.request_stop()
         return {"stop_requested": True}
 
     app.mount("/", StaticFiles(directory=ROOT / "web", html=True), name="web")

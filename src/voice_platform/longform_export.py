@@ -8,6 +8,8 @@ import numpy as np
 import soundfile as sf
 from .audio import sha256,safe_name,srt_time
 from .store import now,uid
+from .worker_runner import kill_worker
+from .process_owner import ProcessOwner
 
 def wav_container(frames):return 'RF64' if frames*3>4294967000 else 'WAV'
 
@@ -68,11 +70,14 @@ class LongformExport:
         log=target.with_suffix('.ffmpeg.log')
         with log.open('wb') as output:
             process=subprocess.Popen([self.owner.platform.config['ffmpeg'],'-nostdin','-hide_banner','-loglevel','error','-y','-i',str(source),str(target)],stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=output)
+            lease=None
             try:
+                lease=ProcessOwner(process.pid)
                 while process.poll() is None:self.check(identity);self.owner.stop_event.wait(.2)
                 if process.returncode:raise ValueError('编码失败，原始合成 WAV 保留；查看 '+str(log))
             finally:
-                if process.poll() is None:process.terminate();process.wait(timeout=10)
+                kill_worker(process)
+                if lease:lease.close()
     def run(self,item):
         identity=item['id'];book=self.db.book(item['book_id']);request=item['request'];folder=self.owner.root/book['id']/'exports'/identity;folder.mkdir(parents=True,exist_ok=True)
         prefix='DRAFT_' if request['draft'] else '';mode=request['mode'];format=request['format'];pause=book['config']['pause_ms'];rate=None;book_frames=0;files=[];chapter_done=0;cue=0

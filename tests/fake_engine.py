@@ -29,3 +29,9 @@ class FakeEngine:
 class LimitedEngine(FakeEngine):
     def capabilities(self):
         return dict(tts=True, voice_design=False, cloning=False, streaming=False, languages=["en"])
+
+
+class BlockingEngine(FakeEngine):
+    def synthesize(self, request):
+        time.sleep(60)
+        yield np.zeros(100, dtype=np.float32)

@@ -9,7 +9,7 @@ import soundfile as sf
 from .audio import sha256
 from .schemas import ProcessingInput,VoiceInput
 from .store import uid,now
-from .worker_runner import run_worker
+from .worker_runner import run_worker,run_command
 
 log=logging.getLogger(__name__)
 TERMINAL={'succeeded','failed','cancelled'}
@@ -67,7 +67,7 @@ class AudioRestoration:
         source=item['source_snapshot'];path=self.data/source['original_path']
         if sha256(path)!=source['original_sha256']:raise ValueError('原录音哈希不匹配，拒绝处理')
         target=folder/'before.wav';maximum=self.config['reference_preprocessing']['max_recording_seconds']
-        result=subprocess.run([self.config['ffmpeg'],'-nostdin','-hide_banner','-loglevel','error','-y','-protocol_whitelist','file,pipe','-i',str(path),'-t',str(maximum+1),'-vn','-ac','2','-ar','48000','-c:a','pcm_s24le',str(target)],capture_output=True,timeout=180)
+        result=run_command([self.config['ffmpeg'],'-nostdin','-hide_banner','-loglevel','error','-y','-protocol_whitelist','file,pipe','-i',str(path),'-t',str(maximum+1),'-vn','-ac','2','-ar','48000','-c:a','pcm_s24le',str(target)],self.stop_event)
         if result.returncode:raise ValueError('无法解码待处理录音：'+result.stderr.decode('utf-8',errors='replace')[-1000:])
         if not .5<=sf.info(target).duration<=maximum:raise ValueError('待处理音频超出时长限制')
         self.store.update('audio_processing',item['id'],before_path=str(target.relative_to(self.data)),input_sha256=sha256(target))

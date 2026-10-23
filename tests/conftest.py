@@ -10,7 +10,7 @@ def cfg(tmp_path):
     c = copy.deepcopy(load_config())
     c.update(data_dir=str(tmp_path / "data"), log_dir=str(tmp_path / "logs"), idle_unload_seconds=300,
              allowed_hosts=["testserver", "127.0.0.1", "localhost"],
-             engines={"test": {"adapter": "tests.fake_engine:FakeEngine"}, "limited": {"adapter": "tests.fake_engine:LimitedEngine"}}, default_engine="test", segment_chars=15)
+             engines={"test": {"adapter": "tests.fake_engine:FakeEngine", "execution": "inprocess"}, "limited": {"adapter": "tests.fake_engine:LimitedEngine", "execution": "inprocess"}}, default_engine="test", segment_chars=15)
     for key in ("data_dir", "log_dir"):
         Path(c[key]).mkdir(parents=True)
     # Controlled restoration workers need model identity snapshots, not real weights.

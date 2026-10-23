@@ -116,7 +116,7 @@ def main():
         sys.stdout.reconfigure(encoding="utf-8")
     args = parser().parse_args()
     try:
-        client = Client(auto_start=args.command not in {"health", "stop"})
+        client = Client(auto_start=args.command not in {"health", "stop", "unload"})
         command = args.command
         if command in {"start", "ui"}:
             output = dict(client.request("GET", "/health"), webui=client.url)
@@ -124,8 +124,10 @@ def main():
                 output["browser_opened"] = webbrowser.open(client.url)
         elif command in {"health", "settings", "models", "voices", "projects", "jobs", "results", "exports", "recordings"}:
             output = client.request("GET", "/"+command,params={'archived':str(args.archived).lower()} if command=='jobs' else {})
-        elif command in {"stop", "backup"}:
-            output = client.request("POST", "/maintenance/"+command)
+        elif command == 'stop':
+            output = client.stop()
+        elif command == 'backup':
+            output = client.request('POST', '/maintenance/backup')
         elif command == "unload":
             output = client.request("POST", "/models/unload")
         elif command == "generate":

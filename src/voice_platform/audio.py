@@ -50,6 +50,45 @@ def write_wav(path, pcm, sample_rate):
     sf.write(temp, pcm, sample_rate, subtype="PCM_24")
     temp.replace(path)
 
+
+def join_wavs(path, segments, sample_rate, pause_ms, check=lambda: None):
+    """Assemble from disk in fixed blocks rather than holding a whole task's PCM."""
+    path = Path(path)
+    temp = path.with_suffix('.part.wav')
+    gap = round(pause_ms * sample_rate / 1000)
+    frames = sum(sf.info(p).frames for p in segments) + gap * max(0, len(segments)-1)
+    container = 'RF64' if frames * 3 > 4294967000 else 'WAV'
+    with sf.SoundFile(temp, 'w', samplerate=sample_rate, channels=1, subtype='PCM_24', format=container) as out:
+        for index, segment in enumerate(segments):
+            check()
+            if index and gap:
+                out.write(np.zeros(gap, dtype=np.float32))
+            with sf.SoundFile(segment) as source:
+                if source.samplerate != sample_rate or source.channels != 1:
+                    raise ValueError('Segment format changed during assembly.')
+                while len(block := source.read(65536, dtype='float32')):
+                    check()
+                    out.write(block)
+    temp.replace(path)
+
+
+def waveform_peaks(path, bins=190):
+    """Return a small preview without decoding a complete recording in the browser."""
+    peaks = []
+    with sf.SoundFile(path) as source:
+        frames = source.frames
+        for index in range(bins):
+            remaining = frames * (index+1) // bins - frames * index // bins
+            peak = 0.
+            while remaining:
+                block = source.read(min(65536, remaining), dtype='float32')
+                if not len(block):
+                    raise ValueError('Incomplete audio file.')
+                peak = max(peak, float(np.max(np.abs(block))))
+                remaining -= len(block)
+            peaks.append(peak)
+        return dict(peaks=peaks, duration=frames/source.samplerate, sample_rate=source.samplerate)
+
 def srt_time(seconds):
     ms = round(seconds * 1000)
     return f"{ms//3600000:02}:{ms//60000%60:02}:{ms//1000%60:02},{ms%1000:03}"

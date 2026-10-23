@@ -13,7 +13,7 @@
   "cache_dir": "runtime/model-cache",
   "ffmpeg": "ffmpeg",
   "device": "cuda:0",
-  "idle_unload_seconds": 300,
+  "idle_unload_seconds": 30,
   "segment_chars": 160,
   "segment_pause_ms": 180,
   "max_text_chars": 60000,
@@ -56,6 +56,8 @@
   "engines": {
     "voxcpm2": {
       "adapter": "voice_platform.engines.voxcpm:VoxEngine",
+      "execution": "process",
+      "cpu_threads": 4,
       "label": "VoxCPM2 · 本地 CUDA"
     }
   },

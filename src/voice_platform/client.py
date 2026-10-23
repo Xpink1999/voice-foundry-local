@@ -47,9 +47,9 @@ class Client:
 
     def ensure_running(self):
         try:
-            self.request("GET", "/health")
+            self.request("GET", "/health", timeout=2)
             return
-        except httpx.ConnectError:
+        except (httpx.ConnectError, httpx.ConnectTimeout):
             if "VOICE_PLATFORM_URL" in os.environ:
                 raise ValueError("指定的远程服务不可用，不自动启动本地服务")
         log_dir = Path(self.config["log_dir"])
@@ -59,15 +59,45 @@ class Client:
                 options["creationflags"] = subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
             else:
                 options["start_new_session"] = True
-            subprocess.Popen([sys.executable, "-m", "voice_platform.server"], **options)
-        for _ in range(100):
+            process = subprocess.Popen([sys.executable, "-m", "voice_platform.server"], **options)
+        deadline = time.monotonic() + 20
+        while time.monotonic() < deadline:
+            if process.poll() is not None:
+                raise ValueError(f"服务启动失败，请查看 {log_dir / 'server.log'}")
             time.sleep(0.2)
             try:
-                self.request("GET", "/health")
+                self.request("GET", "/health", timeout=1)
                 return
-            except httpx.ConnectError:
+            except (httpx.ConnectError, httpx.ConnectTimeout):
                 pass
         raise ValueError(f"服务启动超时，请查看 {log_dir / 'server.log'}")
+
+    def stop(self, timeout=60):
+        from .process_owner import ProcessExit
+        try:
+            health = self.request('GET', '/health', timeout=2)
+        except httpx.ConnectError:
+            return dict(stopped=True, already_stopped=True)
+        watch = ProcessExit(health['process_id']) if os.name == 'nt' and 'VOICE_PLATFORM_URL' not in os.environ else None
+        try:
+            self.request('POST', '/maintenance/stop', timeout=5)
+            deadline = time.monotonic() + timeout
+            while time.monotonic() < deadline:
+                if watch is not None:
+                    if watch.exited():
+                        return dict(stopped=True, process_id=health['process_id'])
+                else:
+                    try:
+                        self.http.get('/api/v1/health', timeout=1).raise_for_status()
+                    except httpx.ConnectError:
+                        return dict(stopped=True)
+                    except httpx.ConnectTimeout:
+                        pass  # A timeout alone cannot confirm that a remote process exited.
+                time.sleep(.1)
+            raise TimeoutError('Service shutdown has not finished. Check server.log; memory release is not yet confirmed.')
+        finally:
+            if watch:
+                watch.close()
 
     def wait(self, identity, timeout=3600, progress=None):
         end = time.monotonic() + timeout

@@ -51,3 +51,7 @@
 导出适配器实现 folder(result) 返回相对目录，并在 export_adapters 中注册。适配器不能修改模型、任务或原始资产；具体引擎导入工具可读取 manifest.json 和逐音频 JSON。Godot、Unity、Unreal、剪辑工具均是输出消费者，不是平台核心依赖。
 
 首次安装：`install-voice.cmd` 调用 `scripts/install.ps1`。`scripts/check_install.py` 独立检查核心环境、CUDA 与模型；`requirements-cuda.txt` 固定 Windows x64 / Python 3.11 的官方 CUDA wheel 地址和哈希。
+
+- `process_engine.py`：语音适配器进程隔离与有界音频传输；卸载时结束整个推理进程。
+- `process_owner.py`：Windows 子进程所有权与退出确认，服务强制退出时回收所属工作进程。
+- 引擎配置默认 `execution: "process"`；`inprocess` 仅供受控测试或明确不需要隔离的适配器。能力与身份查询不得加载模型。

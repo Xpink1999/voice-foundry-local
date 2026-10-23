@@ -54,7 +54,8 @@ class ReferenceLibrary:
         target=folder/'analysis.wav'
         command=[self.config['ffmpeg'],'-nostdin','-hide_banner','-loglevel','error','-y','-protocol_whitelist','file,pipe','-i',str(source),'-t',str(self.options['max_recording_seconds']+1),
                  '-vn','-ac','1','-ar',str(self.options['sample_rate']),'-c:a','pcm_s16le',str(target)]
-        result=subprocess.run(command,capture_output=True,timeout=180)
+        from .worker_runner import run_command
+        result=run_command(command,self.stop_event)
         if result.returncode:raise ValueError('音频解码失败：'+result.stderr.decode('utf-8',errors='replace')[-1200:])
         import soundfile as sf
         info=sf.info(target)

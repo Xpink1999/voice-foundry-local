@@ -6,8 +6,9 @@
 
 在安装目录双击 `start-voice.cmd`、`stop-voice.cmd` 或 `check-health.cmd`。启动脚本也会打开 WebUI。
 
+模型仅在生成时加载到独立推理进程。空闲默认 30 秒后退出该进程，同时释放模型内存、PyTorch 运行库和 CUDA 上下文；可在设置中调整。`voice unload` 立即释放空闲推理进程，不会启动已经停止的服务。关闭网页会停止本页试听，后台任务继续；需要结束工具时运行 `stop-voice.cmd` 或 `voice stop`，命令会等候服务退出。已完成音频保留，未完成长文下次可续作。服务启动和浏览音色库不加载模型；未使用时仍有轻量服务占用，完全停止后由系统回收其资源。
+
 - `voice start / health / stop`；没有注册系统服务或开机任务。
-- `voice unload` 释放本平台模型；空闲默认 300 秒自动卸载。不终止其他软件。
 - runtime/logs/platform.log 为轮换异常日志，server.log 为启动和官方模型输出。
 - 运行参数统一在 config/platform.json；改路径时停服务，复制资产与数据库并备份后再更新路径。不要直接移动模型目录而保留旧配置。
 - 一次只运行一个服务进程和一个 GPU 任务；service.lock 进程租约防止重复工作线程消费同一队列。

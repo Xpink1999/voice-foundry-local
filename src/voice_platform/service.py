@@ -13,7 +13,7 @@ from datetime import datetime,timezone,timedelta
 from pathlib import Path
 import numpy as np
 import soundfile as sf
-from .audio import sha256, split_text, write_wav, write_srt, safe_name, convert_audio
+from .audio import sha256, split_text, write_wav, write_srt, safe_name, convert_audio, join_wavs
 from .engines import build_engines, resolve
 from .schemas import GenerationInput
 from .store import Store, uid, now
@@ -72,19 +72,35 @@ class Platform:
         self.longform.start()
 
     def stop(self):
-        self.shutdown.set()
-        self.wake.set()
+        self.request_stop()
         self.longform.stop()
         self.restoration.stop()
         self.references.stop()
         if self.worker:
-            self.worker.join(timeout=30)
-        if not self.worker or not self.worker.is_alive():
-            self.unload()
+            self.worker.join(timeout=10)
+        self.unload()
+
+    def request_stop(self):
+        self.shutdown.set()
+        self.wake.set()
+        for producer in (self.longform, self.restoration, self.references):
+            producer.stop_event.set()
+            producer.wake.set()
+        for engine in self.engines.values():
+            interrupt = getattr(engine, 'interrupt', None)
+            if interrupt:
+                interrupt()
 
     def models(self):
-        return [dict(id=k, label=self.config["engines"][k].get("label", k), loaded=k == self.active_engine,
+        return [dict(id=k, label=self.config["engines"][k].get("label", k), loaded=k == self.loaded_engine(),
                      capabilities=e.capabilities(), identity=e.identity()) for k, e in self.engines.items()]
+
+    def loaded_engine(self):
+        identity = self.active_engine
+        return identity if identity and getattr(self.engines[identity], 'loaded', True) else None
+
+    def engine_process_ids(self):
+        return [pid for engine in self.engines.values() if (pid := getattr(engine, 'pid', None)) is not None]
 
     def unload(self):
         if not self.engine_lock.acquire(blocking=False):
@@ -100,7 +116,7 @@ class Platform:
     def load_engine(self, identity):
         with self.engine_lock:
             engine = self.engines[identity]
-            if self.active_engine == identity:
+            if self.loaded_engine() == identity:
                 return engine
             self.unload()
             try:
@@ -257,6 +273,8 @@ class Platform:
                     pipeline={**{key: self.config[key] for key in ("segment_chars", "segment_pause_ms")},'control_note':control_note})
 
     def submit(self, requests, batch=False):
+        if self.shutdown.is_set():
+            raise ValueError('Service is stopping; start it again before submitting tasks.')
         with self.store.lock:
             pending = sum(j["status"] in {"queued", "running", "cancel_requested"} for j in self.store.list("jobs"))
             if pending + len(requests) > self.config["max_pending_jobs"]:
@@ -363,6 +381,10 @@ class Platform:
                     self.store.event(job["id"], "cancelled")
                     break
                 except Exception as error:
+                    if self.shutdown.is_set():
+                        self.store.update('jobs', job['id'], status='cancelled', finished_at=now())
+                        self.store.event(job['id'], 'cancelled')
+                        break
                     log.exception("generation failed: %s", job["id"])
                     self.store.event(job["id"], "error", attempt=attempt + 1, message=str(error)[:3000])
                     self.store.update("jobs", job["id"], error=str(error)[:3000])
@@ -421,15 +443,14 @@ class Platform:
                     write_wav(folder / f"segment-{index+1:04}.wav", pcm, engine.sample_rate)
                     timeline.append(dict(text=text, start=total/engine.sample_rate, end=(total+len(pcm))/engine.sample_rate,
                                          seed=seed, file=f"segment-{index+1:04}.wav"))
-                    parts.append(pcm)
+                    parts.append(folder / f"segment-{index+1:04}.wav")
                     total += len(pcm)
                     if index < len(segments) - 1:
                         pause = np.zeros(round(pipeline["segment_pause_ms"] * engine.sample_rate / 1000), dtype=np.float32)
-                        parts.append(pause)
                         total += len(pause)
                     self.store.update("jobs", job["id"], progress=round(100*(candidate*len(segments)+index+1)/(request["candidates"]*len(segments)), 1))
                 target = folder / "original.wav"
-                write_wav(target, np.concatenate(parts), engine.sample_rate)
+                join_wavs(target, parts, engine.sample_rate, pipeline['segment_pause_ms'], lambda: self._check_cancel(job))
                 write_srt(folder / "segments.srt", timeline)
                 result = dict(id=result_id, job_id=job["id"], title=job["title"], candidate=candidate+1, attempt=attempt+1,
                     project_id=job["project_id"], voice_snapshot=voice, reference_snapshot=reference, engine=job["engine"], model=job["model"],

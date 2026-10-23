@@ -143,7 +143,12 @@ def voice_export(result_ids: list[str], destination: str, adapter: str = "standa
 @mcp.tool()
 def voice_release_models() -> dict:
     """空闲时释放本服务的模型显存，不影响其他应用。"""
-    return api().request("POST", "/models/unload")
+    return _client().request("POST", "/models/unload")
+
+@mcp.tool()
+def voice_stop_service() -> dict:
+    """停止语音服务及其推理进程，等待退出；保留已保存资产，不自动重启。"""
+    return _client().stop()
 
 @mcp.tool()
 def voice_import_book(path:str,title:str='',encoding:str='auto',voice_id:str='',project_id:str='')->dict:

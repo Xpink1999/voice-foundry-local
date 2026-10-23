@@ -856,5 +856,6 @@
   "字段格式不正确：{0}": "Invalid field type: {0}",
   "返回试听与审核": "Return to review",
   "选择要导出的音频": "Select audio to export",
-  "请求失败": "Request failed"
+  "请求失败": "Request failed",
+  "实时试听缓冲已满，已停止试听；完整音频仍会保存。": "Live preview stopped because its buffer is full. The complete audio will still be saved."
 }

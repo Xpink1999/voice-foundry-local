@@ -1,5 +1,6 @@
 """Short-lived CPU worker: dependencies and model memory are isolated from the TTS process."""
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -18,6 +19,8 @@ def write_progress(path,percent,message):
     return False
 
 def main():
+    if os.environ.get('VOICE_WORKER_OWNED') == '1' and sys.stdin.buffer.readline() != b'start\n':
+        return
     source=Path(sys.argv[1]);request=json.loads(source.read_text(encoding='utf-8'))
     progress_path=source.parent/'progress.json'
     def progress(percent,message):

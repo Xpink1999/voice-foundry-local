@@ -6,7 +6,7 @@
 
 From the installation directory, use `start-voice.cmd`, `stop-voice.cmd` and `check-health.cmd`. With the optional global CLI registered, the equivalent commands are `voice start`, `voice stop` and `voice health`. The start launcher also opens the WebUI. No Windows service or startup task is registered.
 
-`voice unload` releases this platform's models. The default idle timeout is 300 seconds. Other applications are not terminated. Only one service process and one GPU task run at a time; the `service.lock` process lease prevents duplicate queue consumers.
+Models load in a separate inference process only when needed. After 30 idle seconds by default, that process exits, releasing weights, the PyTorch runtime and its CUDA context. Adjust the timeout in Settings. `voice unload` releases an idle inference process without starting a stopped service. Closing the browser stops its preview; background jobs continue. Run `stop-voice.cmd` or `voice stop` to end the tool and wait for service exit. Saved audio is kept; unfinished books can resume later. Startup and library browsing do not load models. The lightweight service still uses some memory until stopped.
 
 Settings are in `config/platform.json`. Before changing storage paths, stop the service, back up and copy the assets/database, then update the paths. Moving a model directory without updating configuration leaves an invalid path.
 

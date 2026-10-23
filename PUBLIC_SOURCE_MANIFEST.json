@@ -33,13 +33,13 @@
     },
     {
       "path": "config/platform.json",
-      "bytes": 2164,
-      "sha256": "86cf7aeb950b22a0ef33a1682a3130b7629183370f3b63de87fa802995faaa3c"
+      "bytes": 2219,
+      "sha256": "e5112b5600cfd659ed07523c6a3816d3764336e47bbc91bd1e234cdd3ef16328"
     },
     {
       "path": "docs/API.md",
-      "bytes": 9933,
-      "sha256": "d277e58299435b62866145128b8bb614e2d9ab4cd7e9248aa2df9851e4ec6fdb"
+      "bytes": 10453,
+      "sha256": "e104ffa4a9c8169efdabddb551dafdf278a1f2647dd5e0ae711c9ad522564679"
     },
     {
       "path": "docs/ARCHITECTURE.md",
@@ -118,28 +118,28 @@
     },
     {
       "path": "docs/MAINTENANCE.en.md",
-      "bytes": 6627,
-      "sha256": "059380c20b986e87ce5bb6562e20d05f49e59ce98a8178ab3336989d4e173ec0"
+      "bytes": 6980,
+      "sha256": "937fe1bfa54ae18e81f344c0e4e03aa7dd11457b7ab9adc26a46d0863236921c"
     },
     {
       "path": "docs/MAINTENANCE.ja.md",
-      "bytes": 7500,
-      "sha256": "f8fd811e36daa8366df987a453bb811ac53452291291edb6938f6569277029a3"
+      "bytes": 8014,
+      "sha256": "04fdcd630b5204a9f8a894b721cae54d31b5f81f9bdea0c0c0e84b30ae32077a"
     },
     {
       "path": "docs/MAINTENANCE.ko.md",
-      "bytes": 7310,
-      "sha256": "21678acbd1eb6ec7f838e8e2cd97057c13eefcecaea71e531eb9709ac7e1332b"
+      "bytes": 7895,
+      "sha256": "3444c70bc23be8788366afa227e33110f6eecebd8796c7f78f65c8a1a3d74465"
     },
     {
       "path": "docs/MAINTENANCE.md",
-      "bytes": 5543,
-      "sha256": "f6aacbd547e2ce10ed61a458cbdd7a5fb53c01b497916b02146c0cd294f21017"
+      "bytes": 6045,
+      "sha256": "0e76ac3e21140fc354da7998ae5ef760511a18b6e00c273acf0f4aefdcbea365"
     },
     {
       "path": "docs/MODULES.md",
-      "bytes": 4535,
-      "sha256": "d53bb156383953a7103cd998baed00df0e57287b386a118f791b2dd1b33be1bb"
+      "bytes": 4922,
+      "sha256": "cd2885da6bab5386c197c97ebc4b4f48b86c5396293009f71b4d0a7838e3e714"
     },
     {
       "path": "docs/PUBLISHING.md",
@@ -1173,8 +1173,8 @@
     },
     {
       "path": "src/voice_platform/api.py",
-      "bytes": 25378,
-      "sha256": "6f87e852d3a8af845e3d471bd28abc3aacd78c8ea4cee223a9b27c1110a4da1b"
+      "bytes": 25779,
+      "sha256": "c3523e3f572b5a2ac5740f17a0c97c7a29338a62f1d5e042f1ccb4dd9b1a45c8"
     },
     {
       "path": "src/voice_platform/assets.py",
@@ -1183,18 +1183,18 @@
     },
     {
       "path": "src/voice_platform/audio.py",
-      "bytes": 3595,
-      "sha256": "d808bf8a2a17d10c1368f493fbd80267ab68339f5be07cbb475d545ed56d1a11"
+      "bytes": 5432,
+      "sha256": "c38f0d22a2224de603a4df5a5728195cefcf0ac50282b3cf4bd540026a21cd59"
     },
     {
       "path": "src/voice_platform/cli.py",
-      "bytes": 14255,
-      "sha256": "addbfb95d6da70298591b48a2d054737818d27657434f1e5ed67b3746671885e"
+      "bytes": 14322,
+      "sha256": "3638b284d127dc58115258262cf8f894c66b08d6b2fb237dc4747c8561caee79"
     },
     {
       "path": "src/voice_platform/client.py",
-      "bytes": 4089,
-      "sha256": "25d94fabc69625f4eaa43ba6d6c0bff43395c3594a41f4ed87c2016af20bec9e"
+      "bytes": 5664,
+      "sha256": "3b33b93b8d29fcf5715c43a69737cb031ac7d6c9057edec4176143130e824b25"
     },
     {
       "path": "src/voice_platform/config.py",
@@ -1203,8 +1203,8 @@
     },
     {
       "path": "src/voice_platform/engines/__init__.py",
-      "bytes": 283,
-      "sha256": "45fef70cad86f2e2422c0d336c0944d661970ff8577ba78d5d09d4564ca8e091"
+      "bytes": 501,
+      "sha256": "6b716b53a00d08a05db11e6666a3cf807482bf0d0cade6fcc3a54278eeb59c0a"
     },
     {
       "path": "src/voice_platform/engines/base.py",
@@ -1228,8 +1228,8 @@
     },
     {
       "path": "src/voice_platform/longform_export.py",
-      "bytes": 11941,
-      "sha256": "fa0cfed0fb9632bb66be4b5860df5da4bb29d10c226875f234e59c0e747cebf1"
+      "bytes": 12085,
+      "sha256": "dbd46d335dd1b77811e0ef01c9c7f44c1ea21e8309a5eb4fd30194b00818bc57"
     },
     {
       "path": "src/voice_platform/longform_store.py",
@@ -1238,8 +1238,18 @@
     },
     {
       "path": "src/voice_platform/mcp_server.py",
-      "bytes": 13834,
-      "sha256": "26d581951091a71b44ee771fbf1417f017a9908a60c809d901d213fbf5992e3e"
+      "bytes": 14025,
+      "sha256": "73a4fc89f2651c1f1b03645badcb47431c0a22c15ae237ff544f1eac5ad12f4d"
+    },
+    {
+      "path": "src/voice_platform/process_engine.py",
+      "bytes": 6305,
+      "sha256": "e0ececd23ccb773ef10a51fa4448ac949063d879611a731eb43656425190c174"
+    },
+    {
+      "path": "src/voice_platform/process_owner.py",
+      "bytes": 4341,
+      "sha256": "2cf293762ef2ad380fe47119371e1f7e912aacd04e1759728870d1a330729fc3"
     },
     {
       "path": "src/voice_platform/processing_engines.py",
@@ -1253,18 +1263,18 @@
     },
     {
       "path": "src/voice_platform/reference_worker.py",
-      "bytes": 1596,
-      "sha256": "ed12e4feaddcef88007bd6fa33fd837cbc4372ce7f3dd41dda66bee8c45dbc62"
+      "bytes": 1719,
+      "sha256": "af9a6bef6c847eb2ae49bc8b65d770b712869b40117117b42de3e29d99149d5d"
     },
     {
       "path": "src/voice_platform/references.py",
-      "bytes": 14750,
-      "sha256": "4bcb68ee995d182934a5ae8fd7083800b86c72e575f7acc2732f0eafe0a02139"
+      "bytes": 14779,
+      "sha256": "afeaa0aeae9668ec4348432353d9b47b01b49444d9afde264eb45deb2c213b09"
     },
     {
       "path": "src/voice_platform/restoration.py",
-      "bytes": 16915,
-      "sha256": "b737fe74ee9cc4dd541d91e58d8ba8820b18b460595beb64036eeaac733e372d"
+      "bytes": 16908,
+      "sha256": "cae9a21fdee36a5e78d477d12e091f94d42f5b9f824307c0f70d57a4b59ad362"
     },
     {
       "path": "src/voice_platform/schemas.py",
@@ -1273,13 +1283,13 @@
     },
     {
       "path": "src/voice_platform/server.py",
-      "bytes": 691,
-      "sha256": "b0a77d3a2b1628c440dbbbd847f6a6279f576b4d3f0cdfbbbeac3cbe241f5ca3"
+      "bytes": 918,
+      "sha256": "81f639f004854a0c35e39c9cfe9cca630899d9f48d9e6b8dee0a64285794bfe8"
     },
     {
       "path": "src/voice_platform/service.py",
-      "bytes": 33505,
-      "sha256": "c9dd1284ba88e7eee838c0227dc6cb7280f5622c1fe6356fc740cb6cdef8b553"
+      "bytes": 34557,
+      "sha256": "dbd977b02ee76671cba1f08e87c02639265d823075fa4538061a61c4016163d6"
     },
     {
       "path": "src/voice_platform/store.py",
@@ -1288,8 +1298,8 @@
     },
     {
       "path": "src/voice_platform/worker_runner.py",
-      "bytes": 2686,
-      "sha256": "f010204e56281c9bea1f640e82d68ca1cc2754eb4ad79888f69255ddb6afb118"
+      "bytes": 4111,
+      "sha256": "943278364172aef735479521431a4d89dc7565d2344ec9f6dbefd0074c3c2646"
     },
     {
       "path": "start-voice.cmd",
@@ -1308,18 +1318,23 @@
     },
     {
       "path": "tests/conftest.py",
-      "bytes": 1449,
-      "sha256": "81548ae3c80c5b7cdaf33380c20924acf2ffdbb2f5c78dc1691563bdc68e61e7"
+      "bytes": 1501,
+      "sha256": "2cca1f60fa09c7127c1b52cf984951a47c2f943d9bcd901b476a9ca1064854fa"
     },
     {
       "path": "tests/fake_engine.py",
-      "bytes": 1235,
-      "sha256": "105637eface5b6551c2a8648b78c0d7ac05f9a91f02e7b654cfd736798c726e8"
+      "bytes": 1375,
+      "sha256": "58ba577ae98603d00aaf7183fdf641ef53656353a6cad52c5c9c5971873bedc2"
     },
     {
       "path": "tests/i18n.test.cjs",
       "bytes": 5143,
       "sha256": "ce3731e451129001849128d3d2b67759357a23db0fa27ab05e9c6d467bb7ce74"
+    },
+    {
+      "path": "tests/memory-ui.test.cjs",
+      "bytes": 1792,
+      "sha256": "f2166849948488806131c6d7aa1d7d2cca328b2fc9ddb52f4ad1e04f862c77c0"
     },
     {
       "path": "tests/test_archive.py",
@@ -1345,6 +1360,11 @@
       "path": "tests/test_longform.py",
       "bytes": 10867,
       "sha256": "8d02f9aeb6540f6def9ad0fc6c6b740768932df30a38cd8501e719f9db75901d"
+    },
+    {
+      "path": "tests/test_memory_lifecycle.py",
+      "bytes": 7468,
+      "sha256": "8864caae1884aafa4a3f1c32b9905c266b4282ee8c2a5b221c0df557ed753b54"
     },
     {
       "path": "tests/test_platform.py",
@@ -1383,8 +1403,8 @@
     },
     {
       "path": "web/app.js",
-      "bytes": 39886,
-      "sha256": "2f6796cf1a7f66d69d1cc844778e30a2187a68adf374a20906c8a0c949b9add7"
+      "bytes": 40509,
+      "sha256": "c1befa955cb2889c68b59b2495b182f11ba30c93564587afd1a0d230bd828373"
     },
     {
       "path": "web/assets-ui.js",
@@ -1403,8 +1423,8 @@
     },
     {
       "path": "web/index.html",
-      "bytes": 27360,
-      "sha256": "4a801e33712f6edd88feed65bcc5dab5a6f5c704c4b4f8cb5a8ad40b69e23323"
+      "bytes": 27366,
+      "sha256": "a571ed2bb12f2141338e340660441a0c3e133a1ff9d221a6202b3584f174a69e"
     },
     {
       "path": "web/jobs-ui.js",
@@ -1413,23 +1433,23 @@
     },
     {
       "path": "web/locales/en.json",
-      "bytes": 58519,
-      "sha256": "a7cc5aadd8f0ac98fda72ab0e86bc5099713d6bbd75a60a09b3433dcb378f442"
+      "bytes": 58689,
+      "sha256": "0720f98b1afe0e65479d256bedebd7857a504caf0c2f8e1ad3c5cf5cd4c6a9ac"
     },
     {
       "path": "web/locales/ja.json",
-      "bytes": 66439,
-      "sha256": "74dc54c6fa0e1f3a3b445c5565b27d56344a8ecdee84e35188b3aee24df9efe9"
+      "bytes": 66629,
+      "sha256": "8a14c3c6d16765f07cdf1e28733faf544b764d31e63ece632b7666dfdabd2817"
     },
     {
       "path": "web/locales/ko.json",
-      "bytes": 64914,
-      "sha256": "0913a30269b1e798d841a07bb9a2d7c48b79526160d5f47dcc1f7fdd996939ba"
+      "bytes": 65111,
+      "sha256": "ac6c4e459977ebefaab9ef6bf1decaecf4e4ce2694c93f724bcd3fdd652b505c"
     },
     {
       "path": "web/locales/zh-CN.json",
-      "bytes": 58137,
-      "sha256": "1f47ab2352a3e56646695af7fd44c1746bfab8c2388cf58e5d8e31ea285650a3"
+      "bytes": 58291,
+      "sha256": "5c2139befb50cdf02060817faf476dfb3cb7993af665d040e5a372a384bdbe1b"
     },
     {
       "path": "web/longform-ui.js",
@@ -1468,8 +1488,8 @@
     },
     {
       "path": "web/translations.js",
-      "bytes": 234394,
-      "sha256": "0c0ac23b5696aa0918c094036f06bef8f868552bdc5b5871a22baa630eecabab"
+      "bytes": 235089,
+      "sha256": "b776a9e8508763bac800f388c67e3db1599ce29285811a6847db7003ea312844"
     },
     {
       "path": "web/voice-workspace.js",
