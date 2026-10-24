@@ -22,7 +22,43 @@ GitHub에서 **Code → Download ZIP**을 선택하고 ZIP의 **압축 풀기**�
 
 ~~~powershell
 git clone https://github.com/Xpink1999/voice-foundry-local.git
-cd voice…1004 tokens truncated…일의 절대 경로를 넣으세요.
+cd voice-foundry-local
+~~~
+
+Program Files와 동기화 폴더를 피하고, 현재 계정이 쓸 수 있는 위치를 선택하세요. 설치 후 폴더를 옮기면 가상 환경을 다시 만들어야 합니다. 관리자 권한, 기존 Python, CUDA Toolkit, Codex, 목소리나 데이터베이스는 필요하지 않습니다.
+
+`install-voice.cmd`를 더블클릭하거나 해당 폴더에서 PowerShell을 엽니다.
+
+~~~powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1
+~~~
+
+전체 설치는 Python 3.11.16, CUDA PyTorch, 고정된 추론 소스와 모델 7세트를 내려받습니다. 가져오기와 CUDA 확인, 코어 테스트 후 서비스를 시작합니다. 가중치는 약 7.1 GiB, PyTorch 다운로드는 약 3.2 GiB입니다. 환경, 압축 해제와 캐시를 포함해 30 GiB 이상 여유 공간을 권장합니다. 새 설치의 목소리, 프로젝트, 작업 목록은 비어 있습니다.
+
+[WebUI](http://127.0.0.1:8961/)에서 한 문장과 목소리 설명을 입력하고 생성하세요. 첫 합성은 모델을 불러오므로 화면을 여는 것보다 오래 걸립니다. 결과는 직접 듣고 승인해야 합니다.
+
+CUDA와 모델을 받지 않고 화면, 데이터베이스와 기본 흐름만 확인하려면:
+
+~~~powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -CoreOnly -NoStart
+~~~
+
+`-CoreOnly`에는 Git, NVIDIA GPU, FFmpeg가 필요하지 않습니다. 빈 화면은 열 수 있지만 음성 생성이나 녹음 처리는 할 수 없습니다. 나중에 옵션 없이 다시 실행하면 전체 설치를 진행합니다. `-SkipModels -NoStart`는 가중치만 생략하며 CUDA 의존성과 추론 소스는 설치합니다.
+
+설치 시 핵심 테스트를 실행합니다. 녹음 디코딩, 변환, 분리 테스트에는 FFmpeg가 필요합니다. 없으면 명시적으로 건너뛰며 정상적으로 설치된 CoreOnly 환경을 실패로 처리하지 않습니다. 서비스, 대기열, 원래 샘플레이트의 WAV 초안 내보내기는 계속 확인합니다. 이 검사는 모델 추론이나 오디오 처리 준비 완료를 뜻하지 않습니다.
+
+Python, uv 상태와 캐시는 `runtime/`(모델과 런타임 캐시는 `cache_dir`, 기본값 `runtime/model-cache`), 독립 환경은 `.venv`, 소스는 `vendor/`, 모델은 `models/`, 데이터베이스와 오디오는 `data/`에 저장합니다. 다른 설치의 환경이나 녹음을 읽지 않으며 사용자 PATH와 Codex 설정을 바꾸지 않습니다.
+
+모델 출처와 리비전은 `config/model-sources.json`에 고정되어 있습니다. 크기와 해시를 확인하고 `provenance.json`에 기록합니다. 다운로드가 끊기면 다시 실행하세요. 정상 파일은 유지합니다.
+
+## 확인과 문제 해결
+
+- 로그: `runtime/install.log`. 확인 결과: `runtime/install-check.json`. 실패하면 0이 아닌 종료 코드를 반환합니다. 원인을 고친 뒤 다시 실행하고 `data/`는 보존하세요.
+- uv나 Git을 찾지 못하면 설치 후 터미널을 다시 여세요. ZIP으로 받은 전체 설치도 추론 소스를 받으려면 Git이 필요합니다. CoreOnly는 필요 없습니다.
+- 설치 전에 실행하면 시작 파일에 설치 명령을 안내합니다.
+- 다른 설치가 같은 포트를 쓰면 해당 서비스를 종료하거나 이 폴더의 `config/platform.json`에서 `port`를 바꾸세요. 로컬 시작, 종료와 상태 확인은 설치 위치를 검사합니다.
+- CUDA를 쓸 수 없으면 NVIDIA 드라이버를 갱신하세요. CUDA 런타임은 PyTorch에 포함됩니다. [버전별 설치 안내](https://pytorch.org/get-started/previous-versions/)도 확인하세요.
+- FFmpeg가 없으면 WAV 텍스트 음성화는 가능하지만 녹음 업로드, 인코딩 내보내기, 무음 자르기, 음량 처리와 고급 분리에 필요합니다. 설치 후 터미널을 다시 열거나 설정의 `ffmpeg`에 실행 파일의 절대 경로를 넣으세요.
 - uv 버전 링크의 권한 오류는 내려받은 로컬 Python을 검사하고 정상일 때만 계속합니다. 시스템 Python으로 대체하지 않습니다. 다운로드나 검사에 실패하면 설치를 중단합니다.
 
 전체 설치를 다시 확인하려면:
