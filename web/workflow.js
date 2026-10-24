@@ -69,7 +69,7 @@
     try {
       const [page = 'studio', item, chapter, book] = String(hash || '').replace(/^#\/?/, '').split('/').map(decodeURIComponent);
       if (!['studio','voices','projects','batch','tasks','review','exports','settings','longform','assets'].includes(page)) return {page: 'studio'};
-      if (page === 'voices') return {page, pane: ['quick','library','design','processing'].includes(item) ? item : 'quick', id: chapter || null};
+      if (page === 'voices') return {page, pane: ['quick','library','references','design','processing'].includes(item) ? item : 'quick', id: chapter || null};
       if (page === 'longform') return {page, id: item || null, chapter: /^[1-9]\d*$/.test(chapter || '') && Number.isSafeInteger(Number(chapter)) ? Number(chapter) : null};
       if (page === 'assets') return {page, kind: item || 'results', trash: chapter === 'trash', book: book || ''};
       return {page, id: ['tasks','review'].includes(page) ? item || null : null};

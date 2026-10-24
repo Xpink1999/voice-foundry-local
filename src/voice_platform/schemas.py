@@ -1,5 +1,5 @@
 from typing import Literal
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator, field_validator
 
 class StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
@@ -58,6 +58,19 @@ class ArchiveJobsInput(StrictModel):
 
 class SaveClipsInput(StrictModel):
     reference_ids: list[str] = Field(min_length=1, max_length=40)
+
+class ReferenceMetadataInput(StrictModel):
+    name: str = Field(default='', max_length=100)
+    scenario: str = Field(default='', max_length=80)
+    notes: str = Field(default='', max_length=2000)
+    tags: list[str] = Field(default_factory=list, max_length=30)
+
+    @field_validator('tags')
+    @classmethod
+    def clean_tags(cls, value):
+        tags = list(dict.fromkeys(tag.strip() for tag in value if tag.strip()))
+        if any(len(tag)>80 for tag in tags):raise ValueError('单个参考标签不能超过 80 字')
+        return tags
 
 class ProcessingInput(StrictModel):
     recording_id: str

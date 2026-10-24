@@ -127,6 +127,33 @@ class ReferenceLibrary:
             value=dict(old,text=request.text,confirmed=request.confirmed,version=old.get('version',1)+1,status='confirmed' if request.confirmed else 'edited_unconfirmed',edited_at=now(),source='user_edit')
             return self.store.update('references',identity,transcript=value,transcript_history=item.get('transcript_history',[])+[dict(old,replaced_at=now())])
 
+    def annotate(self, identity, request):
+        with self.store.lock:
+            item = self.store.get('references', identity)
+            if item.get('deleted_at'):raise ValueError('参考已在回收站，请先恢复')
+            changes = request.model_dump(exclude_unset=True)
+            previous = {key:item.get(key, [] if key=='tags' else '') for key in changes}
+            if changes == previous:return item
+            return self.store.update('references', identity, **changes, updated_at=now(),
+                metadata_history=item.get('metadata_history', [])+[dict(previous, replaced_at=now())])
+
+    def attach(self, voice_id, request):
+        # One version for the whole selection; preserve a previously confirmed default.
+        with self.store.lock:
+            voice = self.store.get('voices', voice_id)
+            if voice.get('deleted_at') or voice['status']=='archived':raise ValueError('请先恢复人物，再添加参考')
+            refs = [self.store.get('references', identity) for identity in dict.fromkeys(request.reference_ids)]
+            body = {key:voice[key] for key in VoiceInput.model_fields if key in voice}
+            body['reference_ids'] = list(dict.fromkeys([voice.get('reference_id')]+voice.get('reference_ids',[])+[r['id'] for r in refs]))
+            body['reference_ids'] = [identity for identity in body['reference_ids'] if identity]
+            body['reference_scenarios'] = dict(voice.get('reference_scenarios',{}))
+            for ref in refs:
+                if ref.get('scenario') and ref['id'] not in body['reference_scenarios']:
+                    body['reference_scenarios'][ref['id']] = ref['scenario']
+            if not body.get('reference_id'):
+                body.update(reference_id=refs[0]['id'], reference_confirmed=False, status='draft')
+            return self.platform.create_voice(VoiceInput(**body), voice_id)
+
     def retry(self,identity):
         item=self.store.get('recordings',identity)
         if item['status'] not in {'failed','cancelled'}:raise ValueError('只可重试失败或已取消的录音分析')

@@ -14,6 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from .config import load_config, ROOT, installation_id
 from .schemas import ProjectInput, VoiceInput, GenerationInput, BatchInput, ReviewInput, ExportInput, SettingsInput,SaveClipsInput,TranscriptInput,CompareReferencesInput,ArchiveJobsInput,ProcessingInput,ResultRecordingInput,OutputRecordingInput,ReferenceVoiceInput
 from .schemas import LongformImportRetry,LongformAction,LongformExportInput,AssetBatch,ReviewBatch
+from .schemas import ReferenceMetadataInput
 from .assets import KINDS
 from .service import Platform, TERMINAL
 from .audio import sha256, waveform_peaks
@@ -269,6 +270,10 @@ def create_app(config=None):
     def update_voice(identity: str, request: VoiceInput):
         return platform.create_voice(request, identity)
 
+    @app.post('/api/v1/voices/{identity}/references')
+    def attach_references(identity: str, request: SaveClipsInput):
+        return platform.references.attach(identity, request)
+
     @app.post("/api/v1/references", status_code=201)
     async def reference(file: UploadFile = File(...), source: str = Form(...), authorization: str = Form(...), rights_confirmed: bool = Form(False)):
         content = await file.read(config["max_upload_mb"] * 1024*1024 + 1)
@@ -277,6 +282,10 @@ def create_app(config=None):
     @app.get("/api/v1/references")
     def references():
         return [r for r in platform.store.list('references') if r.get('saved',True)]
+
+    @app.put('/api/v1/references/{identity}')
+    def annotate_reference(identity: str, request: ReferenceMetadataInput):
+        return platform.references.annotate(identity, request)
 
     @app.post('/api/v1/recordings',status_code=202)
     async def recording(file:UploadFile=File(...),source:str=Form(...),authorization:str=Form(...),rights_confirmed:bool=Form(False),smart_reference:bool=Form(False)):

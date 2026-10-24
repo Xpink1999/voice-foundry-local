@@ -6,6 +6,14 @@ Open Create → Voice design & library → Quick reference setup. Library manage
 
 Recording analysis and generation run locally. Uploaded audio is not sent to a third-party service.
 
+## Reference clips
+
+Quick reference setup accepts up to 10 recordings per upload and processes them separately. Listen to the candidates, select Save to reference clips, name each clip and optionally add a scene, then choose Save selected clips. You can save clips before creating a voice. Originals are retained and recordings are never joined.
+
+In Reference clips, search by name, scene, tags or notes; listen and edit annotations. Add several selected clips to one voice or move them to the recoverable trash. The voice editor reuses its saved default reference without another upload. Scene references let you keep alternatives and choose a new default. This affects future narration only; it does not train a model, combine recordings or guarantee better quality.
+
+Use a clear, stable everyday recording as the default, with separate clips for soft speech, excitement or narration. Each generation uses one clip. A changed default needs listening confirmation again. Existing audio and submitted tasks retain their original reference.
+
 ## Workflow
 
 1. Upload an authorized recording and enter its source and permission details. The browser previews duration. The server retains the original bytes and SHA-256 and creates a 16 kHz mono analysis copy. Limits are 200 MB and 0.5–1,800 seconds per recording.

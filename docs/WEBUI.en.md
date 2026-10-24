@@ -37,6 +37,7 @@ Select audio to show its comparison, review and export actions. Once every selec
 
 Open Voice design & library and choose a tab:
 
+- Reference clips: name and annotate individual clips, then add them to a voice for different scenes.
 - Quick reference setup: upload a recording you have permission to use, listen to the recommended clips and save a voice.
 - Voice library: find, listen to and edit saved voices. Start narration sends a voice to the generation workspace.
 - Voice design: describe a voice, generate a sample and send it to reference preparation.

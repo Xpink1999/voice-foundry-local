@@ -12,6 +12,8 @@
 | 音色详情/新版本 | GET/PUT /voices/{id} |
 | 音色历史 | GET /voices/{id}/versions |
 | 参考上传 | POST /references，multipart: file、source、authorization、rights_confirmed |
+| 参考命名与标注 | PUT /references/{id}，可分别更新 name、scenario、tags、notes；保留标注历史，不修改音频与授权 |
+| 批量添加人物参考 | POST /voices/{id}/references，reference_ids 数组，最多 40 个；一次保存新版本，保留已有默认参考 |
 | 参考列表/试听 | GET /references、/references/{id}/audio |
 | 异步录音预处理 | POST /recordings，multipart: file、source、authorization、rights_confirmed，返回 202 |
 | 录音与候选片段 | GET /recordings、/recordings/{id}、/recordings/{id}/original |

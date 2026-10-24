@@ -59,6 +59,7 @@ test('selection summary includes hidden selected items and removes missing recor
 test('routes restore only known workspaces and bounded chapter identifiers', () => {
   assert.deepEqual(decodeRoute('#longform/book-id/12'),{page:'longform',id:'book-id',chapter:12});
   assert.deepEqual(decodeRoute('#voices/library'),{page:'voices',pane:'library',id:null});
+  assert.deepEqual(decodeRoute('#voices/references'),{page:'voices',pane:'references',id:null});
   assert.deepEqual(decodeRoute('#longform/book-id/-2'),{page:'longform',id:'book-id',chapter:null});
   assert.deepEqual(decodeRoute('#unknown'),{page:'studio'});
   assert.deepEqual(decodeRoute('#voices/%zz'),{page:'studio'});

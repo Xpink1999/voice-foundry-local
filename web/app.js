@@ -29,7 +29,7 @@ function setOptions(select,items,blank){const value=select.value;select.innerHTM
 function updateSelectors(){
   document.querySelectorAll('.project-select').forEach(select=>setOptions(select,state.projects,select.id==='voice-project'?tr("全局共享"):select.id.includes('scope')||['task-project','review-project'].includes(select.id)?tr("所有项目"):tr("独立创作")));
   renderVoiceOptions();
-  setOptions($('voice-reference'),state.references.map(r=>({id:r.id,name:tr("{0} · {1} 秒 · {2}", [r.original_name,r.duration.toFixed(1),r.rights_confirmed?tr("已记录授权"):tr("未确认授权")])})),tr("暂不使用参考"));
+  setOptions($('voice-reference'),state.references.map(r=>({id:r.id,name:tr("{0} · {1} 秒 · {2}", [r.name||r.source_label||r.original_name,r.duration.toFixed(1),r.rights_confirmed?tr("已记录授权"):tr("未确认授权")])})),tr("暂不使用参考"));
   setOptions($('voice-sample'),state.results.map(r=>({id:r.id,name:tr("{0} · 候选 {1} · {2}", [r.title,r.candidate,labels[r.review]])})),tr("暂不绑定示例"));
   const selected=$('gen-engine').value;
   $('gen-engine').innerHTML=state.models.map(m=>`<option value="${e(m.id)}">${e(tr(m.label))}</option>`).join('');

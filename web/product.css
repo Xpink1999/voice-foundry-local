@@ -230,6 +230,26 @@ form[aria-busy=true] button[type=submit]:after{content:"";width:13px;height:13px
 #voice-pane-design .workspace-intro,#voice-pane-processing .workspace-intro{display:none}
 #page-voices:has(#voice-pane-library:not([hidden])) .page-heading #new-voice{display:none}
 .voice-editor{margin:22px 0;border-color:var(--soft-border);box-shadow:none}
+.clip-save-fields,.reference-save-bar{padding-top:16px;margin-top:16px;border-top:1px solid var(--line)}
+.clip-save-fields label{font-size:12px}.clip-save-fields .checkbox{margin-bottom:12px}
+.reference-library-actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:18px 0}
+.reference-library-actions label{display:flex;align-items:center;gap:10px;margin:0}
+.reference-library-actions select{width:auto;max-width:240px;margin:0}
+.reference-library-actions[data-empty=true] label,.reference-library-actions[data-empty=true] #reference-attach,.reference-library-actions[data-empty=true] #reference-delete{display:none}
+#voice-pane-references>.toolbar{align-items:flex-end}
+#voice-pane-references>.toolbar>label{display:block;min-width:0;flex:1}
+#voice-pane-references>.toolbar>label input,#voice-pane-references>.toolbar>label select{display:block;width:100%;margin-top:8px}
+.reference-library-row{display:flex;gap:24px;justify-content:space-between;padding:22px 0;border-bottom:1px solid var(--line)}
+.reference-library-main{min-width:0;flex:1}.reference-library-main .checkbox{font-size:14px}
+.reference-library-main audio{width:min(100%,480px);margin:8px 0 0}
+.reference-library-main p{margin:6px 0;overflow-wrap:anywhere}
+.reference-notes{white-space:pre-wrap;font-size:13px;max-width:70ch}
+.reference-row-actions{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap}
+#reference-metadata-editor{max-width:760px;margin-top:24px}
+#voice-reference-set .reference-binding-row{display:block;padding:16px 0;border-bottom:1px solid var(--line)}
+#voice-reference-set .reference-binding-row>label:not(.checkbox){margin-top:12px}
+#voice-reference-set .reference-binding-row .actions{margin-top:8px}
+@media(max-width:700px){.reference-library-row{flex-direction:column;gap:12px}.reference-library-actions label{width:100%}.reference-library-actions select{flex:1;max-width:none}.reference-library-actions button{min-height:44px}}
 .review-export-bridge{background:var(--surface-soft);box-shadow:none;border-radius:11px;padding:20px;margin-bottom:22px}
 .review-export-bridge label{max-width:160px}
 .review-export-bridge .toolbar{margin-bottom:0}
