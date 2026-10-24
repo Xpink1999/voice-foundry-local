@@ -5,19 +5,19 @@ const path = require('node:path');
 const vm = require('node:vm');
 const web = path.join(__dirname, '../web');
 
-function page({languages = ['zh-CN'], saved, blocked = false, fields = [], files = [], confirm = true} = {}) {
+function page({languages = ['zh-CN'], saved, blocked = false, fields = [], files = [], confirm = true, forms = {}, initialDraft} = {}) {
   const handlers = {}, values = new Map(saved ? [['voice-foundry-language', saved]] : []);
-  const session = new Map();
+  const session = new Map(initialDraft ? [['voice-foundry-language-draft', JSON.stringify(initialDraft)]] : []);
   const storage = map => ({
     getItem: key => {if (blocked) throw Error('blocked'); return map.get(key) ?? null;},
     setItem: (key, value) => {if (blocked) throw Error('blocked'); map.set(key, value);},
     removeItem: key => map.delete(key)
   });
-  const location = {href: 'http://localhost:8961/', search: '', assign(url) {this.assigned = url;}};
+  const location = {href: 'http://localhost:8961/', search: '', assign(url) {this.assigned = url;}, reload() {this.reloaded = true;}};
   const document = {
     querySelectorAll: selector => selector.startsWith('input[id]') ? fields : selector === 'input[type="file"]' ? files : [],
     querySelector: () => null,
-    getElementById: () => ({}),
+    getElementById: id => forms[id] || fields.find(field => field.id === id) || (id === 'ui-language' ? {} : null),
     addEventListener(name, callback) {handlers[name] = callback;}
   };
   const window = {addEventListener(name, callback) {handlers[name] = callback;}, confirm: () => confirm};
@@ -68,13 +68,41 @@ test('language preference persists and drafts exclude tokens, files and approval
   assert.equal(result.values.get('voice-foundry-language'), 'ja');
   const draft = JSON.parse(result.session.get('voice-foundry-language-draft'));
   assert.deepEqual(draft.fields, {'gen-text': '用户原文'});
-  assert.equal(result.location.assigned, 'http://localhost:8961/');
+  assert.equal(result.location.reloaded, true);
+});
+
+test('changing language from a hash workspace reloads instead of only navigating its fragment', () => {
+  const result = page();
+  result.location.href = 'http://localhost:8961/#review';
+  result.i18n.changeLanguage('en');
+  assert.equal(result.location.reloaded, true);
+  assert.equal(result.location.assigned, undefined);
+  assert.equal(result.values.get('voice-foundry-language'), 'en');
 });
 
 test('storage restrictions retain usable language selection', () => {
   const result = page({blocked: true});
   result.i18n.changeLanguage('ko');
   assert.equal(result.location.assigned, 'http://localhost:8961/?ui_lang=ko');
+  assert.equal(result.i18n.changingLanguage, false);
+});
+
+test('language draft restoration does not turn unchanged forms into unsaved changes', () => {
+  const voice = {dataset:{}}, settings = {dataset:{}};
+  const field = {id:'voice-status',tagName:'SELECT',type:'select-one',value:'draft',options:[{value:'draft'}],dispatchEvent(){voice.dataset.dirty='true';}};
+  const result = page({forms:{'voice-form':voice,'settings-form':settings},fields:[field],initialDraft:{fields:{'voice-status':'draft'},selected:[],page:'studio',savedAt:Date.now()}});
+  result.handlers['voice-data-ready']();
+  assert.equal(voice.dataset.dirty,undefined);
+  assert.equal(settings.dataset.dirty,undefined);
+  assert.equal(result.i18n.restoringDraft,false);
+});
+
+test('real unsaved form changes survive a language change', () => {
+  const voice = {dataset:{}}, settings = {dataset:{}};
+  const result = page({forms:{'voice-form':voice,'settings-form':settings},initialDraft:{fields:{},selected:[],page:'studio',dirtyForms:['voice-form'],savedAt:Date.now()}});
+  result.handlers['voice-data-ready']();
+  assert.equal(voice.dataset.dirty,'true');
+  assert.equal(settings.dataset.dirty,undefined);
 });
 
 test('all four catalogs have matching nonempty messages and placeholders', () => {

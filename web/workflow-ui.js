@@ -27,6 +27,9 @@
   }
   function restoreDraft() {
     if (!savedDraft) return;
+    const restoredText = ['gen-title','gen-text','gen-style','batch-text','design-description','lf-title','lf-style'].some(id => savedDraft.values[id]?.trim());
+    const changed = Object.entries(savedDraft.values).some(([id,value]) => $(id) && String(value) !== String($(id).value));
+    if (!changed && !savedDraft.selection?.length && !Object.keys(savedDraft.batchRoles || {}).length) {savedDraft = null; return;}
     restoring = true;
     // Project selectors must be restored before dependent voice/reference selectors.
     const ordered = [...fields.filter(id => id.endsWith('-project')), ...fields.filter(id => !id.endsWith('-project'))];
@@ -41,6 +44,7 @@
     if (Array.isArray(savedDraft.selection)) state.selected = new Set(savedDraft.selection.filter(id => state.results.some(result => result.id === id)));
     renderResults();
     restoring = false; savedDraft = null;
+    if (!restoredText && !state.selected.size) return;
     notice(tr('已恢复本标签页的文本草稿。文件和试听确认需要重新选择。'), [{label: tr('清除草稿'), run: () => {
       for (const id of fields) {const input = $(id); if (!input) continue; input.value = defaults[id] || ''; input.dispatchEvent(new Event(input.tagName === 'SELECT' ? 'change' : 'input', {bubbles: true}));}
       clearTimeout(saveTimer); window.batchUI?.restoreRoles({}); state.selected.clear(); renderResults();
@@ -53,6 +57,7 @@
   window.addEventListener('pagehide', saveDraft);
   window.addEventListener('beforeunload', event => {
     saveDraft();
+    if (window.VoiceI18n.changingLanguage) return;
     if ($('settings-form').dataset.dirty || $('voice-form').dataset.dirty || [...document.querySelectorAll('input[type="file"]')].some(input => input.files?.length && !input.form?.dataset.uploaded)) {event.preventDefault(); event.returnValue = '';}
   });
   document.addEventListener('workflow-form-success', event => {event.target.dataset.uploaded = 'true'; if (event.target.id === 'settings-form') {delete event.target.dataset.dirty; $('settings-unsaved').hidden = true;}});
@@ -175,10 +180,10 @@
   $('export-draft').addEventListener('change', refreshExport); $('export-form').addEventListener('workflow-form-settled', refreshExport);
   for (const [id, other] of [['export-trim','export-subtitles'], ['export-subtitles','export-trim']]) $(id).addEventListener('change', () => {if ($(id).checked && $(other).checked) {$(other).checked = false; notice(tr('静音裁剪与分段字幕不能同时使用，已关闭另一选项。'));}});
   const settingsHint = document.createElement('p'); settingsHint.id = 'settings-unsaved'; settingsHint.className = 'reference-warnings'; settingsHint.hidden = true; settingsHint.textContent = tr('设置已修改，尚未保存。'); $('settings-form').prepend(settingsHint);
-  $('settings-form').addEventListener('input', () => {$('settings-form').dataset.dirty = 'true'; settingsHint.hidden = false;});
+  $('settings-form').addEventListener('input', () => {if(restoring || window.VoiceI18n.restoringDraft)return;$('settings-form').dataset.dirty = 'true'; settingsHint.hidden = false;});
   const discardSettings = document.createElement('button'); discardSettings.type = 'button'; discardSettings.className = 'text-link'; discardSettings.textContent = tr('放弃未保存的设置'); discardSettings.onclick = async () => {delete $('settings-form').dataset.dirty; settingsHint.hidden = true; await renderSettings();}; $('settings-form').querySelector('[type=submit]').after(discardSettings);
-  $('voice-form').addEventListener('input', () => {$('voice-form').dataset.dirty = 'true';});
-  $('voice-form').addEventListener('change', () => {$('voice-form').dataset.dirty = 'true';});
+  $('voice-form').addEventListener('input', () => {if(!restoring && !window.VoiceI18n.restoringDraft)$('voice-form').dataset.dirty = 'true';});
+  $('voice-form').addEventListener('change', () => {if(!restoring && !window.VoiceI18n.restoringDraft)$('voice-form').dataset.dirty = 'true';});
   document.addEventListener('assets-changed', event => {if (event.detail?.deleted && event.detail.batch) notice(tr('所选资产已移入回收站，原文件保留。'), [{label: tr('撤销本次删除'), run: async () => {await window.assetUI.restoreBatch(event.detail.batch); banner.hidden = true;}}]);});
   for (const [id, label] of [['task-project','所属项目'],['task-status','任务状态'],['review-project','所属项目'],['review-status','审核状态'],['voice-scope','音色范围']]) $(id).setAttribute('aria-label', tr(label));
   window.workflowUI = {voiceSaved, batchSubmitted, offerLongform, notice, saveDraft};

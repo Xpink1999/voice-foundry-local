@@ -25,11 +25,12 @@
   function counts() {
     if (exportSignature && exportSignature !== JSON.stringify(current().sort())) {exportSignature = null; $('review-export-ready').replaceChildren();}
     const summary = VoiceWorkflow.selectionSummary(state.results, state.selected, pageSlice(filteredResults()).map(result => result.id));
-    $('review-selection-summary').innerHTML = `<p>${e(tr('已选 {0} 条 · 已审核 {1} 条', [summary.items.length, summary.approved]))}${summary.hidden ? ' · '+e(tr('其中 {0} 条被当前筛选隐藏', [summary.hidden])) : ''}</p>${summary.items.length ? `<details><summary>${tr('查看所选音频')}</summary><ul>${summary.items.slice(0, 30).map(item => `<li>${e(item.title)} · ${e(labels[item.review])}</li>`).join('')}</ul></details>` : ''}`;
+    $('review-selection-summary').innerHTML = summary.items.length ? `<p>${e(tr('已选 {0} 条 · 已审核 {1} 条', [summary.items.length, summary.approved]))}${summary.hidden ? ' · '+e(tr('其中 {0} 条被当前筛选隐藏', [summary.hidden])) : ''}</p><details><summary>${tr('查看所选音频')}</summary><ul>${summary.items.slice(0, 30).map(item => `<li>${e(item.title)} · ${e(labels[item.review])}</li>`).join('')}</ul></details>` : `<p>${e(tr('选择音频后可批量试听、审核和导出。'))}</p>`;
     $('review-export-now').disabled = exporting || !summary.items.length || summary.approved !== summary.items.length;
     $('review-batch-approve').disabled = !summary.items.length || summary.approved === summary.items.length;
     $('review-delete-selected').disabled = !summary.items.length;
     $('review-clear-selected').disabled = !summary.items.length;
+    $('compare-selected').disabled = !summary.items.length;
     $('review-selected-only').disabled = !summary.items.length && !$('review-selected-only').checked;
     $('review-scope').replaceChildren();
     if (state.reviewJob) {

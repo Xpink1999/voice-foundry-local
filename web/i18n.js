@@ -62,9 +62,11 @@
       page: document.querySelector('.page.active')?.id.replace(/^page-/, '') || 'studio',
       pane: document.querySelector('[data-voice-pane][aria-selected="true"]')?.dataset.voicePane,
       selected: typeof state !== 'undefined' ? [...state.selected] : [],
+      dirtyForms: ['settings-form', 'voice-form'].filter(id => document.getElementById(id)?.dataset?.dirty),
       savedAt: Date.now()
     };
   }
+  let changingLanguage = false, restoringDraft = false;
   function changeLanguage(mode) {
     if (!['system', ...supported].includes(mode)) return;
     const next = mode === 'system' ? detect() : mode;
@@ -76,11 +78,14 @@
     let stored = false;
     try { localStorage.setItem(preferenceKey, mode); stored = true; } catch { /* Use URL fallback. */ }
     if (next === locale) { preference = mode; return; }
-    try { sessionStorage.setItem(draftKey, JSON.stringify(captureDraft())); } catch { /* Browser storage may be disabled. */ }
+    try { sessionStorage.setItem(draftKey, JSON.stringify(captureDraft())); changingLanguage = true; } catch { /* Keep unsaved-change protection when a draft cannot be saved. */ }
     const url = new URL(location.href);
     if (stored) url.searchParams.delete('ui_lang');
     else url.searchParams.set('ui_lang', next);
-    location.assign(url.href);
+    // Assigning the same URL with a workspace hash only performs a fragment navigation.
+    // Rebuild the document so both static and dynamically created controls use the new locale.
+    if (url.href === location.href) location.reload();
+    else location.assign(url.href);
   }
   let draft;
   try {
@@ -90,6 +95,8 @@
   } catch { draft = null; }
   function restoreDraft() {
     if (!draft) return;
+    restoringDraft = true;
+    try {
     // Run after data-backed selectors have been populated, then restore text last.
     for (const [id, value] of Object.entries(draft.fields)) {
       const field = document.getElementById(id);
@@ -110,9 +117,19 @@
     if (draft.page === 'voices' && ['quick', 'library', 'design', 'processing'].includes(draft.pane))
       document.querySelector(`[data-voice-pane="${draft.pane}"]`)?.click();
     document.getElementById('gen-text')?.dispatchEvent(new Event('input'));
+    for (const id of ['settings-form', 'voice-form']) {
+      const form = document.getElementById(id);
+      if (!form?.dataset) continue;
+      if (draft.dirtyForms?.includes(id)) form.dataset.dirty = 'true';
+      else delete form.dataset.dirty;
+    }
+    const unsaved = document.getElementById('settings-unsaved');
+    if (unsaved) unsaved.hidden = !document.getElementById('settings-form')?.dataset?.dirty;
     draft = null;
+    } finally { restoringDraft = false; }
   }
-  window.VoiceI18n = {translate, message: serviceMessage, locale, normalize, detect, changeLanguage, applyStatic, escape, captureDraft};
+  window.VoiceI18n = {translate, message: serviceMessage, locale, normalize, detect, changeLanguage, applyStatic, escape, captureDraft,
+    get changingLanguage() {return changingLanguage;}, get restoringDraft() {return restoringDraft;}};
   window.tr = translate;
   window.uiMessage = serviceMessage;
   window.addEventListener('voice-data-ready', restoreDraft, {once: true});
