@@ -77,7 +77,7 @@ def test_reference_authorization_and_confirmation(client):
     bad=client.post('/api/v1/references',files={'file':('wrong.wav',b'not wave')},data=dict(source='self',authorization='test'))
     assert bad.status_code==400
 
-def test_review_gate_and_non_destructive_export(client):
+def test_review_gate_and_non_destructive_export(client,ffmpeg_available):
     job=wait(client,submit(client)["id"])
     rid=job["results"][0]
     result=client.get('/api/v1/results/'+rid).json()
@@ -98,6 +98,25 @@ def test_review_gate_and_non_destructive_export(client):
     assert client.post('/api/v1/exports',json={'result_ids':[rid],'trim_silence':True,'subtitles':True}).status_code==400
     path=client.app.state.platform.data/result['path']
     assert sha256(path)==result['sha256']
+
+def test_native_wav_draft_export_does_not_require_ffmpeg(client, cfg):
+    client.app.state.platform.config['ffmpeg'] = str(Path(cfg['data_dir'])/'ffmpeg-not-installed.exe')
+    job = wait(client, submit(client)['id'])
+    rid = job['results'][0]
+    original = client.get('/api/v1/results/'+rid+'/audio').content
+    assert client.post('/api/v1/exports', json={'result_ids':[rid]}).status_code == 400
+    request = dict(result_ids=[rid], draft=True, format='wav', sample_rate=24000, channels=1)
+    response = client.post('/api/v1/exports', json=request)
+    assert response.status_code == 201, response.text
+    raw = client.get('/api/v1/exports/'+response.json()['id']+'/download').content
+    with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+        name = next(name for name in archive.namelist() if name.endswith('.wav'))
+        assert 'DRAFT_' in name and archive.read(name) == original
+    response = client.post('/api/v1/exports', json={**request, 'sample_rate':16000})
+    assert response.status_code == 400 and 'FFmpeg' in response.json()['detail']
+    assert client.get('/api/v1/results/'+rid+'/audio').content == original
+    assert client.get('/api/v1/results/'+rid).json()['review'] == 'pending'
+
 
 def test_failure_retry_and_preservation(client):
     first=wait(client,submit(client)["id"])

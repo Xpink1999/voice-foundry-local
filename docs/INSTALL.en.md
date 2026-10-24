@@ -45,7 +45,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -CoreO
 
 `-CoreOnly` needs no Git, NVIDIA GPU or FFmpeg. It can open an empty interface, but cannot generate speech or process recordings. Rerun without switches to complete installation later. `-SkipModels -NoStart` still installs CUDA dependencies and inference sources, skipping only weights; it is not a lightweight installation.
 
-Python, uv state and caches stay in `runtime/`; library model caches use `cache_dir`, defaulting to `runtime/model-cache`; the environment is `.venv`. Sources go in `vendor/`, models in `models/`, and databases and assets in `data/`. The installer does not read another installation's environment, recordings or database, or change user PATH or Codex settings.
+Installation runs the core tests. Recording decoding, conversion and separation checks require FFmpeg; when it is absent they are explicitly skipped, rather than failing a valid CoreOnly installation. Service, queue and native-rate WAV draft export checks still run. These checks do not establish model inference or audio-processing readiness.
+
+Python, uv state and caches stay in `runtime/`; model and runtime caches use `cache_dir`, defaulting to `runtime/model-cache`; the environment is `.venv`. Sources go in `vendor/`, models in `models/`, and databases and assets in `data/`. The installer does not read another installation's environment, recordings or database, or change user PATH or Codex settings.
 
 Model sources and revisions are pinned in `config/model-sources.json`. Downloads verify sizes and hashes and retain `provenance.json`. Rerun after an interrupted download; valid existing files are retained.
 
@@ -93,6 +95,8 @@ It adds this installation's `bin` directory to the current user's PATH and regis
 Open a new terminal to use `voice`. Restart Codex or reconnect MCP to discover the tools. If you only need the global CLI, manually add this installation's full `bin` path to user PATH instead of running the script. The WebUI and API work independently.
 
 ## Configuration and remote access
+
+Empty `VOICE_PLATFORM_CONFIG` and `VOICE_PLATFORM_URL` values use this installation’s configuration and local address. They are not treated as a file path or an explicit remote service. Set a complete URL only when intentionally selecting another service.
 
 Paths, models, queue and service settings are in `config/platform.json`. Relative model and data paths use the installation directory as their base. Relative CLI input and export paths use the caller's working directory.
 

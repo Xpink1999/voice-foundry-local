@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MODEL = "openbmb/VoxCPM2"
 
 def configured_path(key, section=None):
-    config = json.loads(Path(os.environ.get('VOICE_PLATFORM_CONFIG', ROOT/'config/platform.json')).read_text(encoding='utf-8-sig'))
+    config = json.loads(Path(os.environ.get('VOICE_PLATFORM_CONFIG', '').strip() or ROOT/'config/platform.json').read_text(encoding='utf-8-sig'))
     value = config[section][key] if section else config[key]
     path = Path(value)
     return path if path.is_absolute() else ROOT/path

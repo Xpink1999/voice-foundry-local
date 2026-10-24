@@ -64,19 +64,49 @@ def test_downloader_keeps_resumable_bytes_but_discards_invalid_complete_file(tmp
     assert not partial.exists()
 
 
-def test_model_destination_uses_configuration_not_a_previous_installation(tmp_path, monkeypatch):
+@pytest.mark.parametrize('override', [None, '', '   '])
+def test_model_destination_uses_configuration_not_a_previous_installation(tmp_path, monkeypatch, override):
     import json
     source = Path(__file__).resolve().parents[1]/'scripts/download_model.py'
     spec = importlib.util.spec_from_file_location('download_path_test', source)
     downloader = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(downloader)
     monkeypatch.setattr(downloader, 'ROOT', tmp_path)
-    monkeypatch.delenv('VOICE_PLATFORM_CONFIG', raising=False)
+    if override is None:
+        monkeypatch.delenv('VOICE_PLATFORM_CONFIG', raising=False)
+    else:
+        monkeypatch.setenv('VOICE_PLATFORM_CONFIG', override)
     (tmp_path/'config').mkdir()
     target = tmp_path/'shared-weights'
     (tmp_path/'config/platform.json').write_text(json.dumps({'model_dir':'own-models', 'reference_preprocessing':{'speaker_dir':str(target)}}), encoding='utf-8')
     assert downloader.configured_path('model_dir') == tmp_path/'own-models'
     assert downloader.configured_path('speaker_dir','reference_preprocessing') == target
+
+
+@pytest.mark.parametrize('override', ['', '   '])
+def test_empty_config_override_keeps_the_installation_config(tmp_path, monkeypatch, override):
+    import json
+    from voice_platform.config import load_config
+    monkeypatch.setattr('voice_platform.config.ROOT', tmp_path)
+    monkeypatch.setenv('VOICE_PLATFORM_CONFIG', override)
+    path = tmp_path/'config/platform.json'
+    path.parent.mkdir()
+    path.write_text(json.dumps(dict(host='127.0.0.1', token_env='TEST_TOKEN', data_dir='data',
+                                    model_dir='models', log_dir='logs')), encoding='utf-8')
+    assert load_config()['config_path'] == str(path.resolve())
+
+
+@pytest.mark.parametrize('override', ['', '   '])
+def test_empty_service_url_cannot_bypass_local_identity(monkeypatch, cfg, override):
+    monkeypatch.setattr('voice_platform.client.load_config', lambda: cfg)
+    monkeypatch.setenv('VOICE_PLATFORM_URL', override)
+    client = Client()
+    assert client.url == f"http://127.0.0.1:{cfg['port']}"
+    client.http.close()
+    client.http = httpx.Client(base_url=client.url, transport=httpx.MockTransport(
+        lambda request: httpx.Response(200, json={'status':'ok','installation_id':'other-installation'})))
+    with pytest.raises(ValueError, match='another installation'):
+        client.request('GET', '/health')
 
 
 def test_unrelated_service_on_the_same_port_is_rejected(monkeypatch, cfg):
@@ -115,12 +145,14 @@ def test_runtime_caches_do_not_reuse_another_applications_cache(tmp_path, monkey
     import json
     from voice_platform.config import load_config
     monkeypatch.setattr('voice_platform.config.ROOT', tmp_path)
-    for key in ('HF_HOME','HF_HUB_CACHE','HF_MODULES_CACHE','TORCH_HOME','TRANSFORMERS_CACHE'):
+    cache_keys = ('HF_HOME','HF_HUB_CACHE','HF_MODULES_CACHE','TORCH_HOME','CUDA_CACHE_PATH',
+                  'TORCH_EXTENSIONS_DIR','TORCHINDUCTOR_CACHE_DIR','TRITON_CACHE_DIR','NUMBA_CACHE_DIR')
+    for key in (*cache_keys,'TRANSFORMERS_CACHE'):
         monkeypatch.setenv(key, str(tmp_path/'foreign-cache'))
     path = tmp_path/'platform.json'
     path.write_text(json.dumps({'data_dir':'data','model_dir':'models','log_dir':'logs','host':'127.0.0.1','token_env':'TEST_ONLY_TOKEN'}), encoding='utf-8')
     cfg = load_config(path)
     assert Path(cfg['cache_dir']) == tmp_path/'runtime/model-cache'
-    assert Path(os.environ['HF_HOME']).is_relative_to(Path(cfg['cache_dir']))
-    assert Path(os.environ['TORCH_HOME']).is_relative_to(Path(cfg['cache_dir']))
+    assert all(Path(os.environ[key]).is_relative_to(Path(cfg['cache_dir'])) for key in cache_keys)
+    assert all(Path(os.environ[key]).is_dir() for key in cache_keys)
     assert 'TRANSFORMERS_CACHE' not in os.environ

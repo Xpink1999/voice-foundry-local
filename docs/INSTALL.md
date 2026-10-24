@@ -45,7 +45,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -CoreO
 
 `-CoreOnly` 不要求 Git、NVIDIA 显卡或 FFmpeg，可启动空白界面，但不能配音或处理录音。之后不带参数重跑即可补全。`-SkipModels -NoStart` 则仍安装 CUDA 依赖和推理源码，只跳过权重；它不是轻量安装。
 
-Python、uv 状态和缓存放在 `runtime/`；运行库模型缓存由 `cache_dir` 指定，默认 `runtime/model-cache`，专用环境在 `.venv`。源码放 `vendor/`，模型放 `models/`，数据库和资产放 `data/`。不读取其他安装的录音、数据库或环境，不自动更改用户 PATH 或 Codex 设置。
+安装检查会运行核心测试。录音解码、转换和分离相关测试需要 FFmpeg；找不到时会明确显示为跳过，不会把已装好的 CoreOnly 环境判为失败。服务、队列和原采样率 WAV 草稿导出仍会检查；这不代表已验证模型推理或音频处理。
+
+Python、uv 状态和缓存放在 `runtime/`；模型与运行库缓存由 `cache_dir` 指定，默认 `runtime/model-cache`，专用环境在 `.venv`。源码放 `vendor/`，模型放 `models/`，数据库和资产放 `data/`。不读取其他安装的录音、数据库或环境，不自动更改用户 PATH 或 Codex 设置。
 
 模型来源和修订在 `config/model-sources.json`；下载器校验文件大小和哈希，保留 `provenance.json`。下载中断可重跑安装命令，已有有效文件会保留。
 
@@ -93,6 +95,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\register-global.ps1
 注册后新开终端可使用 `voice`。重启 Codex 或重新连接 MCP 后可发现工具。如果只需要全局 CLI，可自行将本安装的 `bin` 完整路径加入用户 PATH，不必执行此脚本。WebUI 和 API 可独立使用。
 
 ## 配置与远程访问
+
+`VOICE_PLATFORM_CONFIG` 或 `VOICE_PLATFORM_URL` 为空时使用本目录配置和本机地址，不会把空值当成文件路径或远程服务。需要连接另一服务时再填写完整 URL。
 
 路径、模型、队列和服务参数在 `config/platform.json`。相对模型、数据路径以安装目录为基准；CLI 的相对输入、导出路径以调用者当前目录为基准。
 

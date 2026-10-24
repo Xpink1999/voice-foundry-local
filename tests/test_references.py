@@ -37,7 +37,7 @@ def upload(client):
     assert item['status']=='succeeded',item
     return item,original
 
-def test_original_clips_transcript_and_multi_reference(client,monkeypatch):
+def test_original_clips_transcript_and_multi_reference(client,monkeypatch,ffmpeg_available):
     monkeypatch.setattr(ReferenceLibrary,'_run_worker',fake_analysis)
     item,original=upload(client)
     assert client.get('/api/v1/recordings/'+item['id']+'/original').content==original
@@ -57,7 +57,7 @@ def test_original_clips_transcript_and_multi_reference(client,monkeypatch):
     client.put('/api/v1/references/'+refs[1]['id']+'/transcript',json={'text':'later','confirmed':False})
     assert client.get('/api/v1/jobs/'+job['id']).json()['reference_snapshot']['transcript']['text']=='自动识别的文本'
 
-def test_hifi_validation_and_forwarding(client,monkeypatch):
+def test_hifi_validation_and_forwarding(client,monkeypatch,ffmpeg_available):
     monkeypatch.setattr(ReferenceLibrary,'_run_worker',fake_analysis)
     item,_=upload(client);ids=[r['id'] for r in item['candidates']]
     client.post('/api/v1/recordings/'+item['id']+'/save',json={'reference_ids':ids})
@@ -77,7 +77,7 @@ def test_hifi_validation_and_forwarding(client,monkeypatch):
     call=next(c for c in engine.calls if c.get('clone_mode')=='hifi')
     assert call['prompt_text']=='自动识别的文本' and call['reference_path']
 
-def test_comparison_preserves_drafts_and_all_references(client,monkeypatch):
+def test_comparison_preserves_drafts_and_all_references(client,monkeypatch,ffmpeg_available):
     monkeypatch.setattr(ReferenceLibrary,'_run_worker',fake_analysis)
     item,_=upload(client);ids=[r['id'] for r in item['candidates']]
     client.post('/api/v1/recordings/'+item['id']+'/save',json={'reference_ids':ids})

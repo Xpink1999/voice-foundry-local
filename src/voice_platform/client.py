@@ -10,14 +10,14 @@ class Client:
     def __init__(self, auto_start=False):
         self.config = load_config()
         self.verified = False
-        self.url = os.environ.get("VOICE_PLATFORM_URL", f"http://127.0.0.1:{self.config['port']}").rstrip("/")
+        self.url = os.environ.get("VOICE_PLATFORM_URL", '').strip().rstrip("/") or f"http://127.0.0.1:{self.config['port']}"
         token = os.environ.get(self.config["token_env"])
         self.http = httpx.Client(base_url=self.url, timeout=360, trust_env=False, headers={"Authorization": f"Bearer {token}"} if token else {})
         if auto_start:
             self.ensure_running()
 
     def request(self, method, path, **kwargs):
-        if not self.verified and path != '/health' and 'VOICE_PLATFORM_URL' not in os.environ:
+        if not self.verified and path != '/health' and not os.environ.get('VOICE_PLATFORM_URL', '').strip():
             self.request('GET', '/health')
         response = self.http.request(method, "/api/v1"+path, **kwargs)
         if response.is_error:
@@ -27,7 +27,7 @@ class Client:
                 details = response.text
             raise ValueError(f"HTTP {response.status_code}: {details}")
         result = response.json()
-        if path == '/health' and 'VOICE_PLATFORM_URL' not in os.environ:
+        if path == '/health' and not os.environ.get('VOICE_PLATFORM_URL', '').strip():
             if not isinstance(result, dict) or result.get('status') != 'ok':
                 raise ValueError('This port does not provide a healthy Voice Foundry service. Check the port in config/platform.json.')
             identity = result.get('installation_id')
@@ -50,7 +50,7 @@ class Client:
             self.request("GET", "/health", timeout=2)
             return
         except (httpx.ConnectError, httpx.ConnectTimeout):
-            if "VOICE_PLATFORM_URL" in os.environ:
+            if os.environ.get("VOICE_PLATFORM_URL", '').strip():
                 raise ValueError("指定的远程服务不可用，不自动启动本地服务")
         log_dir = Path(self.config["log_dir"])
         with (log_dir / "server.log").open("ab") as log:
@@ -78,7 +78,7 @@ class Client:
             health = self.request('GET', '/health', timeout=2)
         except httpx.ConnectError:
             return dict(stopped=True, already_stopped=True)
-        watch = ProcessExit(health['process_id']) if os.name == 'nt' and 'VOICE_PLATFORM_URL' not in os.environ else None
+        watch = ProcessExit(health['process_id']) if os.name == 'nt' and not os.environ.get('VOICE_PLATFORM_URL', '').strip() else None
         try:
             self.request('POST', '/maintenance/stop', timeout=5)
             deadline = time.monotonic() + timeout

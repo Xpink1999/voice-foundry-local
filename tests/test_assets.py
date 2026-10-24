@@ -70,7 +70,7 @@ def test_terminal_records_delete_restore(client,kind):
     assert client.post('/api/v1/assets/restore-batch/'+out.json()['batch_id']).json()['restored']==1
     assert platform.store.list(kind)[0]['id']==identity
 
-def test_batch_review_atomic_and_export_after_approval(client):
+def test_batch_review_atomic_and_export_after_approval(client,ffmpeg_available):
     job,one=result(client);job,two=result(client,'第二条测试。');ids=[one['id'],two['id']]
     assert client.post('/api/v1/results/review-batch',json={'result_ids':ids,'status':'approved'}).status_code==422
     assert client.post('/api/v1/results/review-batch',json={'result_ids':[one['id'],'missing'],'status':'approved','listened':True}).status_code==404

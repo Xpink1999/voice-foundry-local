@@ -1,4 +1,5 @@
 import copy
+import shutil
 from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
@@ -30,3 +31,9 @@ def cfg(tmp_path):
 def client(cfg):
     with TestClient(create_app(cfg)) as c:
         yield c
+
+
+@pytest.fixture
+def ffmpeg_available(cfg):
+    if not shutil.which(cfg['ffmpeg']):
+        pytest.skip('FFmpeg is optional; recording decode and audio conversion checks require it.')

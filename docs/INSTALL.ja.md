@@ -45,7 +45,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -CoreO
 
 `-CoreOnly` は Git、NVIDIA GPU、FFmpeg が不要です。空の画面は開けますが、音声生成と録音処理はできません。後でオプションなしで再実行すると完全版になります。`-SkipModels -NoStart` は重みだけを省略し、CUDA 依存関係と推論ソースは取得します。
 
-Python・uv の状態とキャッシュは `runtime/`（モデル用キャッシュは `cache_dir`、標準は `runtime/model-cache`）、専用環境は `.venv`、ソースは `vendor/`、モデルは `models/`、データベースと音声は `data/` に保存します。他のインストール先の環境や録音は読み込まず、ユーザー PATH や Codex 設定も変更しません。
+インストール時にコアテストを実行します。録音のデコード、変換、分離のテストには FFmpeg が必要です。見つからない場合は明示的にスキップし、正常な CoreOnly 環境を失敗扱いにしません。サービス、キュー、元のサンプルレートでの WAV 下書き出力は確認します。モデル推論や音声処理の動作確認とは別です。
+
+Python・uv の状態とキャッシュは `runtime/`（モデル・実行時キャッシュは `cache_dir`、標準は `runtime/model-cache`）、専用環境は `.venv`、ソースは `vendor/`、モデルは `models/`、データベースと音声は `data/` に保存します。他のインストール先の環境や録音は読み込まず、ユーザー PATH や Codex 設定も変更しません。
 
 モデルの取得先とリビジョンは `config/model-sources.json` に固定されています。サイズとハッシュを検証し、`provenance.json` を残します。中断したら再実行してください。正常なファイルは再利用します。
 
@@ -93,6 +95,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\register-global.ps1
 新しいターミナルで `voice` を使用できます。Codex を再起動するか MCP に再接続するとツールを検出できます。グローバル CLI だけが必要なら、このスクリプトを使わず、インストール先の `bin` の絶対パスをユーザー PATH に追加してください。WebUI と API は独立して使用できます。
 
 ## 設定とリモートアクセス
+
+`VOICE_PLATFORM_CONFIG` と `VOICE_PLATFORM_URL` が空なら、このインストールの設定とローカルアドレスを使います。空値をファイルパスや外部サービス指定として扱いません。別のサービスを選ぶときだけ完全な URL を指定してください。
 
 パス、モデル、キュー、サービスの設定は `config/platform.json` にあります。モデルとデータの相対パスはインストール先を基準とし、CLI の入力・出力の相対パスは呼び出し元の作業ディレクトリを基準とします。
 

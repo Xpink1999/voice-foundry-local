@@ -78,7 +78,7 @@ def test_windows_progress_lock_is_advisory(tmp_path,monkeypatch):
     assert write_progress(target,100,'done') is False
 
 
-def test_restoration_original_outputs_lineage_and_dedup(client,monkeypatch):
+def test_restoration_original_outputs_lineage_and_dedup(client,monkeypatch,ffmpeg_available):
     monkeypatch.setattr(ReferenceLibrary,'_run_worker',analysis);monkeypatch.setattr(AudioRestoration,'_run_worker',process)
     recording,original=upload(client);until(client,'recordings/'+recording['id'],lambda x:x['status']=='succeeded')
     response=client.post('/api/v1/audio-processing',json=dict(recording_id=recording['id'],operations=['separate']))
@@ -103,7 +103,7 @@ def test_restoration_original_outputs_lineage_and_dedup(client,monkeypatch):
     assert client.get('/api/v1/recordings/'+recording['id']+'/original').content==original
 
 
-def test_smart_reference_one_upload_ready_and_single_reference_voice(client,monkeypatch):
+def test_smart_reference_one_upload_ready_and_single_reference_voice(client,monkeypatch,ffmpeg_available):
     monkeypatch.setattr(ReferenceLibrary,'_run_worker',analysis);monkeypatch.setattr(AudioRestoration,'_run_worker',process)
     item,original=upload(client,True)
     result=until(client,'recordings/'+item['id'],lambda x:x.get('smart_reference',{}).get('status') in {'ready','partial','failed'})
@@ -122,7 +122,7 @@ def test_smart_reference_one_upload_ready_and_single_reference_voice(client,monk
     assert client.get('/api/v1/recordings/'+item['id']+'/original').content==original
 
 
-def test_processing_failure_preserves_original_and_smart_fallback(client,monkeypatch):
+def test_processing_failure_preserves_original_and_smart_fallback(client,monkeypatch,ffmpeg_available):
     monkeypatch.setattr(ReferenceLibrary,'_run_worker',analysis)
     def fail(*args):raise ValueError('controlled model failure')
     monkeypatch.setattr(AudioRestoration,'_run_worker',fail)
@@ -133,7 +133,7 @@ def test_processing_failure_preserves_original_and_smart_fallback(client,monkeyp
     assert client.get('/api/v1/recordings/'+recording['id']+'/original').content==original
 
 
-def test_retry_failed_child_refreshes_recommendation_without_rerunning_models(client,monkeypatch):
+def test_retry_failed_child_refreshes_recommendation_without_rerunning_models(client,monkeypatch,ffmpeg_available):
     failed=[]
     def once(self,request,*args):
         if request.get('recording',{}).get('processing_id') and not failed:
@@ -149,7 +149,7 @@ def test_retry_failed_child_refreshes_recommendation_without_rerunning_models(cl
     assert len(client.get('/api/v1/audio-processing').json())==1 and len(ready['candidates'])==6
 
 
-def test_processing_validates_operations_hash_and_rights(client,monkeypatch):
+def test_processing_validates_operations_hash_and_rights(client,monkeypatch,ffmpeg_available):
     monkeypatch.setattr(ReferenceLibrary,'_run_worker',analysis);monkeypatch.setattr(AudioRestoration,'_run_worker',process)
     recording,_=upload(client);result=until(client,'recordings/'+recording['id'],lambda x:x['status']=='succeeded')
     assert client.post('/api/v1/audio-processing',json={'recording_id':recording['id'],'operations':['denoise','denoise']}).status_code==422
@@ -161,7 +161,7 @@ def test_processing_validates_operations_hash_and_rights(client,monkeypatch):
     failed=until(client,'audio-processing/'+task['id'],lambda x:x['status']=='failed');assert '哈希' in failed['error']
 
 
-def test_processing_gpu_lock_wait_and_cancellation(client,monkeypatch):
+def test_processing_gpu_lock_wait_and_cancellation(client,monkeypatch,ffmpeg_available):
     monkeypatch.setattr(ReferenceLibrary,'_run_worker',analysis);called=[]
     def tracked(self,*args):called.append(True);return process(self,*args)
     monkeypatch.setattr(AudioRestoration,'_run_worker',tracked)

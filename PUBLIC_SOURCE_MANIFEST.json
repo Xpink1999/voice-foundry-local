@@ -108,23 +108,23 @@
     },
     {
       "path": "docs/INSTALL.en.md",
-      "bytes": 7712,
-      "sha256": "7369159744d1ed1c65cb51e3fc594bf3f4d3fcb87b555312357e10c873b7d31c"
+      "bytes": 8320,
+      "sha256": "5b8e4100a5f51ad0de3b3a637fa5ac19b3eaceee7b12093eadf7eefad83e0469"
     },
     {
       "path": "docs/INSTALL.ja.md",
-      "bytes": 9219,
-      "sha256": "97652f0112b703400387d85a3fb27777a13385597a12ce995c3138f11fb514e3"
+      "bytes": 9960,
+      "sha256": "bbb7d767e1a8462a67f2f43d975944e450de2424700dec1b8c8e634be36d3bd1"
     },
     {
       "path": "docs/INSTALL.ko.md",
-      "bytes": 8583,
-      "sha256": "6754a096db400e80fdd5b33ec2817755f8c31080c0097e168443544d11635bc4"
+      "bytes": 9313,
+      "sha256": "8cdc9e7089577999c6ac1e78ba16ac71d8c7296c45f52d192e11b21bc23303d0"
     },
     {
       "path": "docs/INSTALL.md",
-      "bytes": 6973,
-      "sha256": "fde369a9f6a1f0fea5483de7723e7a6039fe0b8205a6e41df4a2ca2d911cf711"
+      "bytes": 7475,
+      "sha256": "9eb2eab5e373bd9abc946e3dd3686efcebbde08845aef369c3fceeced00c269d"
     },
     {
       "path": "docs/INSTALLATION_REVIEW.md",
@@ -1158,8 +1158,8 @@
     },
     {
       "path": "scripts/download_model.py",
-      "bytes": 4157,
-      "sha256": "276640edc59e51d299d7d54669653ab832c776ab31a1f27ae65c0021ae497bd7"
+      "bytes": 4171,
+      "sha256": "93e940a63c17801c429a8101fecbe6cbb7d9f249fd06096cbdee6f2323bf169f"
     },
     {
       "path": "scripts/download_processing_models.py",
@@ -1253,13 +1253,13 @@
     },
     {
       "path": "src/voice_platform/client.py",
-      "bytes": 5664,
-      "sha256": "3b33b93b8d29fcf5715c43a69737cb031ac7d6c9057edec4176143130e824b25"
+      "bytes": 5734,
+      "sha256": "de06739bc53cf13dd88ada2d6ee4e3184dbb0be78f2fd6ca31cc550ceaf09735"
     },
     {
       "path": "src/voice_platform/config.py",
-      "bytes": 1424,
-      "sha256": "487cc5f16c31a9475435da43175964310e5957f3433428b51785aa7d2abfac02"
+      "bytes": 1753,
+      "sha256": "afd5e03e776304d26f9bcd494d568ae642813646ec9a70c7f4d603c46f5f6dc2"
     },
     {
       "path": "src/voice_platform/engines/__init__.py",
@@ -1378,8 +1378,8 @@
     },
     {
       "path": "tests/conftest.py",
-      "bytes": 1501,
-      "sha256": "2cca1f60fa09c7127c1b52cf984951a47c2f943d9bcd901b476a9ca1064854fa"
+      "bytes": 1700,
+      "sha256": "f1b050d6599e53d1826981c61679ca9fdba5649a937a59d60bb749a4c5b1dcd0"
     },
     {
       "path": "tests/fake_engine.py",
@@ -1403,8 +1403,8 @@
     },
     {
       "path": "tests/test_assets.py",
-      "bytes": 8950,
-      "sha256": "8f21901d2cd874ea8b1d4ae53a8d65325c10778ba51f6dcd3aa7b2e240cfedf6"
+      "bytes": 8967,
+      "sha256": "e1bf1abfdf6cbefb242990aacdb09c28ffea1bd137d44cbb3f9d8c1290d01a7a"
     },
     {
       "path": "tests/test_i18n.py",
@@ -1413,8 +1413,8 @@
     },
     {
       "path": "tests/test_installation.py",
-      "bytes": 6006,
-      "sha256": "798fbe21b793acc5f6ec223c43e620362486ccb437d63009fd019ac0bb9f62af"
+      "bytes": 7656,
+      "sha256": "4eb4bffb62c537928cf98cdbf0ea22142ccd0880b29d311fdac2bd9d97e6aade"
     },
     {
       "path": "tests/test_longform.py",
@@ -1428,8 +1428,8 @@
     },
     {
       "path": "tests/test_platform.py",
-      "bytes": 11470,
-      "sha256": "d2c16673456f6ad028197e98d59a04a1b9fab84311af27486b1a326395031198"
+      "bytes": 12702,
+      "sha256": "9064ad7c26c09e42a816ee41baee3ff279cd954c61a47dbddd3dc3351af57975"
     },
     {
       "path": "tests/test_publication.py",
@@ -1438,13 +1438,13 @@
     },
     {
       "path": "tests/test_references.py",
-      "bytes": 8494,
-      "sha256": "26f019ed48daa0f28f9ae8e7e872a467246e2d03aa0e06db9a9dc69d3bdd597d"
+      "bytes": 8545,
+      "sha256": "bcb4d27e0b89c53cb0f6bf4b99fec9c9d8c6f6842a5540d160251428cf260b49"
     },
     {
       "path": "tests/test_restoration.py",
-      "bytes": 12643,
-      "sha256": "a1411ddb575d49523a169e6500cca25c77e9303ca3693eb9e99a9690fefa28d0"
+      "bytes": 12745,
+      "sha256": "aa0784d6cd3eeb28857905c95af4c776aad2319739fd27b0e3e4177bbe4023db"
     },
     {
       "path": "tests/theme.test.cjs",
