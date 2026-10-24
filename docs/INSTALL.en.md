@@ -2,6 +2,8 @@
 
 # Installation and startup
 
+Start with the [WebUI guide](WEBUI.en.md) for the current navigation, generation, review and export workflow.
+
 [Back to README](../README.en.md)
 
 Choose a permanent installation directory. Projects share the service and models installed there.
@@ -76,7 +78,7 @@ bin\voice.cmd health
 bin\voice.cmd unload
 ~~~
 
-These are separate commands for starting, stopping, checking health and unloading models; run only the one you need. Models unload after 5 idle minutes by default. Manual unloading releases this platform's models without terminating other applications' GPU tasks. Closing the browser does not stop background tasks. Installation does not register a Windows service or a startup task.
+These are separate commands for starting, stopping, checking health and unloading models; run only the one you need. Models unload after 30 idle seconds by default. Manual unloading releases this platform's models without terminating other applications' GPU tasks. Closing the browser does not stop background tasks. Installation does not register a Windows service or a startup task.
 
 ## Global commands and MCP
 

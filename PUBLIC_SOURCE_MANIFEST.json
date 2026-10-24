@@ -48,43 +48,83 @@
     },
     {
       "path": "docs/AUDIO_RESTORATION.en.md",
-      "bytes": 7732,
-      "sha256": "c8c6440aa5df0af4c2eae1d9443c6853d642f653d1d80f1230498cb4bad2e220"
+      "bytes": 7960,
+      "sha256": "ff465ebb8108cb93d7dc337d2c4f17036258940ddb8cb7ab60e1c69669017a27"
     },
     {
       "path": "docs/AUDIO_RESTORATION.ja.md",
-      "bytes": 8098,
-      "sha256": "3ed61a996a4f8d2cb34e4e12ce6cc1fdec2e14c1513155f6fbff52d3c5a00317"
+      "bytes": 8358,
+      "sha256": "b7b8e90f923538c0c5a48965b1db2af1e7dfbe3e7003409a9e4e03efccb30ece"
     },
     {
       "path": "docs/AUDIO_RESTORATION.ko.md",
-      "bytes": 7866,
-      "sha256": "1af577453c7cece74dfc36fd57b3a75b2975947070d4657e92c625080efa3a9f"
+      "bytes": 8128,
+      "sha256": "a7306b8b2c8b819436e5ba85331e3fffaf555ee435eccb7d4363079e214712d2"
     },
     {
       "path": "docs/AUDIO_RESTORATION.md",
-      "bytes": 6706,
-      "sha256": "3a153a2abae2b6baa8fd53f13c0e024c1f52cc525d28ae4a06fc338bf5a1d588"
+      "bytes": 6900,
+      "sha256": "cef09cde47c0d0cbd97f8dadab08ece7e6b42c423546c48bcf2cc6b6a12e561c"
+    },
+    {
+      "path": "docs/images/README.md",
+      "bytes": 690,
+      "sha256": "cb52a22558ab50dd2ad38a2fb2a3ee06392a553c197e87b186b4e1600b62315f"
+    },
+    {
+      "path": "docs/images/reference-en.jpg",
+      "bytes": 59569,
+      "sha256": "f50e04486a6c560b18f5af21c190c899c8a25daf9bd279612ea9c60ff21a9099"
+    },
+    {
+      "path": "docs/images/reference-mobile-en.jpg",
+      "bytes": 28575,
+      "sha256": "20ea453a10889a48d19f41d1ebb776ba98d326bd79bc4cec578b08010ce84dd6"
+    },
+    {
+      "path": "docs/images/studio-dark-en.jpg",
+      "bytes": 78487,
+      "sha256": "5d44a5c91e5c2b5f2b8d22347fd96a8036a738d463dbaf99b4111aa8b6cadd78"
+    },
+    {
+      "path": "docs/images/studio-en.jpg",
+      "bytes": 76909,
+      "sha256": "52a71353c96f40e52dff0d3273ce5c44bc0905b99cbc22fdf4267360607776fa"
+    },
+    {
+      "path": "docs/images/studio-ja.jpg",
+      "bytes": 79373,
+      "sha256": "286763cf0b3b2a1beb9aaf5c4071c02490edc82b7f8f7a148237d6ee672eb9f6"
+    },
+    {
+      "path": "docs/images/studio-ko.jpg",
+      "bytes": 78089,
+      "sha256": "a21daf1e9c3da67dc34241173b23853862d62f2b8b24604134637ac673f2f0d9"
+    },
+    {
+      "path": "docs/images/studio-zh-CN.jpg",
+      "bytes": 75011,
+      "sha256": "ed91f3ee6abb1f561071c2aecaf3fe7ebcf4665ae8e10c65053f0289e45b5028"
     },
     {
       "path": "docs/INSTALL.en.md",
-      "bytes": 7600,
-      "sha256": "ddb9be215cdc130845f429563f087c25a097f3da516aedc14bf797d9aea4c40b"
+      "bytes": 7712,
+      "sha256": "7369159744d1ed1c65cb51e3fc594bf3f4d3fcb87b555312357e10c873b7d31c"
     },
     {
       "path": "docs/INSTALL.ja.md",
-      "bytes": 9069,
-      "sha256": "ae466268dd1cc114120f19006801466539110f6c1be6c068c8b7bd46920d61ce"
+      "bytes": 9219,
+      "sha256": "97652f0112b703400387d85a3fb27777a13385597a12ce995c3138f11fb514e3"
     },
     {
       "path": "docs/INSTALL.ko.md",
-      "bytes": 8447,
-      "sha256": "130d798945ddab49ad15721ff42c9d84e65cabe02150e07cb873ae72e4d03409"
+      "bytes": 8583,
+      "sha256": "6754a096db400e80fdd5b33ec2817755f8c31080c0097e168443544d11635bc4"
     },
     {
       "path": "docs/INSTALL.md",
-      "bytes": 6871,
-      "sha256": "8ef5e6133f2ce0757f66852097aca83288021b231651fe4595922a8c0de50212"
+      "bytes": 6973,
+      "sha256": "fde369a9f6a1f0fea5483de7723e7a6039fe0b8205a6e41df4a2ca2d911cf711"
     },
     {
       "path": "docs/INSTALLATION_REVIEW.md",
@@ -98,43 +138,43 @@
     },
     {
       "path": "docs/LONGFORM.en.md",
-      "bytes": 9453,
-      "sha256": "9cb331daf9c7047a6d26af94bddbf9faeb6bff0fcb37568b7196d6f0bdc682c4"
+      "bytes": 9721,
+      "sha256": "e307c2e9b6557f1480f69ec3c133d2b6e95c751e844168a1a3bb8f64d9ce276a"
     },
     {
       "path": "docs/LONGFORM.ja.md",
-      "bytes": 10772,
-      "sha256": "15a8194ddc3e0c13054d53f4bd3a2e6cc6db1c617a39df3c126f23aa0f516d33"
+      "bytes": 11112,
+      "sha256": "79dfede806ddf968563a2a5f2450f4bab82b1ebd02c9cf8a033b9b2efdaf8f23"
     },
     {
       "path": "docs/LONGFORM.ko.md",
-      "bytes": 10732,
-      "sha256": "a88898ba9ed42ab9fa268a493b931c71da2fe6df578875622f7bdd2fee785619"
+      "bytes": 11063,
+      "sha256": "5254deb9cf766f9a3fea39531d8c698dfda90cb8e07fa035b5ab1df26514b703"
     },
     {
       "path": "docs/LONGFORM.md",
-      "bytes": 9727,
-      "sha256": "9bf8c3e2526ff1e66cbd15fad6ca8e3b4475585afaf832829c2b1a77d4857a9c"
+      "bytes": 9971,
+      "sha256": "e6d4a5d950ab2a751044bb1237101dee7e1381d899d2902b68005afa3288003e"
     },
     {
       "path": "docs/MAINTENANCE.en.md",
-      "bytes": 6980,
-      "sha256": "937fe1bfa54ae18e81f344c0e4e03aa7dd11457b7ab9adc26a46d0863236921c"
+      "bytes": 7237,
+      "sha256": "cf3c03c9e50d32c4805b08d6ec0bd6cc091dba62d1f42fd06ffae9b2535091b6"
     },
     {
       "path": "docs/MAINTENANCE.ja.md",
-      "bytes": 8014,
-      "sha256": "04fdcd630b5204a9f8a894b721cae54d31b5f81f9bdea0c0c0e84b30ae32077a"
+      "bytes": 8357,
+      "sha256": "36d8fa1912ca5993b3e9e5f7dc22dea4b185bfebafa9762763721ebd3f14a011"
     },
     {
       "path": "docs/MAINTENANCE.ko.md",
-      "bytes": 7895,
-      "sha256": "3444c70bc23be8788366afa227e33110f6eecebd8796c7f78f65c8a1a3d74465"
+      "bytes": 8227,
+      "sha256": "507d8975f18fb7b3f946f3f0311fafa3812a43dbce529f58f66599832b3cc447"
     },
     {
       "path": "docs/MAINTENANCE.md",
-      "bytes": 6045,
-      "sha256": "0e76ac3e21140fc354da7998ae5ef760511a18b6e00c273acf0f4aefdcbea365"
+      "bytes": 6301,
+      "sha256": "92cb664d8c076d43ccafb6129a5db115d2f11b653a7aaf34d521700438eb26e4"
     },
     {
       "path": "docs/MODULES.md",
@@ -148,23 +188,23 @@
     },
     {
       "path": "docs/REFERENCE_PREPROCESSING.en.md",
-      "bytes": 8132,
-      "sha256": "f623cd689394ebdef68f4bf5a04fb4e65c36674cb2acb8b6cc65dab009535967"
+      "bytes": 8428,
+      "sha256": "05c0a47cb14fd39851e3536b2f6ecc84decd186053f9d3fc690c168817aaccff"
     },
     {
       "path": "docs/REFERENCE_PREPROCESSING.ja.md",
-      "bytes": 8956,
-      "sha256": "e083ad1248c7a3242e63dfecf63076b706a3b2a0c5bffcfd1bf2e9d208dc4f1f"
+      "bytes": 9325,
+      "sha256": "45dad153f1e066627f949751b2cae3a34ea0f0ae985eb4b3ec12e1e28cde55a0"
     },
     {
       "path": "docs/REFERENCE_PREPROCESSING.ko.md",
-      "bytes": 8739,
-      "sha256": "a3996b97cff2c702fd78b2f1f972b4eece9cc7251faa11298c4dfeee0a4bcefc"
+      "bytes": 9153,
+      "sha256": "2e849865410c43ba27bdc900f7da7baac82727fe145dd1584107a9ccb18afb4a"
     },
     {
       "path": "docs/REFERENCE_PREPROCESSING.md",
-      "bytes": 7750,
-      "sha256": "19e7b50a655df07a1a5ffe6bc74e3b6173884cd36f942046ce3e70490de80095"
+      "bytes": 8020,
+      "sha256": "c139cde089eda3a0b3f2d2bba212a3775a6d9b956dafa9335df6f4070c08e327"
     },
     {
       "path": "docs/TESTING.md",
@@ -175,6 +215,26 @@
       "path": "docs/UX_REVIEW.md",
       "bytes": 7118,
       "sha256": "7fa2990504392a3e928ecf5613c2f4369849a0da49bbe83e3ac8e24d641bf076"
+    },
+    {
+      "path": "docs/WEBUI.en.md",
+      "bytes": 4376,
+      "sha256": "7e6a97783da2698561b6d15295666180238cb6e68a05e160d35bddf1fbafdcfb"
+    },
+    {
+      "path": "docs/WEBUI.ja.md",
+      "bytes": 5504,
+      "sha256": "50217ddd22164e3dca01031e6a187722778c2e375c45fde3296e703cfb20cfb5"
+    },
+    {
+      "path": "docs/WEBUI.ko.md",
+      "bytes": 5440,
+      "sha256": "cc0c44b128cde8a34f35ffcf541cad9622e1361b71c180fac859cd71251aa3e9"
+    },
+    {
+      "path": "docs/WEBUI.md",
+      "bytes": 4126,
+      "sha256": "59524bdd6a08cca8ad382e212adbd8e78e8b704cffad35a52257b6fa861c555e"
     },
     {
       "path": "install-voice.cmd",
@@ -1048,23 +1108,23 @@
     },
     {
       "path": "README.en.md",
-      "bytes": 5677,
-      "sha256": "054670459c45075da30dfc9d229d2f331a88ecad47026786ba19aab1953ce5cf"
+      "bytes": 6245,
+      "sha256": "b0e55ec31aead04725522963b9d8397270a13b8a9d4070837e08bb7839af3e54"
     },
     {
       "path": "README.ja.md",
-      "bytes": 6863,
-      "sha256": "b2d85ba32fdf8a5115baa59cd2d39a87396b6ab406892d385736675cf46339ff"
+      "bytes": 7537,
+      "sha256": "cd133512142487a80c459f904761b98aacbeb2f08fcda657b1f9335a1a5d7dfa"
     },
     {
       "path": "README.ko.md",
-      "bytes": 6680,
-      "sha256": "e97572afeef84d53ec64314fa704416467269a752087455e993565f09b7aef67"
+      "bytes": 7359,
+      "sha256": "7d51bfab80c74902ea30e7dd330853123f0bebb952a3c65f339c16bd016bc91d"
     },
     {
       "path": "README.md",
-      "bytes": 4869,
-      "sha256": "48c08dce790f2b49ce844733ab2b6c9aa7512b9c12de8f5ee8f476a610c6d8a1"
+      "bytes": 5396,
+      "sha256": "39907cbe2dfed07c3067797d317c5205a5fa99cb5ff90c2cd9fb0a6901537c7d"
     },
     {
       "path": "requirements-cuda.txt",
@@ -1123,8 +1183,8 @@
     },
     {
       "path": "scripts/package_public.py",
-      "bytes": 3776,
-      "sha256": "e8f2e2df6516981c09abe2a5975adfc989b316f2d13afb6e2dd22eb70782f210"
+      "bytes": 4520,
+      "sha256": "9fb9e954fc4422606490e482a21b5f64226fab2060a59e1faed02bc016048831"
     },
     {
       "path": "scripts/register-global.ps1",
@@ -1373,8 +1433,8 @@
     },
     {
       "path": "tests/test_publication.py",
-      "bytes": 2066,
-      "sha256": "8aac2938ec384c8e9a162942754310b6b8d87d13464a25d9b3fc180a2e53fe48"
+      "bytes": 3326,
+      "sha256": "46abbfcaa61d7f03900d1a3fed404db395e4239a10deb3c93b29202b7ea4c86a"
     },
     {
       "path": "tests/test_references.py",

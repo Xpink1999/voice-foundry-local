@@ -2,6 +2,8 @@
 
 # Reference audio preparation
 
+Open Create → Voice design & library → Quick reference setup. Library management, text-based voice design and audio processing have separate tabs. Manage voices on Generate opens the library; Start narration brings a voice back. See the [WebUI guide](WEBUI.en.md) for screenshots and steps.
+
 Recording analysis and generation run locally. Uploaded audio is not sent to a third-party service.
 
 ## Workflow

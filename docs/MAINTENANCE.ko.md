@@ -2,6 +2,8 @@
 
 # 유지 관리·복구·업데이트
 
+‘관리 → 모델 및 설정’을 엽니다. 지원 언어와 모델 버전, 저장 경로와 실행 환경은 필요할 때 펼쳐 보세요. 실행 설정을 바꾼 뒤에는 저장해야 합니다. 표시 언어와 테마는 오른쪽 위에서 따로 고릅니다. [WebUI 사용법](WEBUI.ko.md)에 화면이 있습니다.
+
 ## 일상적인 실행
 
 설치 폴더에서 `start-voice.cmd`, `stop-voice.cmd`, `check-health.cmd`를 사용합니다. 선택 사항인 전역 CLI 등록 후에는 `voice start`, `voice stop`, `voice health`도 사용할 수 있습니다. 시작 파일은 WebUI도 엽니다. Windows 서비스나 시작 프로그램은 등록하지 않습니다.

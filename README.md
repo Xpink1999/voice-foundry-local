@@ -6,6 +6,14 @@
 
 目前接入 VoxCPM2。界面支持中英日韩四种语言和深浅配色，可跟随浏览器设置。界面语言与配音语言分别选择，正文、资产名称和转写保留原文。平台可独立运行，适用于游戏、影视、有声读物及交互应用。
 
+## 界面与操作
+
+![新版语音生成工作台](docs/images/studio-zh-CN.jpg)
+
+空白安装界面，未使用用户文件。查看[操作说明](docs/WEBUI.md)、[深色界面](docs/images/studio-dark-en.jpg)和[窄屏布局](docs/images/reference-mobile-en.jpg)。
+
+左侧按「创作、制作、资源」分组。生成时先填文本、选声音，再提交；候选数、参考克隆等选项按需展开。审核后可在同一页直接导出。右上角切换语言和配色，Ctrl / ⌘ + K 快速跳转工作区。
+
 ## 安装
 
 完整配音需要 Windows 11、Git、[uv](https://docs.astral.sh/uv/getting-started/installation/) 和可用的 NVIDIA 驱动，主要在 RTX 4090 上验证。录音上传和处理还需要 [FFmpeg](https://ffmpeg.org/download.html)。无需预装 Python 或 Codex。

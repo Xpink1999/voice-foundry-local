@@ -2,6 +2,8 @@
 
 # Audio processing and quick references
 
+Quick reference setup keeps the short upload-to-recommendation workflow. Use the Audio processing tab when you want to choose individual processing operations. The [WebUI guide](WEBUI.en.md) explains the tabs with screenshots.
+
 ## Quick workflow
 
 In voice design and the voice library, choose quick reference creation: upload an authorized recording, let the service separate voices, remove music/noise and recommend clips, then listen, name the character and save. Model settings are not required for this workflow. Recommended clips are 5–30 seconds; clips under 5 seconds receive a warning rather than being padded to meet the recommendation.

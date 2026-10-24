@@ -2,6 +2,8 @@
 
 # Maintenance, recovery and updates
 
+Open Resources → Models & settings. Expand language/model details or installation/runtime details when needed, and save changes to runtime settings. Interface language and theme are separate controls at the top right. See the [WebUI guide](WEBUI.en.md).
+
 ## Daily operation
 
 From the installation directory, use `start-voice.cmd`, `stop-voice.cmd` and `check-health.cmd`. With the optional global CLI registered, the equivalent commands are `voice start`, `voice stop` and `voice health`. The start launcher also opens the WebUI. No Windows service or startup task is registered.

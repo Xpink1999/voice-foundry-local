@@ -2,6 +2,8 @@
 
 # Long-form narration
 
+Open Create → Long-form narration. Existing works appear first; expand Import a new work to add text. Voice instructions and cloning mode are optional expanded controls. Review and export chapters inside the work. See the [WebUI guide](WEBUI.en.md) for navigation.
+
 ## Import and split
 
 Open long-form narration, import a TXT or Markdown file, and choose a voice and project. Check the chapter list and segments before generating the whole book or a selected chapter. Closing the browser does not stop work; use pause to stop generation. After restarting the platform, reopen the work and resume. Completed segments are kept.

@@ -6,6 +6,14 @@ Design voices, clone voices from recordings and produce narration for dialogue, 
 
 The current engine is VoxCPM2. The interface supports Chinese, English, Japanese and Korean, with light and dark themes that can follow browser preferences. Interface and speech languages are selected separately. Text, asset names and transcripts retain their original language. The service runs independently for games, video, audiobooks and interactive applications.
 
+## Interface and workflow
+
+![Updated generation workspace](docs/images/studio-en.jpg)
+
+An empty installation, with no user files. See the [WebUI guide](docs/WEBUI.en.md), [dark theme](docs/images/studio-dark-en.jpg) and [narrow layout](docs/images/reference-mobile-en.jpg).
+
+Navigation is grouped into Create, Production and Resources. Enter text, choose a voice and submit; expand candidate and reference controls when needed. Approved audio can be exported from the review page. Language and theme controls are at the top right. Ctrl / ⌘ + K switches workspaces.
+
 ## Installation
 
 Full speech generation needs Windows 11, Git, [uv](https://docs.astral.sh/uv/getting-started/installation/) and a working NVIDIA driver, primarily tested on an RTX 4090. Recording uploads and processing also need [FFmpeg](https://ffmpeg.org/download.html). Python and Codex do not need to be preinstalled.

@@ -15,12 +15,21 @@ ROOT_FILES = ('README.md', 'README.en.md', 'README.ja.md', 'README.ko.md',
               'pyproject.toml', 'requirements-cuda.txt', 'requirements-inference.txt', 'requirements.lock.txt',
               '.gitignore', 'install-voice.cmd', 'start-voice.cmd', 'stop-voice.cmd', 'check-health.cmd')
 EXTENSIONS = {'.py', '.js', '.cjs', '.css', '.html', '.json', '.toml', '.md', '.txt', '.ps1', '.cmd'}
+DOCUMENTATION_IMAGES = tuple('docs/images/'+name for name in (
+    'studio-zh-CN.jpg', 'studio-en.jpg', 'studio-ja.jpg', 'studio-ko.jpg',
+    'studio-dark-en.jpg', 'reference-en.jpg', 'reference-mobile-en.jpg'))
 SECRETS = re.compile(r'(?:gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|sk-[A-Za-z0-9_-]{32,}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|https?://[^\s/@]+:[^\s/@]+@)')
 
 
 def selected_files(root):
     root = root.resolve()
     files = [root/name for name in ROOT_FILES]
+    for name in DOCUMENTATION_IMAGES:
+        path = root/name
+        if path.is_file():
+            if path.is_symlink() or not path.resolve().is_relative_to(root):
+                raise ValueError('Symlink or escaped documentation image: '+name)
+            files.append(path)
     for folder in FOLDERS:
         for path in (root/folder).rglob('*'):
             if not path.is_file():
@@ -49,12 +58,16 @@ def build(root, dest):
     prepared = []
     for path in selected_files(root):
         raw = path.read_bytes()
-        text = raw.decode('utf-8-sig')
         rel = path.relative_to(root).as_posix()
-        if SECRETS.search(text):
-            raise ValueError('Possible secret; review before publication: '+rel)
-        if re.search(r'(?:[A-Za-z]:[\\/]+Users[\\/]+[^\\/\s]+|192\.168\.\d+\.\d+)', text, re.I):
-            raise ValueError('Machine-specific information: '+rel)
+        if rel in DOCUMENTATION_IMAGES:
+            if not raw.startswith(b'\xff\xd8\xff') or not raw.endswith(b'\xff\xd9') or len(raw)>2*1024*1024:
+                raise ValueError('Invalid documentation JPEG: '+rel)
+        else:
+            text = raw.decode('utf-8-sig')
+            if SECRETS.search(text):
+                raise ValueError('Possible secret; review before publication: '+rel)
+            if re.search(r'(?:[A-Za-z]:[\\/]+Users[\\/]+[^\\/\s]+|192\.168\.\d+\.\d+)', text, re.I):
+                raise ValueError('Machine-specific information: '+rel)
         prepared.append((rel, raw))
     dest.mkdir(parents=True)
     manifest = []

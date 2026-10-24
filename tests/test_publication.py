@@ -46,3 +46,32 @@ def test_secret_or_machine_path_blocks_copy_before_destination_is_created(tmp_pa
         with pytest.raises(ValueError):
             publication.build(root, dest)
         assert not dest.exists()
+
+
+def test_only_named_documentation_images_are_packaged_byte_for_byte(tmp_path):
+    root = source(tmp_path)
+    image = (ROOT/publication.DOCUMENTATION_IMAGES[0]).read_bytes()
+    for name in publication.DOCUMENTATION_IMAGES:
+        path = root/name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(image)
+    for name in ('docs/images/private.jpg', 'docs/evidence/studio-en.jpg', 'data/photo.jpg'):
+        path = root/name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(image)
+    dest = tmp_path/'public'
+    records = publication.build(root, dest)
+    images = {row['path'] for row in records if row['path'].endswith('.jpg')}
+    assert images == set(publication.DOCUMENTATION_IMAGES)
+    assert all((dest/name).read_bytes() == image for name in images)
+
+
+def test_invalid_named_documentation_image_blocks_the_package(tmp_path):
+    root = source(tmp_path)
+    path = root/publication.DOCUMENTATION_IMAGES[0]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text('This is not an image', encoding='utf-8')
+    dest = tmp_path/'public'
+    with pytest.raises(ValueError, match='Invalid documentation JPEG'):
+        publication.build(root, dest)
+    assert not dest.exists()

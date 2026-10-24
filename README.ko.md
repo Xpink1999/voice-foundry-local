@@ -6,6 +6,14 @@ Windows에서 목소리를 디자인하고 녹음으로 음성을 복제해 대�
 
 현재 엔진은 VoxCPM2입니다. 화면은 중국어, 영어, 일본어, 한국어와 밝은 테마·어두운 테마를 지원하며 브라우저 설정을 따를 수 있습니다. 화면 언어와 음성 언어는 따로 선택합니다. 본문, 에셋 이름, 전사문은 원문을 유지합니다. 게임, 영상, 오디오북, 대화형 앱에서 독립적으로 사용할 수 있습니다.
 
+## 화면과 작업 흐름
+
+![새 음성 생성 작업 공간](docs/images/studio-ko.jpg)
+
+사용자 파일을 사용하지 않은 빈 환경입니다. [사용 가이드](docs/WEBUI.ko.md), [어두운 테마](docs/images/studio-dark-en.jpg), [좁은 화면](docs/images/reference-mobile-en.jpg)을 확인하세요.
+
+왼쪽 기능은 제작·작업·관리로 나뉩니다. 텍스트 입력, 목소리 선택, 생성 순서로 진행하고 후보 수나 참조 설정은 필요할 때 펼칩니다. 승인한 오디오는 검토 화면에서 바로 내보낼 수 있습니다. 오른쪽 위에서 언어와 테마를 고르고 Ctrl / ⌘ + K로 작업 공간을 이동합니다.
+
 ## 설치
 
 전체 음성 생성에는 Windows 11, Git, [uv](https://docs.astral.sh/uv/getting-started/installation/), 작동하는 NVIDIA 드라이버가 필요하며 주로 RTX 4090에서 검증했습니다. 녹음 업로드와 처리에는 [FFmpeg](https://ffmpeg.org/download.html)도 필요합니다. Python이나 Codex를 미리 설치할 필요는 없습니다.
