@@ -16,7 +16,7 @@ def source(tmp_path):
         (root/name).write_text('source\n', encoding='utf-8')
     for name in ('src/service.py', 'data/recording.wav', 'models/weights.pt',
                  'vendor/repo/source.py', 'runtime/private.json', 'docs/evidence/recording.wav',
-                 'docs/evidence/private.json', 'docs/ACCEPTANCE.md', 'dist/backup.zip',
+                 'docs/evidence/private.json', 'docs/ACCEPTANCE.md', 'docs/DESIGN_REVIEW.md', 'dist/backup.zip',
                  'src/__pycache__/module.pyc', 'LICENSES/upstream/LICENSE'):
         path = root/name
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -31,7 +31,7 @@ def test_public_copy_contains_source_and_licenses_but_no_user_material(tmp_path)
     paths = {x['path'] for x in records}
     assert 'src/service.py' in paths and 'LICENSES/upstream/LICENSE' in paths
     assert all(not p.startswith(('data/', 'models/', 'vendor/', 'runtime/', 'dist/', 'docs/evidence/')) for p in paths)
-    assert 'docs/ACCEPTANCE.md' not in paths
+    assert 'docs/ACCEPTANCE.md' not in paths and 'docs/DESIGN_REVIEW.md' not in paths
     assert json.loads((dest/'PUBLIC_SOURCE_MANIFEST.json').read_text(encoding='utf-8'))['files'] == records
     with pytest.raises(ValueError):
         publication.build(root, dest)

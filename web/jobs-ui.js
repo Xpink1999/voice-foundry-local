@@ -1,4 +1,7 @@
 (() => {
+  const scope=document.createElement('p');scope.className='hint';
+  scope.append(document.createTextNode(tr('这里查看普通配音任务；长文进度保存在作品内。')+' '));
+  const longform=document.createElement('button');longform.type='button';longform.className='text-link';longform.textContent=tr('打开长文作品');longform.onclick=()=>{navigate('longform');window.longformUI?.library();};scope.append(longform);$('page-tasks').querySelector('.page-heading').after(scope);
   const queue={archived:false,page:0,size:50,items:[],selected:new Set(),sequence:0,signature:''};
   const toolbar=document.createElement('div');toolbar.className='queue-archive-toolbar';
   toolbar.innerHTML=("<div class=\"toolbar\"><label>"+tr("任务视图")+"<select id=\"task-archive-view\"><option value=\"current\">"+tr("当前队列")+"</option><option value=\"archived\">"+tr("已归档")+"</option></select></label><button id=\"task-select-page\" class=\"secondary\">"+tr("全选本页已结束任务")+"</button><button id=\"task-archive-selected\" class=\"secondary\" disabled>"+tr("归档所选")+"</button><span id=\"task-selection-count\" class=\"hint\">"+tr("已选择 0 项")+"</span></div><p id=\"task-archive-policy\" class=\"hint\"></p>");

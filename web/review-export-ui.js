@@ -1,6 +1,10 @@
 /* Keep selection, listening, review and export visible in the same workspace. */
 (() => {
   'use strict';
+  for(const [page,copy] of [['review','这里审核普通配音候选；长文章节请在作品内审核。'],['exports','这里打包普通配音候选；长文导出请在作品内创建。']]){
+    const scope=document.createElement('p');scope.className='hint';scope.append(document.createTextNode(tr(copy)+' '));
+    const open=document.createElement('button');open.type='button';open.className='text-link';open.textContent=tr('打开长文作品');open.onclick=()=>{navigate('longform');window.longformUI?.library();};scope.append(open);$('page-'+page).querySelector('.page-heading').after(scope);
+  }
   let batchIds = null, exporting = false, approving = false, exportSignature = null;
   const dialog = $('review-dialog'), approval = $('review-confirm'), direct = document.createElement('button');
   direct.type = 'button'; direct.className = 'primary'; direct.id = 'review-approve-export'; direct.textContent = tr('批准并准备导出'); approval.after(direct);
@@ -66,8 +70,8 @@
     dialog.querySelector('p').textContent = tr('只有实际试听了所选 {0} 条音频后，才能批准。请确认所有选中结果都符合要求。', [batchIds.length]); approvalButtons(); dialog.showModal();
   };
   $('review-selected-only').onchange = () => renderResults();
-  $('review-clear-selected').onclick = () => {state.selected.clear(); $('review-selected-only').checked = false; renderResults();};
-  $('review-delete-selected').onclick = () => window.assetUI.preview(current().map(id => ({kind: 'results', id})));
+  $('review-clear-selected').onclick = () => {stopComparison(); state.selected.clear(); $('review-selected-only').checked = false; renderResults();};
+  $('review-delete-selected').onclick = () => {stopComparison(); window.assetUI.preview(current().map(id => ({kind: 'results', id})));};
   $('review-export-advanced').onclick = () => {$('export-format').value = $('review-export-format').value.toUpperCase(); navigate('exports');};
   $('review-export-now').onclick = async () => {
     const ids = current(); if (!ids.length || exporting) return;
@@ -82,33 +86,42 @@
     finally {exporting = false; counts();}
   };
   // Stop and replace comparison listeners rather than accumulating ended handlers.
-  let playToken = 0, listening = null, ended = null, running = false;
+  let playToken = 0, listening = null, ended = null, failed = null, running = false;
   const stop = document.createElement('button'); stop.id = 'compare-stop'; stop.className = 'text-link'; stop.textContent = tr('停止对比'); stop.hidden = true; $('compare-selected').after(stop);
+  $('compare-selected').textContent=tr('连续对比全部所选');
+  const comparisonStatus=document.createElement('span');comparisonStatus.className='hint';comparisonStatus.setAttribute('role','status');stop.after(comparisonStatus);
+  function releaseComparisonAudio(){
+    if(!listening)return;
+    if(ended)listening.removeEventListener('ended',ended);
+    if(failed)listening.removeEventListener('error',failed);
+    listening.pause();listening.removeAttribute('src');listening.load();listening=null;ended=null;failed=null;
+  }
   function stopComparison() {
     playToken++; running = false; stop.hidden = true;
-    if (listening && ended) listening.removeEventListener('ended', ended);
-    if (listening) listening.pause(); listening = null; ended = null;
+    releaseComparisonAudio();comparisonStatus.textContent='';
   }
   stop.onclick = stopComparison;
   $('compare-selected').onclick = async () => {
     stopComparison();
-    const items = pageSlice(filteredResults()).filter(item => state.selected.has(item.id));
+    const items = state.results.filter(item => state.selected.has(item.id));
     if (!items.length) return toast(tr('请先选择要比较的候选'), true);
+    document.querySelectorAll('#result-list audio').forEach(audio=>audio.pause());
     running = true; stop.hidden = false; const token = playToken; let index = 0;
     const next = async () => {
       if (token !== playToken) return;
-      if (listening && ended) listening.removeEventListener('ended', ended);
-      if (index >= items.length) {stopComparison(); return;}
-      listening = document.querySelector(`[data-audio="${items[index++].id}"]`);
-      if (!listening) return stopComparison();
-      ended = next; listening.addEventListener('ended', ended, {once: true}); listening.currentTime = 0;
-      try {await listening.play();} catch (error) {stopComparison(); toast(error.message, true);}
+      releaseComparisonAudio();
+      if (index >= items.length) {stopComparison();comparisonStatus.textContent=tr('已完成所选 {0} 条音频对比',[items.length]);return;}
+      const item=items[index++];listening=new Audio(`/api/v1/results/${encodeURIComponent(item.id)}/audio`);listening.preload='metadata';
+      comparisonStatus.textContent=tr('正在对比 {0}/{1}：{2}',[index,items.length,item.title]);
+      ended = next; listening.addEventListener('ended', ended, {once: true});
+      failed=()=>{if(token!==playToken)return;stopComparison();toast(tr('对比音频读取失败，请重试或检查该结果。'),true);};listening.addEventListener('error',failed,{once:true});
+      try {await listening.play();} catch (error) {if(token===playToken){stopComparison();toast(error.message, true);}}
     };
     await next();
   };
   document.addEventListener('play', event => {if (running && event.target !== listening) stopComparison();}, true);
   window.addEventListener('voice-page-change', event => {if (event.detail.page !== 'review') stopComparison();});
-  const priorRender = renderResults; renderResults = function () {if (running) stopComparison(); priorRender();};
+  window.addEventListener('pagehide',stopComparison);
   window.reviewPlayback = {stop: stopComparison};
   counts(); approvalButtons();
 })();

@@ -141,6 +141,19 @@ class LongformImportRetry(StrictModel):
 class LongformAction(StrictModel):
     chapter_no: int | None = Field(default=None,ge=1)
 
+class RegenerationInput(StrictModel):
+    reference_id: str | None = None
+    style: str | None = Field(default=None, max_length=1000)
+    clone_mode: Literal['reference','hifi'] | None = None
+    seed: int | None = Field(default=None, ge=0, le=2147483646)
+
+class LongformRegenerationInput(RegenerationInput):
+    use_book_defaults: bool = False
+    start: bool = False
+
+class UseAttemptInput(StrictModel):
+    attempt: int = Field(ge=1)
+
 class LongformExportInput(StrictModel):
     chapter_no: int | None = Field(default=None,ge=1)
     mode: Literal['chapters','book'] = 'chapters'

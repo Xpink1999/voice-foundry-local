@@ -84,8 +84,8 @@ class LongformExport:
         summary=dict(id=identity,book_id=book['id'],title=book['title'],draft=request['draft'],request=request,source_sha256=book['source_sha256'],normalized_sha256=book['normalized_sha256'],config_sha256=book['config_sha256'],snapshot=book['snapshot'],timestamp_kind='segment_boundaries_not_forced_alignment',created_at=now(),assembly_pause_ms=pause)
         (folder/'manifest.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding='utf-8')
         files.append(folder/'manifest.json')
-        metadata=folder/'segments.jsonl';chapter_metadata=folder/'chapters.jsonl';subtitles=folder/'book.srt'
-        with metadata.open('w',encoding='utf-8') as ledger,chapter_metadata.open('w',encoding='utf-8') as chapter_ledger,subtitles.open('w',encoding='utf-8') as srt:
+        metadata=folder/'segments.jsonl';chapter_metadata=folder/'chapters.jsonl';subtitles=folder/'book.srt';profiles=folder/'generation-profiles.jsonl';seen_profiles=set()
+        with metadata.open('w',encoding='utf-8') as ledger,chapter_metadata.open('w',encoding='utf-8') as chapter_ledger,subtitles.open('w',encoding='utf-8') as srt,profiles.open('w',encoding='utf-8') as profile_ledger:
             for chapter in self.chapter_rows(book['id'],request['chapter_no']):
                 self.check(identity)
                 # Freeze of generation is enforced while this export is queued/running.
@@ -99,6 +99,10 @@ class LongformExport:
                 with chapter_srt.open('w',encoding='utf-8') as local_srt,sf.SoundFile(wave,'w',samplerate=rate,channels=1,format=wav_container(frames),subtype='PCM_24') as out:
                     for segment in self.segment_rows(book['id'],chapter['no']):
                         self.check(identity);take=segment['take']
+                        profile_id=take.get('generation_profile_id')
+                        if profile_id and profile_id not in seen_profiles:
+                            snapshot=self.owner.generation_snapshot(book,dict(profile_id=profile_id))
+                            profile_ledger.write(json.dumps(dict(id=profile_id,snapshot=snapshot),ensure_ascii=False)+'\n');seen_profiles.add(profile_id)
                         if segment['status']!='succeeded' or not take or take['sample_rate']!=rate:raise ValueError('分段状态或采样率不一致')
                         path=self.owner.audio(book['id'],segment['no'])
                         if index:out.write(np.zeros(gap,dtype=np.float32));written+=gap
@@ -128,7 +132,7 @@ class LongformExport:
             target=wave if format=='wav' else wave.with_suffix('.'+format)
             if format!='wav':self.convert(wave,target,format,identity)
             files.append(target)
-        self.check(identity);files.extend([metadata,chapter_metadata,subtitles])
+        self.check(identity);files.extend([metadata,chapter_metadata,subtitles,profiles])
         package=folder/(prefix+'book-export.zip')
         with zipfile.ZipFile(package,'w',allowZip64=True) as archive:
             for file in files:

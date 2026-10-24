@@ -15,6 +15,7 @@ from .config import load_config, ROOT, installation_id
 from .schemas import ProjectInput, VoiceInput, GenerationInput, BatchInput, ReviewInput, ExportInput, SettingsInput,SaveClipsInput,TranscriptInput,CompareReferencesInput,ArchiveJobsInput,ProcessingInput,ResultRecordingInput,OutputRecordingInput,ReferenceVoiceInput
 from .schemas import LongformImportRetry,LongformAction,LongformExportInput,AssetBatch,ReviewBatch
 from .schemas import ReferenceMetadataInput
+from .schemas import RegenerationInput,LongformRegenerationInput,UseAttemptInput
 from .assets import KINDS
 from .service import Platform, TERMINAL
 from .audio import sha256, waveform_peaks
@@ -161,7 +162,19 @@ def create_app(config=None):
     def retry_book_segment(identity:str,number:int):return platform.longform.retry(identity,number=number)
 
     @app.post('/api/v1/longform/books/{identity}/segments/{number}/regenerate')
-    def regenerate_book_segment(identity:str,number:int):return platform.longform.regenerate(identity,number)
+    def regenerate_book_segment(identity:str,number:int,request:LongformRegenerationInput|None=None):return platform.longform.regenerate(identity,number,request)
+
+    @app.get('/api/v1/longform/books/{identity}/segments/{number}/generation')
+    def segment_generation(identity:str,number:int):return platform.longform.generation(identity,number)
+
+    @app.get('/api/v1/longform/books/{identity}/segments/{number}/attempts/{attempt}/audio')
+    def segment_attempt_audio(identity:str,number:int,attempt:int):return FileResponse(platform.longform.attempt_audio(identity,number,attempt),media_type='audio/wav')
+
+    @app.post('/api/v1/longform/books/{identity}/segments/{number}/use-attempt')
+    def segment_use_attempt(identity:str,number:int,request:UseAttemptInput):return platform.longform.use_attempt(identity,number,request.attempt)
+
+    @app.post('/api/v1/results/{identity}/regenerate',status_code=202)
+    def regenerate_result(identity:str,request:RegenerationInput):return platform.regenerate_result(identity,request)
 
     @app.post('/api/v1/longform/books/{identity}/chapters/{chapter}/review')
     def review_book_chapter(identity:str,chapter:int,request:ReviewInput):return platform.longform.review(identity,chapter,request)

@@ -230,6 +230,14 @@ form[aria-busy=true] button[type=submit]:after{content:"";width:13px;height:13px
 #voice-pane-design .workspace-intro,#voice-pane-processing .workspace-intro{display:none}
 #page-voices:has(#voice-pane-library:not([hidden])) .page-heading #new-voice{display:none}
 .voice-editor{margin:22px 0;border-color:var(--soft-border);box-shadow:none}
+#regeneration-dialog{width:min(760px,calc(100vw - 32px));max-width:760px;max-height:calc(100dvh - 32px);overflow:auto;padding:26px}
+#regeneration-dialog h2{font-size:21px;margin:0}
+#regeneration-dialog audio{width:100%;margin:8px 0 16px}
+.regeneration-text{white-space:pre-wrap;overflow-wrap:anywhere;max-height:140px;overflow:auto;line-height:1.8;padding:14px;background:var(--surface-soft);border-radius:8px}
+.regeneration-version{display:flex;gap:18px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding:16px 0}
+.regeneration-version>div{flex:1;min-width:0}.regeneration-version p{margin:6px 0}.regeneration-version audio{margin-bottom:0}
+.regeneration-version>button{flex-shrink:0}
+@media(max-width:600px){#regeneration-dialog{padding:18px}.regeneration-version{flex-wrap:wrap}.regeneration-version>div{flex-basis:100%}.lf-segment-actions{flex-wrap:wrap;gap:14px}}
 .clip-save-fields,.reference-save-bar{padding-top:16px;margin-top:16px;border-top:1px solid var(--line)}
 .clip-save-fields label{font-size:12px}.clip-save-fields .checkbox{margin-bottom:12px}
 .reference-library-actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:18px 0}

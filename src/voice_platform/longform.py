@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 import numpy as np
 from .audio import sha256,write_wav
-from .schemas import GenerationInput
+from .schemas import GenerationInput,LongformRegenerationInput
 from .store import now,uid
 from .longform_store import LongformStore
 
@@ -179,21 +179,70 @@ class Longform:
         self.book(identity)
         with self.store.connect() as db:
             if db.execute("SELECT 1 FROM lf_exports WHERE book_id=? AND state IN ('queued','running','cancel_requested') LIMIT 1",(identity,)).fetchone():raise ValueError('本作品正在导出，请等待完成或取消导出后再改变生成状态')
-    def regenerate(self,identity,number):
+    def generation_snapshot(self,book,segment):
+        if not segment.get('profile_id'):return book['snapshot']
+        with self.store.connect() as db:
+            row=db.execute('SELECT body FROM lf_generation_profiles WHERE book_id=? AND id=?',(book['id'],segment['profile_id'])).fetchone()
+        if not row:raise ValueError('本段的生成配置缺失，请恢复配置记录')
+        if hashlib.sha256(row[0].encode()).hexdigest()!=segment['profile_id']:raise ValueError('本段的生成配置哈希不匹配')
+        return json.loads(row[0])
+    def generation(self,identity,number):
+        book=self.db.book(identity);segment=self.db.segment(identity,number);snapshot=self.generation_snapshot(book,segment)
+        reference=snapshot.get('reference_snapshot')
+        return dict(book_id=identity,book_state=book['state'],segment_no=number,chapter_no=segment['chapter_no'],status=segment['status'],take=segment.get('take'),text=self.text(book,segment),reference={key:reference.get(key) for key in ('id','name','original_name','source_label','duration','transcript')} if reference else None,
+                    style=snapshot['style'],clone_mode=snapshot['request']['clone_mode'],seed=(segment.get('take') or {}).get('seed',snapshot['seed']),
+                    engine=snapshot['engine'],voice_id=(snapshot.get('voice_snapshot') or {}).get('id'),book_reference_id=(book['snapshot'].get('reference_snapshot') or {}).get('id'),
+                    book_defaults=dict(style=book['snapshot']['style'],clone_mode=book['snapshot']['request']['clone_mode'],seed=book['snapshot']['seed']))
+    def regenerate(self,identity,number,request=None):
+        request=request or LongformRegenerationInput()
         with self.store.lock,self.store.connect() as db:
             self.ensure_idle_export(identity);book=self.db.book(identity);segment=self.db.segment(identity,number)
             if book['state']=='running' or segment['status']=='running':raise ValueError('请先暂停作品，再重新生成单段')
-            if segment['status']!='succeeded':raise ValueError('未成功的段请使用失败重试或续作')
-            db.execute("UPDATE lf_segments SET status='pending',variant=variant+1,error=NULL WHERE book_id=? AND no=?",(identity,number))
-            db.execute("UPDATE lf_chapters SET done=done-1,revision=revision+1,review='pending' WHERE book_id=? AND no=?",(identity,segment['chapter_no']))
-            db.execute("UPDATE lf_books SET done=done-1,state='paused' WHERE id=?",(identity,))
+            if segment['status'] not in {'succeeded','failed'}:raise ValueError('请等待当前段生成完成，再调整参考')
+            snapshot=book['snapshot'] if request.use_book_defaults else self.generation_snapshot(book,segment)
+            prepared=self.platform.prepare_revision(snapshot,request,text=self.text(book,segment))
+            profile={key:prepared[key] for key in ('request','engine','model','voice_snapshot','reference_snapshot','style','seed','runtime','pipeline')}
+            if request.seed is not None:profile['segment_seed']=request.seed
+            elif not request.use_book_defaults and 'segment_seed' in snapshot:profile['segment_seed']=snapshot['segment_seed']
+            body=json.dumps(profile,ensure_ascii=False,sort_keys=True);profile_id=hashlib.sha256(body.encode()).hexdigest()
+            db.execute('INSERT OR IGNORE INTO lf_generation_profiles VALUES (?,?,?)',(identity,profile_id,body))
+            done=int(segment['status']=='succeeded');failed=int(segment['status']=='failed')
+            db.execute("UPDATE lf_segments SET status='pending',variant=variant+1,profile_id=?,error=NULL WHERE book_id=? AND no=?",(profile_id,identity,number))
+            db.execute("UPDATE lf_chapters SET done=done-?,failed=failed-?,revision=revision+1,review='pending' WHERE book_id=? AND no=?",(done,failed,identity,segment['chapter_no']))
+            db.execute("UPDATE lf_books SET done=done-?,failed=failed-?,state=?,active_segment=?,active_chapter=?,error=NULL WHERE id=?",(done,failed,'running' if request.start else 'paused',number,segment['chapter_no'],identity))
+        self.wake.set()
         return self.book(identity)
+    def use_attempt(self,identity,number,attempt):
+        with self.store.lock,self.store.connect() as db:
+            self.ensure_idle_export(identity);book=self.db.book(identity);segment=self.db.segment(identity,number)
+            if book['state']=='running' or segment['status']=='running':raise ValueError('请先暂停作品，再切换分段版本')
+            row=db.execute('SELECT body FROM lf_attempts WHERE book_id=? AND segment_no=? AND attempt=?',(identity,number,attempt)).fetchone()
+            if not row:raise KeyError('分段版本不存在')
+            take=json.loads(row[0])
+            if take.get('status')!='succeeded':raise ValueError('只能采用生成成功的版本')
+            self.attempt_audio(identity,number,attempt)
+            done=int(segment['status']!='succeeded');failed=int(segment['status']=='failed')
+            db.execute("UPDATE lf_segments SET status='succeeded',take=?,profile_id=?,error=NULL WHERE book_id=? AND no=?",(json.dumps(take,ensure_ascii=False),take.get('generation_profile_id'),identity,number))
+            db.execute("UPDATE lf_chapters SET done=done+?,failed=failed-?,revision=revision+1,review='pending' WHERE book_id=? AND no=?",(done,failed,identity,segment['chapter_no']))
+            db.execute("UPDATE lf_books SET done=done+?,failed=failed-?,state='paused',active_segment=NULL,error=NULL WHERE id=?",(done,failed,identity))
+            total,expected,failures=db.execute('SELECT done,segments,failed FROM lf_books WHERE id=?',(identity,)).fetchone()
+            db.execute('UPDATE lf_books SET state=? WHERE id=?',('completed' if total==expected else 'attention' if failures else 'paused',identity))
+        return self.db.segment(identity,number)
+    def attempt_audio(self,identity,number,attempt):
+        self.book(identity);self.db.segment(identity,number)
+        with self.store.connect() as db:row=db.execute('SELECT body FROM lf_attempts WHERE book_id=? AND segment_no=? AND attempt=?',(identity,number,attempt)).fetchone()
+        if not row:raise KeyError('分段版本不存在')
+        take=json.loads(row[0])
+        if take.get('status')!='succeeded':raise ValueError('该版本没有完整音频')
+        path=self.data/take['path']
+        if not path.is_file() or sha256(path)!=take['sha256']:raise ValueError('版本音频缺失或哈希不匹配')
+        return path
     def resume(self,identity,chapter=None):
         with self.store.lock:
             book=self.db.book(identity);self.ensure_idle_export(identity)
             if book['phase']!='ready':raise ValueError('请等待文本解析完成')
             if chapter is not None:self.db.chapter(identity,chapter)
-            self.db.update(identity,state='running',active_chapter=chapter,error=None);self.wake.set();return self.book(identity)
+            self.db.update(identity,state='running',active_chapter=chapter,active_segment=None,error=None);self.wake.set();return self.book(identity)
     def pause(self,identity):
         self.db.book(identity);return self.db.update(identity,state='paused')
     def retry(self,identity,number=None,chapter=None):
@@ -239,16 +288,17 @@ class Longform:
     def generate_next(self,identity):
         book=self.db.book(identity);self.check(identity);where="book_id=? AND status='pending' AND deleted_batch IS NULL";args=[identity]
         if book['active_chapter'] is not None:where+=' AND chapter_no=?';args.append(book['active_chapter'])
+        if book.get('active_segment') is not None:where+=' AND no=?';args.append(book['active_segment'])
         with self.store.connect() as db:next_row=db.execute('SELECT no FROM lf_segments WHERE '+where+' ORDER BY no LIMIT 1',args).fetchone()
         if not next_row:
             state='completed' if book['done']==book['segments'] else 'attention' if book['failed'] else 'paused'
-            self.db.update(identity,state=state);return False
+            self.db.update(identity,state=state,active_segment=None);return False
         item=self.db.segment(identity,next_row[0]);attempt=item['attempt']+1;folder=self.root/identity/'audio'/f'{item["no"]:09d}'/uid();folder.mkdir(parents=True)
         with self.store.lock,self.store.connect() as db:
             self.check(identity)  # Pause and segment claim share the same lock; no late claim after pause.
             db.execute("UPDATE lf_segments SET status='running',attempt=?,updated_at=? WHERE book_id=? AND no=?",(attempt,now(),identity,item['no']))
         try:
-            text=self.text(book,item);snapshot=book['snapshot'];engine=self.platform.engines[snapshot['engine']]
+            text=self.text(book,item);snapshot=self.generation_snapshot(book,item);engine=self.platform.engines[snapshot['engine']]
             if engine.identity()!=snapshot['model']:raise ValueError('模型版本已变化，请恢复匹配的模型后续作；成功段保持不变')
             reference=snapshot['reference_snapshot'];reference_path=self.data/reference['path'] if reference else None
             if reference and sha256(reference_path)!=reference['sha256']:raise ValueError('冻结的参考音频哈希不匹配')
@@ -256,7 +306,7 @@ class Longform:
             try:
                 self.check(identity);self.platform.last_use=time.monotonic()
                 self.platform.load_engine(snapshot['engine'])
-                request=snapshot['request'];seed=(snapshot['seed']+item['no']-1+item['variant']*1000003)%2147483647
+                request=snapshot['request'];seed=snapshot.get('segment_seed',(snapshot['seed']+item['no']-1+item['variant']*1000003)%2147483647)
                 generation=dict(text=text,style=snapshot['style'],seed=seed,engine_options=request['engine_options'],clone_mode=request['clone_mode'],prompt_text=reference.get('transcript',{}).get('text') if reference else None,streaming=True if engine.capabilities().get('streaming') else False,reference_path=str(reference_path) if reference else None)
                 chunks=[];stream=engine.synthesize(generation)
                 try:
@@ -265,6 +315,9 @@ class Longform:
                     if hasattr(stream,'close'):stream.close()
                 pcm=np.concatenate(chunks) if chunks else np.array([]);path=folder/'original.wav';write_wav(path,pcm,engine.sample_rate)
                 take=dict(id=folder.name,path=str(path.relative_to(self.data)),sha256=sha256(path),sample_rate=engine.sample_rate,frames=len(pcm),duration=len(pcm)/engine.sample_rate,seed=seed,text_sha256=item['text_sha256'],config_sha256=book['config_sha256'],model=snapshot['model'],attempt=attempt,created_at=now(),review='pending')
+                take.update(generation_profile_id=item.get('profile_id'),reference_id=reference['id'] if reference else None,
+                            reference_name=(reference.get('name') or reference.get('source_label') or reference.get('original_name')) if reference else None,
+                            reference_sha256=reference.get('sha256') if reference else None,clone_mode=request['clone_mode'],style=snapshot['style'])
                 (folder/'provenance.json').write_text(json.dumps(take,ensure_ascii=False,indent=2),encoding='utf-8')
             finally:self.platform.last_use=time.monotonic();self.platform.engine_lock.release()
             with self.store.lock,self.store.connect() as db:
@@ -272,12 +325,15 @@ class Longform:
                 db.execute('INSERT INTO lf_attempts VALUES (?,?,?,?)',(identity,item['no'],attempt,json.dumps(dict(status='succeeded',**take),ensure_ascii=False)))
                 db.execute("UPDATE lf_chapters SET done=done+1,revision=revision+1,review='pending' WHERE book_id=? AND no=?",(identity,item['chapter_no']))
                 db.execute('UPDATE lf_books SET done=done+1 WHERE id=?',(identity,))
+                if book.get('active_segment') is not None:
+                    total,expected,failures=db.execute('SELECT done,segments,failed FROM lf_books WHERE id=?',(identity,)).fetchone()
+                    db.execute('UPDATE lf_books SET state=?,active_segment=NULL WHERE id=?',('completed' if total==expected else 'attention' if failures else 'paused',identity))
             return True
         except Exception as error:
             paused=isinstance(error,Paused)
             with self.store.lock,self.store.connect() as db:
                 db.execute('UPDATE lf_segments SET status=?,error=?,updated_at=? WHERE book_id=? AND no=?',('pending' if paused else 'failed',str(error)[:2000],now(),identity,item['no']))
-                db.execute('INSERT OR REPLACE INTO lf_attempts VALUES (?,?,?,?)',(identity,item['no'],attempt,json.dumps(dict(status='interrupted' if paused else 'failed',error=str(error)[:2000],folder=str(folder.relative_to(self.data)),created_at=now()),ensure_ascii=False)))
+                db.execute('INSERT OR REPLACE INTO lf_attempts VALUES (?,?,?,?)',(identity,item['no'],attempt,json.dumps(dict(status='interrupted' if paused else 'failed',error=str(error)[:2000],folder=str(folder.relative_to(self.data)),generation_profile_id=item.get('profile_id'),created_at=now()),ensure_ascii=False)))
                 if not paused:
                     db.execute("UPDATE lf_chapters SET failed=failed+1,review='pending' WHERE book_id=? AND no=?",(identity,item['chapter_no']))
                     db.execute("UPDATE lf_books SET failed=failed+1,state='attention',error=? WHERE id=?",(f'第 {item["no"]} 段失败：'+str(error)[:1000],identity))

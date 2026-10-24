@@ -90,6 +90,7 @@
   projectCreate.className='panel project-create';projectCreate.open=!state.projects.length;
   const projectSummary=document.createElement('summary');projectSummary.textContent=tr('创建项目');
   projectCreate.append(projectSummary,...projectPanel.childNodes);projectPanel.replaceWith(projectCreate);
+  let projectInitialRender=false;const priorProjectRender=renderProjects;renderProjects=function(){priorProjectRender();if(!projectInitialRender){projectInitialRender=true;if(state.projects.length&&!$('project-form').dataset.dirty)projectCreate.open=false;}};
   document.addEventListener('workflow-form-success',event=>{if(event.target.id==='project-form')projectCreate.open=false;});
   const libraryActions=$('library-actions'),newVoice=$('new-voice');
   newVoice.classList.remove('primary');newVoice.classList.add('secondary');

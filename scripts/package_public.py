@@ -39,7 +39,7 @@ def selected_files(root):
                 continue
             if rel.parts[:2] == ('docs', 'evidence'):
                 continue
-            if folder == 'docs' and (path.name == 'ACCEPTANCE.md' or path.name.endswith('_ACCEPTANCE.md')):
+            if folder == 'docs' and (path.name in ('ACCEPTANCE.md', 'DESIGN_REVIEW.md') or path.name.endswith('_ACCEPTANCE.md')):
                 continue
             if rel.as_posix() == 'scripts/package_source.py':
                 continue

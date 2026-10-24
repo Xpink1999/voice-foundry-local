@@ -23,7 +23,7 @@ Long-form import is separate from the regular 60,000-character text field and 20
 
 Original bytes are kept at `data/longform/<work UUID>/source.original`. A separate UTF-8 copy normalizes line endings. Both files have SHA-256 records. Segment offsets refer to the normalized file, not the original GB2312 or UTF-16 bytes.
 
-Each work freezes its voice version, one reference and transcript version, model identity, parameters, base seed, segmentation and pause settings. The default source limit is **2 GiB of original file bytes**, configurable as an upload limit. The model still receives small segments. Disk space, runtime and model capability limit practical production volume.
+At import, each work freezes its voice version, default reference and transcript version, model identity, parameters, base seed, segmentation and pause settings. A regenerated segment can store its own reference and delivery settings without changing the work defaults. The default source limit is **2 GiB of original file bytes**, configurable as an upload limit. The model still receives small segments. Disk space, runtime and model capability limit practical production volume.
 
 ## Resume, retry and alternate takes
 
@@ -31,7 +31,15 @@ Long-form generation shares the model and compute lock with regular TTS and audi
 
 On pause or restart, unfinished segments return to pending while successful files and records stay intact. A failed segment pauses the work. Retry failed segments, or resume to skip failures and process the rest. A changed model or reference hash blocks resuming under different conditions.
 
-An alternate take uses a new seed variant and retains previous audio and attempts. Only successful segments support alternate takes; use retry for failures. To change voice or model, import a separate work with the new configuration.
+### Change the reference and regenerate one segment
+
+Pause the work first, and finish or cancel any export in progress. Open the reference/regeneration action beside a successful or failed segment. Check the text and current audio, then choose a scene reference for the voice or a clip from the reference library. Preview the reference and its transcript before setting delivery instructions for controllable cloning and an optional seed. Hi-Fi follows the reference delivery, requires an accurate transcript, and does not add a style description.
+
+The default is the segment's frozen reference and settings, rather than the voice's latest default. Choose the option to restore the reference and settings captured at import to return to the work defaults, then set any explicit changes. Regenerating one segment processes only that segment; it does not continue the rest of the chapter or book. Other segments and the work defaults stay unchanged. Changing the voice or model for the entire work still requires a separate import.
+
+Previous audio and attempt records are retained. Open version history to compare successful takes and adopt an older version. Regenerating or adopting a take returns the chapter to pending review; listen and approve it again before formal export. Failed segments can still be retried with their existing settings. A model or frozen reference-file mismatch blocks generation rather than silently substituting new conditions.
+
+Regular candidates on the listening/review page also support reference-based regeneration. This creates a new candidate awaiting review and leaves the original candidate and approval unchanged. Long-form chapter reviews, progress and exports remain inside the work.
 
 A fixed reference reduces drift but does not guarantee identical voice or prosody across a book. Cancellation takes effect at the model's streaming or return boundary.
 
@@ -49,7 +57,7 @@ Formal export requires all selected active chapters to be complete and approved 
 
 Audio and ZIP64 are written in blocks. WAV files predicted to exceed RIFF capacity use RF64, which some older players do not support; split chapters or use FLAC if needed. Combined books retain intermediate chapter WAVs and need extra disk space. The full book's PCM is not assembled in memory.
 
-Packages include the configuration snapshot, source hashes, `segments.jsonl` with text, parameters and audio hashes, `chapters.jsonl`, and segment-boundary subtitles. Chapter SRT files start at zero; `book.srt` uses the book timeline. These are segment timings, not word-level alignment.
+Packages include the configuration snapshot, source hashes, `segments.jsonl` with text and the adopted takes’ parameters and audio hashes, `chapters.jsonl`, segment-boundary subtitles, and `generation-profiles.jsonl`. The latter stores each distinct segment override used in the export by configuration hash. A take’s `generation_profile_id` links to that record; segments without overrides use the work snapshot. Chapter SRT files start at zero; `book.srt` uses the book timeline. These are segment timings, not word-level alignment.
 
 Generation changes for this work are locked during export; other works and regular TTS remain available. Cancellation, failure and interruption retain written files. Submit a new export to retry; original segments are not overwritten. Downloads are streamed, and the CLI checks the ZIP SHA-256.
 
@@ -93,7 +101,7 @@ voice book-download $exportId --dest .\output
 
 `voice delete-assets` previews changes unless `--apply` is supplied. Use `voice restore-asset-batch` with the deletion batch ID to restore a batch.
 
-REST prefixes are `/api/v1/longform` and `/api/v1/assets`. The running service's `/docs` provides the full contract. MCP offers import, pagination, resume, export and asset tools, with no tool that approves audio on your behalf. Reconnect MCP after an update; models do not need reinstalling.
+REST prefixes are `/api/v1/longform` and `/api/v1/assets`. The running service's `/docs` provides the full contract. Fields for segment regeneration, historical audio and take adoption are listed in the [API guide](API.md#按参考重做) (Chinese). MCP offers import, pagination, resume, export and asset tools, with no tool that approves audio on your behalf. Reconnect MCP after an update; models do not need reinstalling.
 
 ## Configuration and validation
 

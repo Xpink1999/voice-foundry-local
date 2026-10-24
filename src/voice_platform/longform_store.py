@@ -40,6 +40,10 @@ class LongformStore:
             for table in ['lf_books','lf_chapters','lf_segments','lf_exports']:
                 if 'deleted_batch' not in {r[1] for r in db.execute('PRAGMA table_info('+table+')')}:
                     db.execute('ALTER TABLE '+table+' ADD COLUMN deleted_batch TEXT')
+            for table,column,kind in [('lf_books','active_segment','INTEGER'),('lf_segments','profile_id','TEXT')]:
+                if column not in {r[1] for r in db.execute('PRAGMA table_info('+table+')')}:
+                    db.execute('ALTER TABLE '+table+' ADD COLUMN '+column+' '+kind)
+            db.execute('CREATE TABLE IF NOT EXISTS lf_generation_profiles (book_id TEXT NOT NULL,id TEXT NOT NULL,body TEXT NOT NULL,PRIMARY KEY(book_id,id))')
             db.execute('CREATE INDEX IF NOT EXISTS lf_live_queue ON lf_segments(book_id,deleted_batch,status,no)')
             db.execute('CREATE INDEX IF NOT EXISTS lf_live_chapter_queue ON lf_segments(book_id,chapter_no,deleted_batch,status,no)')
     def book(self,identity):
@@ -53,7 +57,7 @@ class LongformStore:
         return dict(items=[self.public(self.book(i)) for i in ids],total=total,limit=limit,offset=offset)
     def public(self,item):return {k:v for k,v in item.items() if k not in {'snapshot','config'}}
     def update(self,identity,**changes):
-        allowed={'phase','state','chars','chapters','segments','done','failed','active_chapter','error'}
+        allowed={'phase','state','chars','chapters','segments','done','failed','active_chapter','active_segment','error'}
         if set(changes)-allowed:raise ValueError('不支持的长文状态字段')
         with self.store.lock,self.store.connect() as db:
             db.execute('UPDATE lf_books SET '+','.join(k+'=?' for k in changes)+' WHERE id=?',list(changes.values())+[identity])

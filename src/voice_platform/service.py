@@ -198,14 +198,14 @@ class Platform:
                     source=source.strip(), authorization=authorization.strip(), rights_confirmed=rights_confirmed,
                     duration=info.duration, sample_rate=rate, created_at=now()))
 
-    def prepare_job(self, request, batch_id=None, retry_of=None):
+    def prepare_job(self, request, batch_id=None, retry_of=None, *, frozen_voice=None, frozen_reference=None):
         values = request.model_dump()
         if len(values["text"]) > self.config["max_text_chars"]:
             raise ValueError("文本超出配置长度上限")
         if values["project_id"]:
             project=self.store.get("projects", values["project_id"])
             if project.get("deleted_at"):raise ValueError("项目已在回收站，请先恢复")
-        voice = self.store.get("voices", values["voice_id"]) if values["voice_id"] else None
+        voice = copy.deepcopy(frozen_voice) if frozen_voice is not None else self.store.get("voices", values["voice_id"]) if values["voice_id"] else None
         if voice:
             if voice.get("deleted_at"):raise ValueError("人物已在回收站，请先恢复")
             if voice["status"] == "archived":
@@ -220,7 +220,7 @@ class Platform:
         if engine_id not in self.engines:
             raise ValueError("未知语音引擎")
         chosen_reference=values['reference_id'] or (voice.get('reference_id') if voice else None)
-        reference=self.store.get('references',chosen_reference) if chosen_reference else None
+        reference=copy.deepcopy(frozen_reference) if frozen_reference and frozen_reference['id']==chosen_reference else self.store.get('references',chosen_reference) if chosen_reference else None
         if reference and reference.get('deleted_at'):raise ValueError('参考已在回收站，请先恢复')
         if reference and (not reference['rights_confirmed'] or not reference.get('saved',True)):
             raise ValueError('参考片段未保存或使用授权尚未确认')
@@ -271,6 +271,40 @@ class Platform:
                     style=style, seed=seed, status="queued", progress=0, batch_id=batch_id, retry_of=retry_of,
                     attempt=0, results=[], error=None, created_at=now(), runtime=copy.deepcopy(self.runtime),
                     pipeline={**{key: self.config[key] for key in ("segment_chars", "segment_pause_ms")},'control_note':control_note})
+
+    def prepare_revision(self, snapshot, changes, *, text=None):
+        values=copy.deepcopy(snapshot['request'])
+        values.update(text=text if text is not None else snapshot['text'], engine=snapshot['engine'],
+                      style=snapshot['style'], seed=snapshot['seed'], candidates=1)
+        reference=snapshot.get('reference_snapshot')
+        values['reference_id']=reference['id'] if reference else None
+        fields=changes.model_dump(exclude_unset=True,include={'reference_id','style','clone_mode','seed'})
+        fields={key:value for key,value in fields.items() if value is not None or key=='reference_id'}
+        values.update(fields)
+        if values['clone_mode']=='hifi' and 'style' not in fields:values['style']=''
+        voice=copy.deepcopy(snapshot.get('voice_snapshot'))
+        if voice:
+            voice['style']=''  # The snapshot's effective style is already included above.
+            if not values['reference_id']:voice['reference_id']=None
+        job=self.prepare_job(GenerationInput(**values),frozen_voice=voice,frozen_reference=reference if 'reference_id' not in fields else None)
+        if job['model']!=snapshot['model']:raise ValueError('模型版本已变化，请恢复匹配的模型后再重做')
+        job['voice_snapshot']=copy.deepcopy(snapshot.get('voice_snapshot'))
+        return job
+
+    def regenerate_result(self, identity, changes):
+        with self.store.lock:
+            if self.shutdown.is_set():raise ValueError('服务正在停止，请重新启动后提交')
+            result=self.store.get('results',identity)
+            if result.get('deleted_at'):raise ValueError('结果已在回收站，请先恢复')
+            snapshot=copy.deepcopy(self.store.get('jobs',result['job_id']))
+            snapshot.update(text=result['original_text'],seed=result['parameters']['effective_seed'])
+            snapshot['request']['title']=result['title']
+            pending=sum(job['status'] in {'queued','running','cancel_requested'} for job in self.store.list('jobs'))
+            if pending>=self.config['max_pending_jobs']:raise ValueError('队列已满，请稍后重试')
+            job=self.prepare_revision(snapshot,changes)
+            job['regenerated_from']=identity
+            self.store.save('jobs',job);self.store.event(job['id'],'queued',regenerated_from=identity)
+        self.wake.set();return job
 
     def submit(self, requests, batch=False):
         if self.shutdown.is_set():
@@ -458,6 +492,7 @@ class Platform:
                     runtime=job["runtime"], pipeline=job.get("pipeline"), sample_rate=engine.sample_rate, channels=1, duration=total/engine.sample_rate,
                     path=str(target.relative_to(self.data)), sha256=sha256(target), segments=timeline,
                     timestamp_kind="segment_boundaries_not_forced_alignment", review="pending", review_history=[], created_at=now())
+                if job.get('regenerated_from'):result['regenerated_from']=job['regenerated_from']
                 (folder / "provenance.json").write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
                 self.store.save("results", result)
                 with self.store.lock:

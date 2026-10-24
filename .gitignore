@@ -9,6 +9,7 @@ __pycache__/
 /dist/
 /build/
 /docs/evidence/
+/docs/DESIGN_REVIEW.md
 examples/**/delivery/
 LICENSES/.cache/
 .env

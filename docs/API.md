@@ -32,6 +32,7 @@
 | 增量事件/SSE | GET /jobs/{id}/events、/jobs/{id}/stream |
 | 流式音频块 | GET /events/{event_id}/audio |
 | 结果列表/详情 | GET /results、/results/{id} |
+| 按参考重做候选 | POST /results/{id}/regenerate，返回 202 与新任务；原候选保留 |
 | 原件与分段字幕 | GET /results/{id}/audio、/results/{id}/subtitles |
 | 人工审核 | PUT /results/{id}/review |
 | 导出 | POST/GET /exports，GET /exports/{id}/download |
@@ -91,9 +92,11 @@ MCP 工具名称以 voice_ 开头。接口不依赖 Codex；其他 MCP 客户端
 | 编码重试 | POST /longform/books/{id}/retry-import，encoding |
 | 分页章节/分段 | GET /longform/books/{id}/chapters；/chapters/{n}/segments?limit&offset&status |
 | 连续试听 | GET /longform/books/{id}/chapters/{n}/next-audio?after；/segments/{n}/audio |
-| 尝试追踪 | GET /longform/books/{id}/segments/{n}/attempts |
+| 当前单段生成配置 | GET /longform/books/{id}/segments/{n}/generation |
+| 尝试追踪/历史试听 | GET /longform/books/{id}/segments/{n}/attempts?limit&offset；/attempts/{attempt}/audio |
+| 采用历史版本 | POST /longform/books/{id}/segments/{n}/use-attempt，attempt |
 | 续作、暂停、失败重试 | POST /longform/books/{id}/resume、/pause、/retry-failed；resume/retry-failed 可带 chapter_no |
-| 单段重试/新版本 | POST /longform/books/{id}/segments/{n}/retry、/regenerate |
+| 单段重试/按参考重做 | POST /longform/books/{id}/segments/{n}/retry、/regenerate；重做字段见下文 |
 | 逐章审核 | POST /longform/books/{id}/chapters/{n}/review，批准要求 listened=true |
 | 后台导出 | POST /longform/books/{id}/exports，chapter_no/mode/format/draft；GET 同路径分页查询 |
 | 导出状态/取消/下载 | GET /longform/exports/{id}；POST /cancel；GET /download |
@@ -109,6 +112,46 @@ MCP 工具名称以 voice_ 开头。接口不依赖 Codex；其他 MCP 客户端
 章节目录支持 `limit`、`offset`，也可用 `after=<章号>` 获取该章之后仍有效的章节。`after` 与 `offset` 可组合；下一章可请求 `chapters?after=当前章号&limit=1`，避免假定章号连续。
 
 `GET /health` 返回 `installation_id`，由本次安装目录和数据目录生成。CLI 在本地调用前核对标识，防止误用同端口的另一份安装；连接旧版本时核对 `/settings` 的数据目录。显式设置 `VOICE_PLATFORM_URL` 表示主动选择服务，按该 URL 调用。运行库缓存由配置中的 `cache_dir` 管理，默认 `runtime/model-cache`。
+
+## 按参考重做
+
+普通候选与长文分段共用 `reference_id`、`style`、`clone_mode`、`seed` 四个可选覆盖字段。人物与模型身份沿用原配置；模型版本不匹配时拒绝重做。新参考与转写会冻结到本次配置中，后续编辑不会改变已经提交的生成。
+
+| 字段 | 含义 |
+|---|---|
+| `reference_id` | 省略时沿用当前冻结参考及转写；提供 ID 时读取该参考的当前版本；显式 `null` 表示不使用参考。 |
+| `style` | 演绎说明，最多 1000 字符；省略或 `null` 时继承，空字符串清除。Hi-Fi 不支持额外风格时，不能显式传非空值。 |
+| `clone_mode` | `reference` 或 `hifi`；省略或 `null` 时继承。Hi-Fi 仍要求模型支持与非空准确转写；省略 style 切到 Hi-Fi 时自动清除原风格。 |
+| `seed` | 0–2147483646 的整数；省略或 `null` 时沿用原有种子规则。指定值可固定本次种子，便于比较参考或演绎。 |
+
+### 普通候选
+
+`POST /results/{id}/regenerate` 接收上述 JSON 对象，返回 HTTP 202 和新任务。它以原候选的原文、实际种子及冻结配置为基础，只创建一个新候选，记录 `regenerated_from`。新候选默认待审核；原候选、音频和审核状态保持不变。通过任务接口等待完成，再用新结果 ID 试听、审核或导出。
+
+### 长文分段
+
+`POST /longform/books/{id}/segments/{n}/regenerate` 可用于已成功或失败的段；作品必须先暂停，且没有排队或运行中的导出。请求体可省略，也可在上述四个字段之外提供：
+
+- `use_book_defaults`：默认 `false`，继承本段当前冻结配置；`true` 表示先恢复作品导入时的默认参考、转写和配置，再应用本次显式覆盖字段。人物后来更改的默认参考不会自动替换本段配置。
+- `start`：默认 `false`，把目标段设为待生成并使作品保持暂停；`true` 立即调度**仅此段**，不续作同章或全书的其他待生成段。
+
+例如，下面请求只重做目标段，使用指定参考和可控克隆：
+
+```json
+{
+  "reference_id": "REFERENCE_ID",
+  "clone_mode": "reference",
+  "style": "轻声、放慢语速，保留自然停顿",
+  "seed": 42,
+  "start": true
+}
+```
+
+接口返回作品状态。可查询 `/segments/{n}/generation` 获取本段实际参考、转写、模式、演绎、种子、采用版本与作品默认值；轮询至该段生成结束。旧尝试音频与记录保留，本章回到待审核。其他段、作品默认配置与其他章节的审核不变。
+
+`GET /segments/{n}/attempts?limit=20&offset=0` 按尝试号倒序分页，`limit` 为 1–100；每项 body 为该次尝试的 JSON 记录。成功版本可用 `/segments/{n}/attempts/{attempt}/audio` 试听。`POST /segments/{n}/use-attempt` 接收 `{"attempt":1}`，只允许采用成功且文件哈希有效的版本，恢复其音频与生成配置，不重新推理；同样要求作品暂停且没有进行中的导出，并使本章回到待审核。以上简写路径均接在 `/longform/books/{id}` 后。
+
+长文导出包括 `generation-profiles.jsonl`，按配置哈希记录所选音频实际使用的单段覆盖快照。`segments.jsonl` 中 take 的 `generation_profile_id` 指向该记录；未覆盖的段使用作品配置快照。采用旧版本后，导出追踪当前采用的音频与配置，不把历史尝试误当作现用版本。
 
 ## 模型资源与关闭
 
