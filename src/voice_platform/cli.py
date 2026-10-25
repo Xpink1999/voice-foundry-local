@@ -1,7 +1,6 @@
 import argparse
 import hashlib
 import json
-import shutil
 import sys
 import zipfile
 import webbrowser
@@ -15,15 +14,21 @@ def copy_export(client, package, destination):
     dest = Path(destination).resolve() / f"voice-export-{package['id']}"
     dest.mkdir(parents=True, exist_ok=False)
     archive = dest / "package.zip"
-    response = client.http.get(f"/api/v1/exports/{package['id']}/download")
-    response.raise_for_status()
-    if hashlib.sha256(response.content).hexdigest() != package["sha256"]:
-        raise ValueError("下载包哈希不匹配")
-    archive.write_bytes(response.content)
+    partial = dest / "package.partial"
+    digest = hashlib.sha256()
+    with client.http.stream('GET', f"/api/v1/exports/{package['id']}/download") as response:
+        response.raise_for_status()
+        with partial.open('xb') as output:
+            for block in response.iter_bytes(1024*1024):
+                output.write(block)
+                digest.update(block)
+    if digest.hexdigest() != package["sha256"]:
+        raise ValueError("下载包哈希不匹配，部分文件保留")
+    partial.replace(archive)
     with zipfile.ZipFile(archive) as source:
         for item in source.infolist():
             path = (dest / item.filename).resolve()
-            if not path.is_relative_to(dest) or path == dest:
+            if not path.is_relative_to(dest) or path in {dest, archive}:
                 raise ValueError("导出包内含非法路径")
         source.extractall(dest)
     return dict(package, destination=str(dest))
@@ -44,7 +49,7 @@ def download_book_export(client,identity,destination):
 def parser():
     p = argparse.ArgumentParser(description="Voice Foundry：本地语音平台，所有目录使用同一服务与模型")
     commands = p.add_subparsers(dest="command", required=True)
-    for name in ("start", "ui", "stop", "health", "models", "unload", "settings", "backup", "voices", "projects", "jobs", "results", "exports", "recordings"):
+    for name in ("start", "ui", "stop", "health", "models", "unload", "settings", "backup", "voices", "projects", "jobs", "results", "exports", "recordings", "references"):
         commands.add_parser(name)
     commands.choices['jobs'].add_argument('--archived',action='store_true',help='查看已归档任务')
     generate = commands.add_parser("generate")
@@ -64,12 +69,21 @@ def parser():
     generate.add_argument("--streaming", action="store_true")
     generate.add_argument("--engine-options", default="{}", help="模型能力声明中的参数，JSON 对象")
     generate.add_argument("--wait", action="store_true")
-    book_import=commands.add_parser('import-book');book_import.add_argument('file');book_import.add_argument('--title',default='');book_import.add_argument('--encoding',default='auto',choices=['auto','utf-8-sig','utf-16','utf-16-le','utf-16-be','gb2312','gbk','gb18030']);book_import.add_argument('--voice-id',default='');book_import.add_argument('--project-id',default='');book_import.add_argument('--style',default='')
+    book_import=commands.add_parser('import-book');book_import.add_argument('file');book_import.add_argument('--title',default='');book_import.add_argument('--encoding',default='auto',choices=['auto','utf-8-sig','utf-16','utf-16-le','utf-16-be','gb2312','gbk','gb18030']);book_import.add_argument('--voice-id',default='');book_import.add_argument('--project-id',default='');book_import.add_argument('--style',default='');book_import.add_argument('--clone-mode',choices=['reference','hifi'],default='reference')
     books=commands.add_parser('books');books.add_argument('--limit',type=int,default=20);books.add_argument('--offset',type=int,default=0)
     for name in ['book','book-resume','book-pause','book-retry-failed']:
         c=commands.add_parser(name);c.add_argument('id');c.add_argument('--chapter',type=int)
         if name=='book':c.add_argument('--chapters',action='store_true');c.add_argument('--limit',type=int,default=50);c.add_argument('--offset',type=int,default=0)
     segments=commands.add_parser('book-segments');segments.add_argument('id');segments.add_argument('chapter',type=int);segments.add_argument('--limit',type=int,default=50);segments.add_argument('--offset',type=int,default=0)
+    for name in ['book-generation','book-attempts','book-regenerate','book-use-attempt']:
+        c=commands.add_parser(name);c.add_argument('id');c.add_argument('segment',type=int)
+        if name=='book-attempts':c.add_argument('--limit',type=int,default=20);c.add_argument('--offset',type=int,default=0)
+        if name=='book-use-attempt':c.add_argument('attempt',type=int)
+        if name=='book-regenerate':
+            c.add_argument('--reference-id');c.add_argument('--clone-mode',choices=['reference','hifi']);c.add_argument('--style');c.add_argument('--seed',type=int);c.add_argument('--use-book-defaults',action='store_true');c.add_argument('--start',action='store_true',help='只生成本段，不续作其他段')
+    revision=commands.add_parser('regenerate-result');revision.add_argument('id');revision.add_argument('--reference-id');revision.add_argument('--clone-mode',choices=['reference','hifi']);revision.add_argument('--style');revision.add_argument('--seed',type=int)
+    annotate=commands.add_parser('update-reference');annotate.add_argument('id');annotate.add_argument('file',help='UTF-8 JSON，name/scenario/tags/notes')
+    attach=commands.add_parser('attach-references');attach.add_argument('id',help='Voice ID');attach.add_argument('--ids',nargs='+',required=True)
     export_book=commands.add_parser('book-export');export_book.add_argument('id');export_book.add_argument('--chapter',type=int);export_book.add_argument('--mode',choices=['chapters','book'],default='chapters');export_book.add_argument('--format',choices=['wav','mp3','flac','ogg'],default='wav');export_book.add_argument('--draft',action='store_true')
     commands.add_parser('book-export-status').add_argument('id')
     download=commands.add_parser('book-download');download.add_argument('id');download.add_argument('--dest',required=True)
@@ -122,7 +136,7 @@ def main():
             output = dict(client.request("GET", "/health"), webui=client.url)
             if command == "ui":
                 output["browser_opened"] = webbrowser.open(client.url)
-        elif command in {"health", "settings", "models", "voices", "projects", "jobs", "results", "exports", "recordings"}:
+        elif command in {"health", "settings", "models", "voices", "projects", "jobs", "results", "exports", "recordings", "references"}:
             output = client.request("GET", "/"+command,params={'archived':str(args.archived).lower()} if command=='jobs' else {})
         elif command == 'stop':
             output = client.stop()
@@ -140,12 +154,24 @@ def main():
                 output = client.wait(output["id"], progress=lambda j: print(f"{j['status']} {j['progress']}%", file=sys.stderr))
         elif command=='import-book':
             with Path(args.file).open('rb') as source:
-                output=client.request('POST','/longform/books',files={'file':(Path(args.file).name,source,'text/plain')},data=dict(title=args.title,encoding=args.encoding,voice_id=args.voice_id,project_id=args.project_id,style=args.style))
+                output=client.request('POST','/longform/books',files={'file':(Path(args.file).name,source,'text/plain')},data=dict(title=args.title,encoding=args.encoding,voice_id=args.voice_id,project_id=args.project_id,style=args.style,clone_mode=args.clone_mode))
         elif command=='books':output=client.request('GET','/longform/books',params=dict(limit=args.limit,offset=args.offset))
         elif command=='book':output=client.request('GET','/longform/books/'+args.id+('/chapters' if args.chapters else ''),params=dict(limit=args.limit,offset=args.offset) if args.chapters else {})
         elif command in {'book-resume','book-pause','book-retry-failed'}:
             output=client.request('POST','/longform/books/'+args.id+'/'+command.removeprefix('book-'),json=dict(chapter_no=args.chapter) if command!='book-pause' else {})
         elif command=='book-segments':output=client.request('GET',f'/longform/books/{args.id}/chapters/{args.chapter}/segments',params=dict(limit=args.limit,offset=args.offset))
+        elif command in {'book-generation','book-attempts','book-regenerate','book-use-attempt'}:
+            route=f'/longform/books/{args.id}/segments/{args.segment}'
+            if command=='book-generation':output=client.request('GET',route+'/generation')
+            elif command=='book-attempts':output=client.request('GET',route+'/attempts',params=dict(limit=args.limit,offset=args.offset))
+            elif command=='book-use-attempt':output=client.request('POST',route+'/use-attempt',json={'attempt':args.attempt})
+            else:
+                body={key:getattr(args,key) for key in ('reference_id','clone_mode','style','seed') if getattr(args,key) is not None}
+                body.update(use_book_defaults=args.use_book_defaults,start=args.start)
+                output=client.request('POST',route+'/regenerate',json=body)
+        elif command=='regenerate-result':output=client.request('POST',f'/results/{args.id}/regenerate',json={key:getattr(args,key) for key in ('reference_id','clone_mode','style','seed') if getattr(args,key) is not None})
+        elif command=='update-reference':output=client.request('PUT','/references/'+args.id,json=json.loads(Path(args.file).read_text(encoding='utf-8-sig')))
+        elif command=='attach-references':output=client.request('POST','/voices/'+args.id+'/references',json={'reference_ids':args.ids})
         elif command=='book-export':output=client.request('POST',f'/longform/books/{args.id}/exports',json=dict(chapter_no=args.chapter,mode=args.mode,format=args.format,draft=args.draft))
         elif command=='book-export-status':output=client.request('GET','/longform/exports/'+args.id)
         elif command=='book-download':output=download_book_export(client,args.id,args.dest)

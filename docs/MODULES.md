@@ -34,6 +34,8 @@
 | scripts/build_i18n.py | 词条完整性与占位符检查，生成浏览器词条包 |
 | web/theme.js、themes.css | 系统/浏览器配色监听、手动选择记忆、双配色与真实波形重绘 |
 | web/references-ui.js | 生成时的单片段选择和人物多参考编辑 |
+| web/reference-library.js | 参考片段检索、命名标注、批量人物关联和场景复用 |
+| web/regeneration-ui.js | 普通候选与长文单段按参考重做、历史试听和版本采用 |
 | web/voice-workspace.js | 快速创建、人物库、声音设计、独立高级处理及 A/B 试听 |
 | web/jobs-ui.js | 当前/归档视图、批量选择、服务端分页及恢复；默认每页 50 项 |
 | tests/ | 模型契约、任务/版本/隔离/审核/恢复/导出/边界测试 |

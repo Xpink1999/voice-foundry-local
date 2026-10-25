@@ -2,7 +2,6 @@ import copy
 import importlib.metadata
 import json
 import logging
-import os
 import secrets
 import shutil
 import string
@@ -156,6 +155,7 @@ class Platform:
             raise ValueError("正式音色需要明确确认的参考音频；请先保存为草稿并试听")
         if values["sample_result_id"]:
             sample = self.store.get("results", values["sample_result_id"])
+            if sample.get('deleted_at'):raise ValueError('示例音频已在回收站，请先恢复')
             if sample["engine"] != values["engine"]:
                 raise ValueError("示例音频与音色引擎不匹配")
             if not values["engine_options"]:
@@ -198,7 +198,7 @@ class Platform:
                     source=source.strip(), authorization=authorization.strip(), rights_confirmed=rights_confirmed,
                     duration=info.duration, sample_rate=rate, created_at=now()))
 
-    def prepare_job(self, request, batch_id=None, retry_of=None, *, frozen_voice=None, frozen_reference=None):
+    def prepare_job(self, request, batch_id=None, retry_of=None, *, frozen_voice=None, frozen_reference=None, frozen_style=None):
         values = request.model_dump()
         if len(values["text"]) > self.config["max_text_chars"]:
             raise ValueError("文本超出配置长度上限")
@@ -247,7 +247,7 @@ class Platform:
             if "enum" in spec and value not in spec["enum"]:
                 raise ValueError(f"引擎参数 {key} 不是允许的选项")
             options[key] = value
-        style = ", ".join(filter(None, [voice.get("style", "") if voice else "", values["style"]]))
+        style = frozen_style if frozen_style is not None else ", ".join(filter(None, [voice.get("style", "") if voice else "", values["style"]]))
         control_note=None
         if values['clone_mode']=='hifi':
             if not caps.get('hifi_cloning'):raise ValueError('该模型不支持 Hi-Fi 延续式克隆')
@@ -281,12 +281,16 @@ class Platform:
         fields=changes.model_dump(exclude_unset=True,include={'reference_id','style','clone_mode','seed'})
         fields={key:value for key,value in fields.items() if value is not None or key=='reference_id'}
         values.update(fields)
-        if values['clone_mode']=='hifi' and 'style' not in fields:values['style']=''
+        frozen_style=None
+        if 'style' not in fields:
+            # Effective voice+request directions may legally exceed the single-input limit.
+            frozen_style='' if values['clone_mode']=='hifi' else snapshot['style']
+            values['style']=''
         voice=copy.deepcopy(snapshot.get('voice_snapshot'))
         if voice:
             voice['style']=''  # The snapshot's effective style is already included above.
             if not values['reference_id']:voice['reference_id']=None
-        job=self.prepare_job(GenerationInput(**values),frozen_voice=voice,frozen_reference=reference if 'reference_id' not in fields else None)
+        job=self.prepare_job(GenerationInput(**values),frozen_voice=voice,frozen_reference=reference if 'reference_id' not in fields else None,frozen_style=frozen_style)
         if job['model']!=snapshot['model']:raise ValueError('模型版本已变化，请恢复匹配的模型后再重做')
         job['voice_snapshot']=copy.deepcopy(snapshot.get('voice_snapshot'))
         return job
@@ -322,11 +326,13 @@ class Platform:
         return jobs
 
     def retry(self, identity):
-        old = self.store.get("jobs", identity)
-        if old["status"] not in {"failed", "cancelled"}:
-            raise ValueError("只可重试失败或取消的任务")
         # Reuse frozen voice/model/seed, even if the current voice has changed.
         with self.store.lock:
+            if self.shutdown.is_set():raise ValueError('服务正在停止，请重新启动后提交')
+            old = self.store.get("jobs", identity)
+            if old.get('deleted_at'):raise ValueError('任务已在回收站，请先恢复')
+            if old["status"] not in {"failed", "cancelled"}:
+                raise ValueError("只可重试失败或取消的任务")
             pending = sum(j["status"] in {"queued", "running", "cancel_requested"} for j in self.store.list("jobs"))
             if pending >= self.config["max_pending_jobs"]:
                 raise ValueError("队列已满")

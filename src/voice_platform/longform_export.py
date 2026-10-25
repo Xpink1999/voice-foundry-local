@@ -1,9 +1,7 @@
 """Disk-streamed chapter/book assembly, review gates, RF64 and ZIP64 exports."""
 import json
 import subprocess
-import time
 import zipfile
-from pathlib import Path
 import numpy as np
 import soundfile as sf
 from .audio import sha256,safe_name,srt_time
@@ -34,10 +32,11 @@ class LongformExport:
         if self.owner.stop_event.is_set():raise InterruptedError('服务停止，已写文件保留，请重新提交导出')
         if self.db.export(identity)['state']=='cancel_requested':raise InterruptedError('导出已取消，已写文件保留')
     def cancel(self,identity):
-        item=self.db.export(identity)
-        if item['state']=='queued':item['state']='cancelled'
-        elif item['state']=='running':item['state']='cancel_requested'
-        self.db.save_export(item);return item
+        with self.store.lock:
+            item=self.db.export(identity)
+            if item['state']=='queued':item['state']='cancelled'
+            elif item['state']=='running':item['state']='cancel_requested'
+            self.db.save_export(item);return item
     def loop(self):
         while not self.owner.stop_event.is_set():
             with self.store.connect() as db:row=db.execute("SELECT id FROM lf_exports WHERE state='queued' ORDER BY created_at LIMIT 1").fetchone()

@@ -53,7 +53,7 @@
       }
       const text = VoiceWorkflow.decodeText(await file.arrayBuffer());
       if (text.length > 1000000) return window.workflowUI.offerLongform(file);
-      state.batchJSON = null; $('batch-text').value = text; $('batch-text').dispatchEvent(new Event('input', {bubbles: true})); preview();
+      $('batch-text').value = text; $('batch-text').dispatchEvent(new Event('input', {bubbles: true})); preview();
       form.dataset.uploaded = 'true';
     } catch (error) {toast(error.message, true);}
   };

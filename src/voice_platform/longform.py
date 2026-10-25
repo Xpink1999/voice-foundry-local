@@ -1,7 +1,6 @@
 """Streaming book import and independently checkpointed segment production."""
 import codecs
 import hashlib
-import io
 import json
 import logging
 import re
@@ -10,7 +9,7 @@ import time
 from pathlib import Path
 import numpy as np
 from .audio import sha256,write_wav
-from .schemas import GenerationInput,LongformRegenerationInput
+from .schemas import LongformRegenerationInput
 from .store import now,uid
 from .longform_store import LongformStore
 
@@ -72,9 +71,7 @@ class Longform:
         self.stop_event.set();self.wake.set()
         for t in self.threads:t.join(timeout=10)
     def book(self,identity):
-        item=self.db.book(identity)
-        if item.get('deleted_batch'):raise ValueError('作品已移入回收站，请先恢复')
-        return self.db.public(item)
+        return self.db.public(self.db.book(identity))
     def _body(self,identity,**values):
         with self.store.lock,self.store.connect() as db:
             row=db.execute('SELECT body FROM lf_books WHERE id=?',(identity,)).fetchone()
@@ -249,7 +246,7 @@ class Longform:
         with self.store.lock,self.store.connect() as db:
             book=self.db.book(identity);self.ensure_idle_export(identity)
             if book['phase']!='ready':raise ValueError('文本尚未准备好')
-            where="book_id=? AND status='failed'";args=[identity]
+            where="book_id=? AND status='failed' AND deleted_batch IS NULL";args=[identity]
             if number is not None:where+=' AND no=?';args.append(number);self.db.segment(identity,number)
             if chapter is not None:where+=' AND chapter_no=?';args.append(chapter);self.db.chapter(identity,chapter)
             counts=db.execute('SELECT chapter_no,COUNT(*) FROM lf_segments WHERE '+where+' GROUP BY chapter_no',args).fetchall()

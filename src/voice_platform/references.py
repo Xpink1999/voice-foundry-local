@@ -1,13 +1,7 @@
 """Durable recording/clip library, preprocessing queue and controlled clone comparison."""
 import copy
-import json
 import logging
-import mimetypes
-import os
-import subprocess
-import sys
 import threading
-import time
 from pathlib import Path
 from .audio import sha256,safe_name
 from .schemas import GenerationInput,VoiceInput
@@ -25,7 +19,10 @@ class ReferenceLibrary:
         if not self.options.get('enabled',False):return
         for kind in ('recordings','reference_comparisons'):
             for item in self.store.list(kind):
-                if item['status']=='running':self.store.update(kind,item['id'],status='failed',error='预处理服务中断；原始录音及已有片段保留，可重试')
+                if item['status'] in {'running','cancel_requested'}:
+                    changes=dict(status='cancelled' if item['status']=='cancel_requested' else 'failed',error='预处理服务中断；原始录音及已有片段保留，可重试')
+                    if item['status']=='cancel_requested' and item.get('smart_reference'):changes['smart_reference']=dict(item['smart_reference'],status='cancelled')
+                    self.store.update(kind,item['id'],**changes)
         self.stop_event.clear();self.thread=threading.Thread(target=self._work,name='reference-worker',daemon=True);self.thread.start()
 
     def stop(self):
@@ -33,6 +30,7 @@ class ReferenceLibrary:
         if self.thread:self.thread.join(timeout=10)
 
     def upload(self,filename,content,source,authorization,rights,smart_reference=False,metadata=None):
+        if self.platform.shutdown.is_set():raise ValueError('服务正在停止，请重新启动后提交')
         if not self.options.get('enabled'):raise ValueError('参考预处理未启用，请检查配置')
         if sum(r['status'] in {'queued','running','cancel_requested'} for r in self.store.list('recordings'))>=self.options.get('max_pending_recordings',10):raise ValueError('录音预处理队列已满，请稍后重试')
         if not source.strip() or not authorization.strip():raise ValueError('请填写来源与授权说明')
@@ -63,11 +61,6 @@ class ReferenceLibrary:
         self.store.update('recordings',recording['id'],duration=info.duration,analysis_path=str(target.relative_to(self.data)))
         return dict(recording,analysis_path=str(target),duration=info.duration)
 
-    def _kill(self,process):
-        if process.poll() is None:
-            if os.name=='nt':subprocess.run(['taskkill','/PID',str(process.pid),'/T','/F'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
-            else:process.terminate()
-
     def _run_worker(self,request,folder,kind,identity):
         from .worker_runner import run_worker
         return run_worker(self,request,folder,kind,identity)
@@ -75,9 +68,13 @@ class ReferenceLibrary:
     def _analyze(self,recording):
         attempt=recording.get('attempt',0)+1
         folder=self.data/'recordings'/recording['id']/f'analysis-{attempt}-{uid()[:8]}'
-        folder.mkdir(parents=True)
-        self.store.update('recordings',recording['id'],status='running',attempt=attempt,progress=1,error=None,message='解码并保留原始录音')
+        with self.store.lock:
+            current=self.store.get('recordings',recording['id'])
+            if self.stop_event.is_set() or current['status']!='queued' or current.get('deleted_at'):raise InterruptedError('排队分析已停止，原件保留')
+            folder.mkdir(parents=True)
+            self.store.update('recordings',recording['id'],status='running',attempt=attempt,progress=1,error=None,message='解码并保留原始录音')
         decoded=self._decode(recording,folder)
+        if self.stop_event.is_set() or self.store.get('recordings',recording['id'])['status']=='cancel_requested':raise InterruptedError('录音分析已停止，原件保留')
         result=self._run_worker(dict(mode='analyze',recording=decoded),folder,'recordings',recording['id'])
         candidates=[]
         for index,clip in enumerate(result['clips']):
@@ -88,10 +85,13 @@ class ReferenceLibrary:
                 saved=False,embedding=embedding,analysis_models=result['summary']['models'],transcript_history=[],created_at=now())
             for key in ('root_recording_id','processing_id','processing_output_id','source_lineage','source_label'):
                 if key in recording:reference[key]=recording[key]
-            self.store.save('references',reference);candidates.append(identity)
-        old=self.store.get('recordings',recording['id'])
-        self.store.update('recordings',recording['id'],status='succeeded',progress=100,message='候选片段已生成，请试听选择并保存',
-                          summary=result['summary'],candidate_ids=old['candidate_ids']+candidates,finished_at=now())
+            candidates.append(reference)
+        with self.store.lock:
+            old=self.store.get('recordings',recording['id'])
+            if self.stop_event.is_set() or old['status']=='cancel_requested':raise InterruptedError('录音分析已停止，原件和已有片段保留')
+            for reference in candidates:self.store.save('references',reference)
+            self.store.update('recordings',recording['id'],status='succeeded',progress=100,message='候选片段已生成，请试听选择并保存',
+                              summary=result['summary'],candidate_ids=old['candidate_ids']+[r['id'] for r in candidates],finished_at=now())
 
     def _work(self):
         while not self.stop_event.is_set():
@@ -116,6 +116,7 @@ class ReferenceLibrary:
 
     def save(self,identity,reference_ids):
         recording=self.store.get('recordings',identity)
+        if recording.get('deleted_at'):raise ValueError('录音已在回收站，请先恢复')
         if not set(reference_ids)<={r['id'] for r in self.platform.restoration.candidates(recording)}:raise ValueError('片段不属于此录音或其处理结果')
         with self.store.lock:
             for rid in reference_ids:self.store.update('references',rid,saved=True,saved_at=now())
@@ -124,6 +125,7 @@ class ReferenceLibrary:
     def transcript(self,identity,request):
         with self.store.lock:
             item=self.store.get('references',identity);old=item.get('transcript',{})
+            if item.get('deleted_at'):raise ValueError('参考已在回收站，请先恢复')
             value=dict(old,text=request.text,confirmed=request.confirmed,version=old.get('version',1)+1,status='confirmed' if request.confirmed else 'edited_unconfirmed',edited_at=now(),source='user_edit')
             return self.store.update('references',identity,transcript=value,transcript_history=item.get('transcript_history',[])+[dict(old,replaced_at=now())])
 
@@ -156,6 +158,8 @@ class ReferenceLibrary:
 
     def retry(self,identity):
         item=self.store.get('recordings',identity)
+        if self.platform.shutdown.is_set():raise ValueError('服务正在停止，请重新启动后提交')
+        if item.get('deleted_at'):raise ValueError('录音已在回收站，请先恢复')
         if item['status'] not in {'failed','cancelled'}:raise ValueError('只可重试失败或已取消的录音分析')
         changes=dict(status='queued',progress=0,error=None)
         if item.get('smart_reference'):changes['smart_reference']=dict(status='analyzing',message='正在重新分析原录音')
@@ -168,8 +172,9 @@ class ReferenceLibrary:
         self.wake.set();return self.store.get('recordings',identity)
 
     def cancel(self,identity):
-        item=self.store.get('recordings',identity)
-        if item['status'] in {'queued','running'}:item=self.store.update('recordings',identity,status='cancelled' if item['status']=='queued' else 'cancel_requested')
+        with self.store.lock:
+            item=self.store.get('recordings',identity)
+            if item['status'] in {'queued','running'}:item=self.store.update('recordings',identity,status='cancelled' if item['status']=='queued' else 'cancel_requested')
         workflow=item.get('smart_reference')
         if workflow and workflow['status'] not in {'ready','partial','failed','cancelled'}:
             if workflow.get('processing_id'):

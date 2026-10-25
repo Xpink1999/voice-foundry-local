@@ -20,7 +20,7 @@ def run_worker(owner,request,folder,kind,identity):
     folder.mkdir(parents=True,exist_ok=True)
     path=folder/'request.json';path.write_text(json.dumps(dict(request,config=request.get('config_snapshot',owner.config)),ensure_ascii=False),encoding='utf-8')
     environment=dict(os.environ,OMP_NUM_THREADS=str(owner.options['cpu_threads']),MKL_NUM_THREADS=str(owner.options['cpu_threads']),OPENBLAS_NUM_THREADS=str(owner.options['cpu_threads']),
-                     HF_HUB_OFFLINE='1',TRANSFORMERS_OFFLINE='1',PYTHONUTF8='1',VOICE_WORKER_OWNED='1',NUMBA_CACHE_DIR=str(Path(owner.config['root'])/'runtime/numba-cache'))
+                     HF_HUB_OFFLINE='1',TRANSFORMERS_OFFLINE='1',PYTHONUTF8='1',VOICE_WORKER_OWNED='1',NUMBA_CACHE_DIR=str(Path(owner.config['cache_dir'])/'numba'))
     with (folder/'worker.log').open('wb') as log_file:
         process=subprocess.Popen([sys.executable,'-m','voice_platform.reference_worker',str(path)],cwd=owner.config['root'],env=environment,
             stdout=log_file,stderr=log_file,stdin=subprocess.PIPE,creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)

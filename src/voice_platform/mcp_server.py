@@ -3,6 +3,7 @@ from .client import Client
 from .cli import copy_export,download_book_export
 from functools import lru_cache
 from pathlib import Path
+import json
 
 mcp = FastMCP("voice-foundry", instructions="独立本地语音生产平台；所有项目共用此服务。先查模型能力和音色。情绪、语速、风格为近似控制。生成结果默认待审核，工具不能代替用户试听审核；正式导出仅允许人工批准结果。")
 
@@ -151,10 +152,56 @@ def voice_stop_service() -> dict:
     return _client().stop()
 
 @mcp.tool()
-def voice_import_book(path:str,title:str='',encoding:str='auto',voice_id:str='',project_id:str='')->dict:
+def voice_import_book(path:str,title:str='',encoding:str='auto',voice_id:str='',project_id:str='',style:str='',clone_mode:str='reference')->dict:
     """整本导入本机 TXT/Markdown，流式上传；支持 GB2312/GBK/GB18030、UTF-8/UTF-16。后台自动章节/段落拆分，默认暂停，保存原件。"""
-    file=Path(path).resolve()
-    with file.open('rb') as stream:return api().request('POST','/longform/books',files={'file':(file.name,stream,'text/plain')},data=dict(title=title,encoding=encoding,voice_id=voice_id,project_id=project_id))
+    file=Path(path)
+    if not file.is_absolute():raise ValueError('请使用用户明确指定的绝对文本路径')
+    with file.open('rb') as stream:return api().request('POST','/longform/books',files={'file':(file.name,stream,'text/plain')},data=dict(title=title,encoding=encoding,voice_id=voice_id,project_id=project_id,style=style,clone_mode=clone_mode))
+
+@mcp.tool()
+def voice_regenerate_result(result_id:str,reference_id:str|None=None,clone_mode:str|None=None,style:str|None=None,seed:int|None=None)->dict:
+    """按选定参考或原冻结配置生成新的待审核候选。原音频和审核保留；不代替人工试听。"""
+    return api().request('POST',f'/results/{result_id}/regenerate',json={key:value for key,value in dict(reference_id=reference_id,clone_mode=clone_mode,style=style,seed=seed).items() if value is not None})
+
+@mcp.tool()
+def voice_references()->list:
+    """查询已保存参考片段的名称、场景、标签和转写，不读取音频文件。"""
+    return api().request('GET','/references')
+
+@mcp.tool()
+def voice_update_reference(reference_id:str,name:str|None=None,scenario:str|None=None,tags:list[str]|None=None,notes:str|None=None)->dict:
+    """按用户要求命名或标注参考片段。保留录音、授权和已提交任务，不自动批准。"""
+    return api().request('PUT','/references/'+reference_id,json={key:value for key,value in dict(name=name,scenario=scenario,tags=tags,notes=notes).items() if value is not None})
+
+@mcp.tool()
+def voice_attach_references(voice_id:str,reference_ids:list[str])->dict:
+    """将已保存片段添加为人物场景参考，保留已有默认参考，不拼接录音。"""
+    return api().request('POST','/voices/'+voice_id+'/references',json={'reference_ids':reference_ids})
+
+@mcp.tool()
+def voice_book_generation(book_id:str,segment_no:int)->dict:
+    """查询单段实际采用的参考、克隆模式、演绎及种子；不读取全书。"""
+    return api().request('GET',f'/longform/books/{book_id}/segments/{segment_no}/generation')
+
+@mcp.tool()
+def voice_book_attempts(book_id:str,segment_no:int,limit:int=20,offset:int=0)->dict:
+    """分页查看分段版本记录，成功版本保留独立试听地址，不改变审核。"""
+    client=api();item=client.request('GET',f'/longform/books/{book_id}/segments/{segment_no}/attempts',params=dict(limit=limit,offset=offset))
+    for take in item['items']:
+        if json.loads(take['body']).get('status')=='succeeded':take['audio_url']=f'{client.url}/api/v1/longform/books/{book_id}/segments/{segment_no}/attempts/{take["attempt"]}/audio'
+    return item
+
+@mcp.tool()
+def voice_book_regenerate(book_id:str,segment_no:int,reference_id:str|None=None,clone_mode:str|None=None,style:str|None=None,seed:int|None=None,use_book_defaults:bool=False,start:bool=False)->dict:
+    """调整参考并重做一段。start=true 只生成目标段；旧音频保留，本章回到待审核，不续作其他段。先暂停作品。"""
+    body={key:value for key,value in dict(reference_id=reference_id,clone_mode=clone_mode,style=style,seed=seed).items() if value is not None}
+    body.update(use_book_defaults=use_book_defaults,start=start)
+    return api().request('POST',f'/longform/books/{book_id}/segments/{segment_no}/regenerate',json=body)
+
+@mcp.tool()
+def voice_book_use_attempt(book_id:str,segment_no:int,attempt:int)->dict:
+    """按用户选定的版本采用成功旧音频；保留历史并使本章回到待审核，不代替人工听审。"""
+    return api().request('POST',f'/longform/books/{book_id}/segments/{segment_no}/use-attempt',json={'attempt':attempt})
 
 @mcp.tool()
 def voice_books(limit:int=20,offset:int=0)->dict:

@@ -79,8 +79,9 @@
   async function applyRoute() {
     if (!ready || applying) return;
     applying = true;
+    const requestedHash=location.hash;
     try {
-      const target = VoiceWorkflow.decodeRoute(location.hash);
+      const target = VoiceWorkflow.decodeRoute(requestedHash);
       navigate(target.page);
       if (target.page === 'voices') {
         window.voiceWorkspace.showPane(target.pane);
@@ -95,7 +96,7 @@
       if (target.page === 'review') {state.reviewJob = target.id; renderResults();}
       if (target.page === 'assets') await window.assetUI.restoreContext(target);
     } catch (error) {notice(tr('无法恢复该工作位置：{0}', [error.message]));}
-    finally {applying = false; history.replaceState(null, '', route());}
+    finally {applying=false;if(location.hash!==requestedHash)scheduleRoute();else history.replaceState(null,'',route());}
   }
   const scheduleRoute = () => {clearTimeout(routeTimer); routeTimer = setTimeout(applyRoute, 0);};
   window.addEventListener('popstate', scheduleRoute); window.addEventListener('hashchange', scheduleRoute);
@@ -130,6 +131,7 @@
     });
   }
   function batchSubmitted(batch) {
+    state.detailJob=null;state.detailToken=(state.detailToken||0)+1;state.eventSource?.close();state.eventSource=null;stopLiveAudio();$('job-detail').hidden=true;
     $('task-project').value = ''; $('task-status').value = ''; $('task-archive-view').value = 'current'; $('task-archive-view').dispatchEvent(new Event('change'));
     navigate('tasks');
     notice(tr('已提交 {0} 条台词，任务在后台继续。', [batch.jobs.length]), [{label: tr('返回批量台词'), run: () => navigate('batch')}]);

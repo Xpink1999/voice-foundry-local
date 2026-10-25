@@ -92,10 +92,16 @@ voice book-resume $bookId
 voice book-pause $bookId
 voice book-retry-failed $bookId
 voice book-segments $bookId 1 --limit 25
+voice book-generation $bookId 1
+voice book-attempts $bookId 1
+voice book-regenerate $bookId 1 --reference-id REFERENCE_ID --start
+voice book-use-attempt $bookId 1 1
 voice book-export $bookId --mode chapters --draft
 voice book-export-status $exportId
 voice book-download $exportId --dest .\output
 ~~~
+
+`book-generation`은 고정된 설정을, `book-attempts`는 이전 생성 기록을 보여 줍니다. `book-regenerate --start`는 지정 구간만 생성하며 `--start`를 생략하면 설정을 바꾸고 나중에 재개할 수 있도록 대기시킵니다. `book-use-attempt`는 성공한 이전 버전을 적용합니다. 두 경우 모두 장을 다시 검토해야 합니다. 일반 후보는 `voice regenerate-result RESULT_ID --reference-id REFERENCE_ID`로 검토 대기 상태의 새 후보를 만듭니다. MCP도 참조 재생성, 기록 조회, 버전 적용을 지원합니다. 클립 관리는 `voice references`, `voice update-reference REFERENCE_ID metadata.json`, `voice attach-references VOICE_ID --ids REFERENCE_ID`를 사용하세요.
 
 `voice delete-assets`는 `--apply`가 없으면 변경 내용을 미리 보여줍니다. 삭제 묶음 ID를 `voice restore-asset-batch`에 전달하면 묶음을 복구합니다.
 

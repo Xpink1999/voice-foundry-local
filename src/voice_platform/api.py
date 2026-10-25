@@ -29,27 +29,33 @@ def create_app(config=None):
     async def lifespan(app):
         # Process lease avoids two workers touching one persistent queue, even on different ports.
         lease = open(Path(config["data_dir"]) / "service.lock", "a+b")
-        if lease.tell() == 0:
-            lease.write(b"0")
-            lease.flush()
-        lease.seek(0)
-        if os.name == "nt":
-            import msvcrt
-            msvcrt.locking(lease.fileno(), msvcrt.LK_NBLCK, 1)
-        else:
-            import fcntl
-            fcntl.flock(lease, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        handler = RotatingFileHandler(Path(config["log_dir"]) / "platform.log", maxBytes=5_000_000, backupCount=5, encoding="utf-8")
-        handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s"))
-        logging.getLogger("voice_platform").addHandler(handler)
-        platform.start()
+        handler = None
+        start_attempted = False
         try:
+            if lease.tell() == 0:
+                lease.write(b"0")
+                lease.flush()
+            lease.seek(0)
+            if os.name == "nt":
+                import msvcrt
+                msvcrt.locking(lease.fileno(), msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(lease, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            handler = RotatingFileHandler(Path(config["log_dir"]) / "platform.log", maxBytes=5_000_000, backupCount=5, encoding="utf-8")
+            handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s"))
+            logging.getLogger("voice_platform").addHandler(handler)
+            start_attempted = True
+            platform.start()
             yield
         finally:
-            platform.stop()
-            lease.close()
-            logging.getLogger("voice_platform").removeHandler(handler)
-            handler.close()
+            try:
+                if start_attempted:platform.stop()
+            finally:
+                lease.close()
+                if handler:
+                    logging.getLogger("voice_platform").removeHandler(handler)
+                    handler.close()
 
     app = FastAPI(title="Voice Foundry", version="1.0.0", lifespan=lifespan,
                   description="独立于游戏引擎和 Codex。异步生成、音色版本、人工审核、无损原件与可追溯导出。")
@@ -308,6 +314,7 @@ def create_app(config=None):
     @app.post('/api/v1/recordings/from-result',status_code=202)
     def result_recording(request:ResultRecordingInput):
         result=platform.store.get('results',request.result_id);path=platform.data/result['path']
+        if result.get('deleted_at'):raise ValueError('示例音频已在回收站，请先恢复')
         if sha256(path)!=result['sha256']:raise ValueError('生成结果哈希不匹配')
         return platform.references.upload(result['title']+'.wav',path.read_bytes(),'本平台生成的虚构声音；结果 '+result['id'],'本机生成样音，保存为待审核参考；未声称为真人身份',True,metadata=dict(generated_result_id=result['id'],source_label='设计声音样音'))
 

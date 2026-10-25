@@ -138,23 +138,23 @@
     },
     {
       "path": "docs/LONGFORM.en.md",
-      "bytes": 11716,
-      "sha256": "9300ceebe18e016d342426157c3f265d79ffaee3d30f5025d516f56a3037531c"
+      "bytes": 12561,
+      "sha256": "3491226278b6593be12c9c37105771dfb2bbc4db3fdbba1de1efd02cd2025e3b"
     },
     {
       "path": "docs/LONGFORM.ja.md",
-      "bytes": 13389,
-      "sha256": "09889bad2a6a24108c94abe6ffbadbf2d4c3093b3e545b8718edb3dae8f17d94"
+      "bytes": 14270,
+      "sha256": "25895a89dd9392f2365bcdd638d998190178b9e82db7e0f61bad61aac499e9f4"
     },
     {
       "path": "docs/LONGFORM.ko.md",
-      "bytes": 13414,
-      "sha256": "34c46de983517b3a3b4507cec269c98f2d368d63e5ab9e327864889f39b55206"
+      "bytes": 14338,
+      "sha256": "749c6638b8faa543e8a05f232caec573495fae96d2a49e84b0d129f8ba1a2ee6"
     },
     {
       "path": "docs/LONGFORM.md",
-      "bytes": 11450,
-      "sha256": "0c63f66e8b4feb8ad0ff6c518003508f08eb5155d87c3e391312ecba9a3a3f50"
+      "bytes": 12189,
+      "sha256": "4cd92a154ec1129c007326e844f2b2e880edd4b367e650616636b42021faa136"
     },
     {
       "path": "docs/MAINTENANCE.en.md",
@@ -178,8 +178,8 @@
     },
     {
       "path": "docs/MODULES.md",
-      "bytes": 4922,
-      "sha256": "cd2885da6bab5386c197c97ebc4b4f48b86c5396293009f71b4d0a7838e3e714"
+      "bytes": 5125,
+      "sha256": "f79cbac1810bc9f2d4a469c375da6691bc0e99379733b1dc4b6650d344b4d283"
     },
     {
       "path": "docs/PUBLISHING.md",
@@ -208,8 +208,8 @@
     },
     {
       "path": "docs/TESTING.md",
-      "bytes": 1893,
-      "sha256": "6f48ce6413967b163eeab0c9e7f5f0412f394aa56dd0cf5c803a51ef8f76fd6d"
+      "bytes": 2231,
+      "sha256": "e4d397ba8e809cd1544dff52f5076e79bced897af8e4337033f9e09b50ad4de8"
     },
     {
       "path": "docs/UX_REVIEW.md",
@@ -1178,8 +1178,8 @@
     },
     {
       "path": "scripts/install.ps1",
-      "bytes": 6109,
-      "sha256": "45f0821f7cf93baee38b9fe3523ecf61cca33f351bb5edb795748ccad6334b1d"
+      "bytes": 7160,
+      "sha256": "e405e1ef17249b6657eb0cb2734c4277a193d4638fed5fc2ef7ca9ea071fa48d"
     },
     {
       "path": "scripts/package_public.py",
@@ -1233,8 +1233,8 @@
     },
     {
       "path": "src/voice_platform/api.py",
-      "bytes": 27213,
-      "sha256": "1ac25dceeef304a86d31daebd09b4d520772fdbfc8a240d4e4f284b5654901e6"
+      "bytes": 27574,
+      "sha256": "449f2eb2c05e66821e8212d5b6fbc219b594acb36497ab7c3e73b433370ef93a"
     },
     {
       "path": "src/voice_platform/assets.py",
@@ -1248,8 +1248,8 @@
     },
     {
       "path": "src/voice_platform/cli.py",
-      "bytes": 14322,
-      "sha256": "3638b284d127dc58115258262cf8f894c66b08d6b2fb237dc4747c8561caee79"
+      "bytes": 17385,
+      "sha256": "e02ec33bdb35d800f6ebed20b1a98a08e3491dbf048991f4516a75ac62e4bac0"
     },
     {
       "path": "src/voice_platform/client.py",
@@ -1283,23 +1283,23 @@
     },
     {
       "path": "src/voice_platform/longform.py",
-      "bytes": 30492,
-      "sha256": "57329abb2acd0be1939d6c4502133828a71b7c55cc07d475b30fe7e7a8316b48"
+      "bytes": 30374,
+      "sha256": "108051d4c5df066ce0e898d895d797a28935a53e0702ca55465d67067e15b7a2"
     },
     {
       "path": "src/voice_platform/longform_export.py",
-      "bytes": 12616,
-      "sha256": "181a9f9d9dafb8ce61cf9699dfefa17c4fef11de7137c18859a749935d331a23"
+      "bytes": 12624,
+      "sha256": "7d064f61b0b5cf14f027d691978544440113a2dec86715bd1b8c2d186b3b346e"
     },
     {
       "path": "src/voice_platform/longform_store.py",
-      "bytes": 7661,
-      "sha256": "017829c229a9a17b4f5cdd8401a63d07a885fa10fc7d71629b89fc69ec574784"
+      "bytes": 7865,
+      "sha256": "ef8a8a34053f78acb97a77f52680d22d1ce66c6ab7d0cc79c6cc333c4904cf0d"
     },
     {
       "path": "src/voice_platform/mcp_server.py",
-      "bytes": 14025,
-      "sha256": "73a4fc89f2651c1f1b03645badcb47431c0a22c15ae237ff544f1eac5ad12f4d"
+      "bytes": 17514,
+      "sha256": "f77bc35ade5639041c3c7a2619429d783908269cd067c535e2719a5724bc85a7"
     },
     {
       "path": "src/voice_platform/process_engine.py",
@@ -1328,13 +1328,13 @@
     },
     {
       "path": "src/voice_platform/references.py",
-      "bytes": 16700,
-      "sha256": "f1507fed60f3803d78876d28fc19d53b5f710d6f2fcc958e0a478372ea973eda"
+      "bytes": 17926,
+      "sha256": "96a48dcf1d79edbf4c79cb0ce98b3fa53295787d804477d94c0c7afd4948c53f"
     },
     {
       "path": "src/voice_platform/restoration.py",
-      "bytes": 16908,
-      "sha256": "cae9a21fdee36a5e78d477d12e091f94d42f5b9f824307c0f70d57a4b59ad362"
+      "bytes": 17612,
+      "sha256": "8143616eed0200593a2e126b63263b1545cb14bd24b1a2998ed372b32d71230f"
     },
     {
       "path": "src/voice_platform/schemas.py",
@@ -1343,13 +1343,13 @@
     },
     {
       "path": "src/voice_platform/server.py",
-      "bytes": 918,
-      "sha256": "81f639f004854a0c35e39c9cfe9cca630899d9f48d9e6b8dee0a64285794bfe8"
+      "bytes": 893,
+      "sha256": "f4fa2d1efd6ddd924ca0ebe340611fddab54a4227ba5ddd7a201f054bcc10495"
     },
     {
       "path": "src/voice_platform/service.py",
-      "bytes": 37285,
-      "sha256": "12292e673f269a0c5afeb51455bfa5766532f4e0c5ddc880f3fe151dbff0ec65"
+      "bytes": 37866,
+      "sha256": "1345ecb697dff6cc3ed22ca8ae1833b44d5efc7fe2d69e31a42067ae0069eebe"
     },
     {
       "path": "src/voice_platform/store.py",
@@ -1358,8 +1358,8 @@
     },
     {
       "path": "src/voice_platform/worker_runner.py",
-      "bytes": 4111,
-      "sha256": "943278364172aef735479521431a4d89dc7565d2344ec9f6dbefd0074c3c2646"
+      "bytes": 4102,
+      "sha256": "1b54ae4f0994253da0cce8d3c5fbb826fb942fe865728399df0b92767144259b"
     },
     {
       "path": "start-voice.cmd",
@@ -1405,6 +1405,16 @@
       "path": "tests/test_assets.py",
       "bytes": 8967,
       "sha256": "e1bf1abfdf6cbefb242990aacdb09c28ffea1bd137d44cbb3f9d8c1290d01a7a"
+    },
+    {
+      "path": "tests/test_backend_audit.py",
+      "bytes": 9733,
+      "sha256": "dde320bfe0ba3042c55c0c74b0b3cb57cb4e1252781c427247eadd2cd89a2136"
+    },
+    {
+      "path": "tests/test_client_contracts.py",
+      "bytes": 6470,
+      "sha256": "c79184eff4a152db050739d1c71295060aff742d250bbf995cf4ddfbb9df9d2e"
     },
     {
       "path": "tests/test_i18n.py",
@@ -1462,6 +1472,11 @@
       "sha256": "9a29355193d189a8023ecdf623de11e9c70b5485b418d76ab49bfc3b9125b983"
     },
     {
+      "path": "tests/ui-races.test.cjs",
+      "bytes": 6581,
+      "sha256": "5dbac13abf77f7c56bb0bc05cdba733db8e906bc3cb44af13e49294cd7bdd8a6"
+    },
+    {
       "path": "tests/workflow.test.cjs",
       "bytes": 5267,
       "sha256": "4b134452c8d610655bcd2fb415a9d169979e566d1f0b5c127bef8f891dbadd27"
@@ -1473,18 +1488,18 @@
     },
     {
       "path": "web/app.js",
-      "bytes": 40598,
-      "sha256": "1c14aa51de2a112738b5720e9ffebb6ef533ef262335ae99e5efd9c07a8e4852"
+      "bytes": 38065,
+      "sha256": "112fd4339cec1bab04feb41f9a92584ad166df4224a5682f1df46ee28cc71622"
     },
     {
       "path": "web/assets-ui.js",
-      "bytes": 13626,
-      "sha256": "3bbd39d2f24a08728d32d110099003b46ec3bc7dc023baa820c16c3136af5584"
+      "bytes": 14456,
+      "sha256": "9be161c718621a18e03a2cc4a7816fe739c5be73220bdba58cfc901df03abd45"
     },
     {
       "path": "web/batch-ui.js",
-      "bytes": 6266,
-      "sha256": "ab53c8510ef5adc6ae2bc22b6f2ffb64f35e46dd770d396ee3034ded4931b66a"
+      "bytes": 6239,
+      "sha256": "8d7031b03a1238fd2f66d13a1fa75f6c4a4f7c4e6e359ded0f5de641183d4d6f"
     },
     {
       "path": "web/i18n.js",
@@ -1494,7 +1509,7 @@
     {
       "path": "web/index.html",
       "bytes": 28078,
-      "sha256": "9c2563cee40d24fffa13dc48f5631a1e06e743fccde77c0415e755e214f2a048"
+      "sha256": "0ab56f626afe21594da21bfb33c36a9919286a948803e4fea4ea87cf1c8189a2"
     },
     {
       "path": "web/jobs-ui.js",
@@ -1523,8 +1538,8 @@
     },
     {
       "path": "web/longform-ui.js",
-      "bytes": 27745,
-      "sha256": "7d65fcaa0a862eedb71ca832a0c12dab7e01d85dd990ac813f6aa688ebb16f56"
+      "bytes": 27890,
+      "sha256": "272f51fac1ec9ded784bd76c523ea1cc634f48d4d8761ef9167b99af3a969809"
     },
     {
       "path": "web/longform.css",
@@ -1553,8 +1568,8 @@
     },
     {
       "path": "web/regeneration-ui.js",
-      "bytes": 14554,
-      "sha256": "511e16e44d5266968ab4801f62b0fa431187d5015cbad2dab52eef0fa114a18b"
+      "bytes": 14745,
+      "sha256": "358225dc82a25e1541451a183185efd77a7ef7755344bd16cfa6310524ebd2d2"
     },
     {
       "path": "web/review-export-ui.js",
@@ -1588,8 +1603,8 @@
     },
     {
       "path": "web/workflow-ui.js",
-      "bytes": 18486,
-      "sha256": "265f5a5c437bfb17461d41e51156195c9b0b5ae348979b3de8475bfc8397cea8"
+      "bytes": 18736,
+      "sha256": "b10e64779fffc66dd62d62bfade58537cdc830785bc6b55df16d9127db1fae58"
     },
     {
       "path": "web/workflow.css",

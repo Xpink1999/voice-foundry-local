@@ -94,14 +94,20 @@ voice book-resume $bookId
 voice book-pause $bookId
 voice book-retry-failed $bookId
 voice book-segments $bookId 1 --limit 25
+voice book-generation $bookId 1
+voice book-attempts $bookId 1
+voice book-regenerate $bookId 1 --reference-id REFERENCE_ID --start
+voice book-use-attempt $bookId 1 1
 voice book-export $bookId --mode chapters --draft
 voice book-export-status $exportId
 voice book-download $exportId --dest .\output
 ~~~
 
+`book-generation` 查看当前冻结配置，`book-attempts` 查看历史版本；`book-regenerate --start` 只生成指定段，省略 `--start` 则仅更新配置并排入待生成。`book-use-attempt` 采用成功旧版，两种修改都需要重新审核章节。普通候选用 `voice regenerate-result RESULT_ID --reference-id REFERENCE_ID` 创建待审核的新版本。MCP 提供对应的参考重做、版本查询和采用工具；片段管理使用 `voice references`、`voice update-reference REFERENCE_ID metadata.json` 和 `voice attach-references VOICE_ID --ids REFERENCE_ID`。
+
 `voice delete-assets` 默认只预览；显式加 `--apply` 后移入回收站。用删除批次 ID 调用 `voice restore-asset-batch` 可恢复整批。
 
-长文 REST 前缀 /api/v1/longform，资产管理前缀 /api/v1/assets；在线 /docs 提供完整契约。单段重做、历史试听与版本采用的字段见 [API 说明](API.md#按参考重做)。MCP 新增长文导入、分页、续作、导出和资产管理工具，仍不提供代替用户试听批准的工具。新的 MCP 连接可发现 33 个工具；当前已连接的 Codex 需要重连，不必重复安装模型。
+长文 REST 前缀 /api/v1/longform，资产管理前缀 /api/v1/assets；在线 /docs 提供完整契约。单段重做、历史试听与版本采用的字段见 [API 说明](API.md#按参考重做)。MCP 新增长文导入、分页、续作、导出和资产管理工具，仍不提供代替用户试听批准的工具。更新后请重连 MCP，使用实际发现的工具列表；不必重复安装模型。
 
 ## 配置与维护
 

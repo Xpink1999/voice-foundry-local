@@ -2,7 +2,6 @@
 import copy
 import json
 import logging
-import subprocess
 import threading
 from pathlib import Path
 import soundfile as sf
@@ -38,10 +37,12 @@ class AudioRestoration:
         return dict(enabled=self.options.get('enabled',False),device=self.options.get('device'),operations=models,originals_preserved=True)
 
     def submit(self,request,workflow_root=None):
+        if self.platform.shutdown.is_set():raise ValueError('服务正在停止，请重新启动后提交')
         if not self.options.get('enabled'):raise ValueError('音频处理未启用')
         with self.store.lock:
             if sum(i['status'] not in TERMINAL for i in self.store.list('audio_processing'))>=self.options['max_pending']:raise ValueError('音频处理队列已满，请稍后再试')
             source=self.store.get('recordings',request.recording_id)
+            if source.get('deleted_at'):raise ValueError('录音已在回收站，请先恢复')
             available={c['operation'] for c in self.capabilities()['operations'] if c['available']}
             if set(request.operations)-available:raise ValueError('所选处理模型尚未完整安装')
             if source['status'] not in TERMINAL:raise ValueError('请等待原录音时长与分析完成')
@@ -57,8 +58,9 @@ class AudioRestoration:
             self.store.save('audio_processing',item);self.wake.set();return item
 
     def cancel(self,identity):
-        item=self.store.get('audio_processing',identity)
-        if item['status'] not in TERMINAL:item=self.store.update('audio_processing',identity,status='cancelled' if item['status']=='queued' else 'cancel_requested')
+        with self.store.lock:
+            item=self.store.get('audio_processing',identity)
+            if item['status'] not in TERMINAL:item=self.store.update('audio_processing',identity,status='cancelled' if item['status']=='queued' else 'cancel_requested')
         return item
 
     def _run_worker(self,request,folder,kind,identity):return run_worker(self,request,folder,kind,identity)
@@ -113,10 +115,14 @@ class AudioRestoration:
     def import_output(self,identity,output_id):
         with self.store.lock:
             item=self.store.get('audio_processing',identity)
+            if item.get('deleted_at'):raise ValueError('处理记录已在回收站，请先恢复')
             output=next((o for o in item['outputs'] if o['id']==output_id),None)
             if not output:raise KeyError('处理输出不存在')
             if output['role']!='speech':raise ValueError('背景音乐轨不能用作人物声音参考')
-            if output.get('recording_id'):return self.store.get('recordings',output['recording_id'])
+            if output.get('recording_id'):
+                recording=self.store.get('recordings',output['recording_id'])
+                if recording.get('deleted_at'):raise ValueError('处理结果录音已在回收站，请先恢复')
+                return recording
             path=self.data/output['path']
             if sha256(path)!=output['sha256']:raise ValueError('处理结果哈希不匹配')
             source=item['source_snapshot']
@@ -201,8 +207,10 @@ class AudioRestoration:
     def create_reference_voice(self,request):
         with self.store.lock:
             ref=self.store.get('references',request.reference_id)
+            if ref.get('deleted_at'):raise ValueError('参考已在回收站，请先恢复')
             if not ref['rights_confirmed']:raise ValueError('请先确认录音用途授权，再保存为人物参考')
             voice=self.store.get('voices',request.voice_id) if request.voice_id else None
+            if voice and voice.get('deleted_at'):raise ValueError('人物已在回收站，请先恢复')
             if voice and voice['status']=='archived':raise ValueError('该人物已归档，请先恢复人物')
             if ref.get('recording_id'):self.platform.references.save(ref['recording_id'],[ref['id']])
             if voice:

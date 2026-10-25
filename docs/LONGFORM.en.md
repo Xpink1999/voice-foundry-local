@@ -94,10 +94,16 @@ voice book-resume $bookId
 voice book-pause $bookId
 voice book-retry-failed $bookId
 voice book-segments $bookId 1 --limit 25
+voice book-generation $bookId 1
+voice book-attempts $bookId 1
+voice book-regenerate $bookId 1 --reference-id REFERENCE_ID --start
+voice book-use-attempt $bookId 1 1
 voice book-export $bookId --mode chapters --draft
 voice book-export-status $exportId
 voice book-download $exportId --dest .\output
 ~~~
+
+`book-generation` shows the frozen settings and `book-attempts` lists previous takes. `book-regenerate --start` generates only that segment; without `--start`, it updates the settings and queues the segment for a later resume. `book-use-attempt` adopts a successful earlier take. Both changes require a new chapter review. For a regular candidate, `voice regenerate-result RESULT_ID --reference-id REFERENCE_ID` creates a new version awaiting review. MCP provides the same reference regeneration, history and take adoption tools. Manage clips with `voice references`, `voice update-reference REFERENCE_ID metadata.json` and `voice attach-references VOICE_ID --ids REFERENCE_ID`.
 
 `voice delete-assets` previews changes unless `--apply` is supplied. Use `voice restore-asset-batch` with the deletion batch ID to restore a batch.
 

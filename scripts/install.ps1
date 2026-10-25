@@ -61,6 +61,17 @@ try {
     Invoke-Checked $Python $CheckArguments
     $TestDirectory = 'runtime/pytest-install-' + [guid]::NewGuid().ToString('N')
     Invoke-Checked $Python @('-m','pytest','-q','--basetemp',$TestDirectory)
+    # Successful installation checks contain only this run's disposable fixtures.
+    # Failed checks keep their directory so the reported failure can be inspected.
+    $TestPath = [IO.Path]::GetFullPath((Join-Path $PlatformRoot $TestDirectory))
+    $RuntimePath = [IO.Path]::GetFullPath((Join-Path $PlatformRoot 'runtime'))
+    if ((Split-Path $TestPath -Parent) -ne $RuntimePath -or (Split-Path $TestPath -Leaf) -notmatch '^pytest-install-[a-f0-9]{32}$') { throw 'Refusing to clean an unexpected test directory.' }
+    if (Test-Path -LiteralPath $TestPath) {
+        if ((Get-Item -LiteralPath $TestPath).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Refusing to clean a linked test directory.' }
+        $TestLinks = @(Get-ChildItem -LiteralPath $TestPath -Recurse -Force | Where-Object { $_.Attributes -band [IO.FileAttributes]::ReparsePoint })
+        if ($TestLinks.Count -gt 0) { throw 'Refusing to clean test fixtures containing linked directories.' }
+        Remove-Item -LiteralPath $TestPath -Recurse -Force
+    }
     if ($CoreOnly -or $SkipModels) { Write-Warning 'Model weights were not installed. The interface can be inspected, but speech generation is not ready.' }
     if (-not $NoStart) { Invoke-Checked $Python @('-m','voice_platform.cli','start') }
     Write-Host 'Installation checks passed. Use start-voice.cmd to open the interface.'

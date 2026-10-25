@@ -1,6 +1,5 @@
 """Indexed long-form ledger. No book text or segment audio is loaded as a collection."""
 import json
-from .store import now
 
 class LongformStore:
     def __init__(self,store):
@@ -49,7 +48,9 @@ class LongformStore:
     def book(self,identity):
         with self.store.connect() as db:row=db.execute('SELECT * FROM lf_books WHERE id=?',(identity,)).fetchone();names=[d[1] for d in db.execute('PRAGMA table_info(lf_books)')]
         if row is None:raise KeyError('长文作品不存在')
-        item=dict(zip(names,row));body=json.loads(item.pop('body'));return {**body,**item}
+        item=dict(zip(names,row));body=json.loads(item.pop('body'))
+        if item.get('deleted_batch'):raise ValueError('作品已移入回收站，请先恢复')
+        return {**body,**item}
     def books(self,limit=20,offset=0):
         with self.store.connect() as db:
             total=db.execute('SELECT COUNT(*) FROM lf_books WHERE deleted_batch IS NULL').fetchone()[0]
@@ -79,10 +80,12 @@ class LongformStore:
             where+=' AND no>?';args.append(after)
         return self.rows('lf_chapters',where,args,limit=limit,offset=offset)
     def chapter(self,identity,number):
+        self.book(identity)
         result=self.rows('lf_chapters','book_id=? AND no=?',[identity,number],limit=1)
         if not result['items']:raise KeyError('章节不存在')
         return result['items'][0]
     def segment(self,identity,number):
+        self.book(identity)
         result=self.rows('lf_segments','book_id=? AND no=?',[identity,number],limit=1)
         if not result['items']:raise KeyError('分段不存在')
         return result['items'][0]
@@ -91,9 +94,9 @@ class LongformStore:
         result=self.rows('lf_exports','book_id=?',[identity],order='created_at DESC',limit=limit,offset=offset)
         result['items']=[{**json.loads(r['body']),'state':r['state']} for r in result['items']];return result
     def export(self,identity):
-        with self.store.connect() as db:row=db.execute('SELECT state,body FROM lf_exports WHERE id=?',(identity,)).fetchone()
+        with self.store.connect() as db:row=db.execute('SELECT state,body FROM lf_exports WHERE id=? AND deleted_batch IS NULL',(identity,)).fetchone()
         if not row:raise KeyError('长文导出不存在')
-        return {**json.loads(row[1]),'state':row[0]}
+        item={**json.loads(row[1]),'state':row[0]};self.book(item['book_id']);return item
     def save_export(self,item):
         with self.store.lock,self.store.connect() as db:
             db.execute('INSERT INTO lf_exports(id,book_id,state,body,created_at) VALUES (?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET state=excluded.state,body=excluded.body',(item['id'],item['book_id'],item['state'],json.dumps(item,ensure_ascii=False),item['created_at']))

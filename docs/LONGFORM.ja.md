@@ -92,10 +92,16 @@ voice book-resume $bookId
 voice book-pause $bookId
 voice book-retry-failed $bookId
 voice book-segments $bookId 1 --limit 25
+voice book-generation $bookId 1
+voice book-attempts $bookId 1
+voice book-regenerate $bookId 1 --reference-id REFERENCE_ID --start
+voice book-use-attempt $bookId 1 1
 voice book-export $bookId --mode chapters --draft
 voice book-export-status $exportId
 voice book-download $exportId --dest .\output
 ~~~
+
+`book-generation` は固定済み設定、`book-attempts` は過去の生成履歴を表示します。`book-regenerate --start` は指定区間だけ生成し、`--start` を省略すると設定を更新して再開待ちにします。`book-use-attempt` は成功した旧版を採用します。いずれも章を再審査してください。通常候補は `voice regenerate-result RESULT_ID --reference-id REFERENCE_ID` で審査待ちの新候補を作ります。MCP にも参照再生成、履歴取得、版の採用があります。クリップ管理は `voice references`、`voice update-reference REFERENCE_ID metadata.json`、`voice attach-references VOICE_ID --ids REFERENCE_ID` を使います。
 
 `voice delete-assets` は `--apply` がなければ変更のプレビューです。削除バッチ ID を `voice restore-asset-batch` に渡すと一括復元できます。
 
