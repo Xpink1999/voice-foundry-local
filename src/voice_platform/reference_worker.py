@@ -25,7 +25,13 @@ def main():
     progress_path=source.parent/'progress.json'
     def progress(percent,message):
         write_progress(progress_path,percent,message)
-    if request['mode']=='process':
+    if request['mode']=='assemble':
+        from .speaker_tracking import assemble_clips
+        result=assemble_clips(request,source.parent,progress)
+    elif request['mode']=='track':
+        from .speaker_tracking import SpeakerTracker
+        result=SpeakerTracker(request['config']).run(request,source.parent,progress)
+    elif request['mode']=='process':
         from .processing_engines import ProcessingEngines
         result=ProcessingEngines(request['config']).process(request,source.parent,progress)
     else:

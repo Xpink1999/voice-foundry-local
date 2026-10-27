@@ -15,6 +15,7 @@ from .config import load_config, ROOT, installation_id
 from .schemas import ProjectInput, VoiceInput, GenerationInput, BatchInput, ReviewInput, ExportInput, SettingsInput,SaveClipsInput,TranscriptInput,CompareReferencesInput,ArchiveJobsInput,ProcessingInput,ResultRecordingInput,OutputRecordingInput,ReferenceVoiceInput
 from .schemas import LongformImportRetry,LongformAction,LongformExportInput,AssetBatch,ReviewBatch
 from .schemas import ReferenceMetadataInput
+from .schemas import TrackedSpeakerInput,TrackedClipsInput,AssembleClipsInput
 from .schemas import RegenerationInput,LongformRegenerationInput,UseAttemptInput
 from .assets import KINDS
 from .service import Platform, TERMINAL
@@ -336,17 +337,33 @@ def create_app(config=None):
     @app.get('/api/v1/audio-processing/{identity}/before')
     def processing_before(identity:str):
         item=platform.store.get('audio_processing',identity)
+        if item.get('deleted_at'):raise ValueError('处理记录已在回收站，请先恢复')
         if not item.get('before_path'):raise ValueError('任务尚未解码原件，请稍候')
         return FileResponse(platform.data/item['before_path'],media_type='audio/wav')
 
     @app.get('/api/v1/audio-processing/{identity}/outputs/{output_id}')
-    def processing_audio(identity:str,output_id:str):
+    def processing_audio(identity:str,output_id:str,download:bool=False):
         item=platform.store.get('audio_processing',identity);output=next((o for o in item['outputs'] if o['id']==output_id),None)
+        if item.get('deleted_at'):raise ValueError('处理记录已在回收站，请先恢复')
         if not output:raise KeyError('处理输出不存在')
-        return FileResponse(platform.data/output['path'],media_type='audio/wav')
+        from .audio import safe_name
+        return FileResponse(platform.data/output['path'],media_type='audio/wav',
+            filename=safe_name(output['label'])+'.wav' if download else None)
 
     @app.post('/api/v1/audio-processing/{identity}/analyze-output',status_code=202)
     def processing_analyze(identity:str,request:OutputRecordingInput):return platform.restoration.import_output(identity,request.output_id)
+
+    @app.put('/api/v1/audio-processing/{identity}/speakers/{speaker_id}')
+    def name_tracked_speaker(identity:str,speaker_id:str,request:TrackedSpeakerInput):
+        return platform.restoration.name_speaker(identity,speaker_id,request.name)
+
+    @app.post('/api/v1/audio-processing/{identity}/save-clips',status_code=201)
+    def save_tracked_clips(identity:str,request:TrackedClipsInput):
+        return platform.restoration.save_tracked(identity,request.output_ids,request.scenario)
+
+    @app.post('/api/v1/audio-processing/{identity}/assemble',status_code=202)
+    def assemble_tracked_clips(identity:str,request:AssembleClipsInput):
+        return platform.restoration.assemble(identity,request)
 
     @app.post('/api/v1/reference-voices',status_code=201)
     def reference_voice(request:ReferenceVoiceInput):return platform.restoration.create_reference_voice(request)

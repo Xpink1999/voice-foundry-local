@@ -13,8 +13,8 @@
   "files": [
     {
       "path": ".gitignore",
-      "bytes": 271,
-      "sha256": "56aa1c9e7a057b44a0395ce589624811aab828d8ff8aea835faea948e7bbc7a1"
+      "bytes": 286,
+      "sha256": "95fafda4b1e4270a153114e4b189bf3a30fda035285dc265137510df100a79db"
     },
     {
       "path": "bin/voice.cmd",
@@ -33,8 +33,8 @@
     },
     {
       "path": "config/platform.json",
-      "bytes": 2219,
-      "sha256": "e5112b5600cfd659ed07523c6a3816d3764336e47bbc91bd1e234cdd3ef16328"
+      "bytes": 2553,
+      "sha256": "9eb6f097ff37393ca6cb0cb68b5c54677f80777a0e962bffecef5b45d2a8b4a9"
     },
     {
       "path": "docs/API.md",
@@ -188,23 +188,23 @@
     },
     {
       "path": "docs/REFERENCE_PREPROCESSING.en.md",
-      "bytes": 9469,
-      "sha256": "4afadf050dce3d60cc3a051c1ae17bf50cbe1537b74fbf1e9d2cb3b7e77d8cad"
+      "bytes": 11578,
+      "sha256": "f682855bd81e4acd10ed51d60744a7eb7baf3c4b730d1069dea65a00dcf5b0b2"
     },
     {
       "path": "docs/REFERENCE_PREPROCESSING.ja.md",
-      "bytes": 10633,
-      "sha256": "494e417c1bdfb11a7dbce223a34e0a93084eee64d6e764b2009485c678b83487"
+      "bytes": 13076,
+      "sha256": "814cd18a1309bfe4ac6a4493f96791c58df7de1edeb2fea6188face67a75f322"
     },
     {
       "path": "docs/REFERENCE_PREPROCESSING.ko.md",
-      "bytes": 10457,
-      "sha256": "aa49d742c134e8b18beefccef666f5b92c0b0ea7e0edfc75fbe48e11b9f7a2bd"
+      "bytes": 12834,
+      "sha256": "6c450669bae3519f6ee6703d23d3870ab14ae3475b564b4df576145018fce80c"
     },
     {
       "path": "docs/REFERENCE_PREPROCESSING.md",
-      "bytes": 8971,
-      "sha256": "659969e1ba9c82ac5447742653fb3053f869ff740982c03de37ad964cb1693d5"
+      "bytes": 10857,
+      "sha256": "361394200063750157cc67cc0822e7667680c5f11d20e37b280bb65f63711300"
     },
     {
       "path": "docs/TESTING.md",
@@ -1077,6 +1077,416 @@
       "sha256": "856bfa782fbae7c43007cc02d554b0100ef4ff1995a27483a9de028b6c0b3d70"
     },
     {
+      "path": "LICENSES/speaker-tracking/aiohappyeyeballs/licenses/LICENSE",
+      "bytes": 13936,
+      "sha256": "3b2f81fe21d181c499c59a256c8e1968455d6689d269aa85373bfb6af41da3bf"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/aiohttp/licenses/LICENSE.txt",
+      "bytes": 11313,
+      "sha256": "2e4be5fc6c4c72a466fcb665d726e049a6891981fe536c4f04b6366749461d23"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/aiohttp/licenses/vendor/llhttp/LICENSE",
+      "bytes": 1069,
+      "sha256": "628168d68bb5a8a17e0bbefb3bd74e326e1edc20583d76f52f457c82c921867d"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/aiosignal/licenses/LICENSE",
+      "bytes": 11332,
+      "sha256": "6fd5243e92dd7f98ec69c7ac377728e74905709ff527a5bf98d6d0263c04f5b6"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/alembic/licenses/LICENSE",
+      "bytes": 1059,
+      "sha256": "6e68d94a03a0e3e327ddf3e86d1ebedc14eece3922022618fc246a36296fd0cc"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/asteroid-filterbanks/LICENSE",
+      "bytes": 1072,
+      "sha256": "c12aebc7a4eeeec2e482414004fd5d68275d7608552031cd48f4088b403f902d"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/colorlog/licenses/LICENSE",
+      "bytes": 1107,
+      "sha256": "b1d9082bc483623fd59fc7279b457f0e40d942a76426cde257239e04dfe4125a"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/contourpy/LICENSE",
+      "bytes": 1563,
+      "sha256": "8553102e03001dd966278098cc027d0683c412b34ea141351b060be4330f39a9"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/cycler/LICENSE",
+      "bytes": 1497,
+      "sha256": "f1218143d766da3fea66f13396b7f15df46a83303f29bf96ba6e98eb4d42f408"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/fonttools/licenses/LICENSE",
+      "bytes": 1093,
+      "sha256": "22bef80697ecfaa17f97e62b9a26dfa12820be05583e8dd12ad169b241274c99"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/fonttools/licenses/LICENSE.external",
+      "bytes": 20410,
+      "sha256": "b082a5f86775b2641f01bccb8b9c82908481de5f502bb254b1e13bfc2a9f303d"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/frozenlist/licenses/LICENSE",
+      "bytes": 11332,
+      "sha256": "6fd5243e92dd7f98ec69c7ac377728e74905709ff527a5bf98d6d0263c04f5b6"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/googleapis-common-protos/licenses/LICENSE",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/grpcio/licenses/LICENSE",
+      "bytes": 30814,
+      "sha256": "ed9abc49f1fa3e3ce962d8ac42e176125c0ab0051ec5783dfcc807dd2a4c1f0f"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/julius/licenses/LICENSE",
+      "bytes": 1059,
+      "sha256": "60f83da40026e37e259b69158852384ff2ee20615d9103a3f86b6cff48784661"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/kiwisolver/licenses/LICENSE",
+      "bytes": 3360,
+      "sha256": "b24c2bf6185f31a124ad6bacccae3071bdc7ad7882de00b00110aa62abb76a15"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/lightning/licenses/LICENSE",
+      "bytes": 11349,
+      "sha256": "a41e2fae9915ae56028f8dbd0bf27995f1907613cbcd2d81a61b010ad34e9fe9"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/lightning-utilities/licenses/LICENSE",
+      "bytes": 11349,
+      "sha256": "a41e2fae9915ae56028f8dbd0bf27995f1907613cbcd2d81a61b010ad34e9fe9"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/Mako/licenses/LICENSE",
+      "bytes": 1098,
+      "sha256": "8c1d171bc5d341ad9cd33d5e2c39b96a82c7bd49b3ae89a470c37e5822232054"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/markdown-it-py/licenses/LICENSE",
+      "bytes": 1078,
+      "sha256": "4a2260d6e2cd0f5a151a1e86dbfe7d3ed552b1e2beabf9941c1ba5c49cbce484"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/markdown-it-py/licenses/LICENSE.markdown-it",
+      "bytes": 1073,
+      "sha256": "792c48c5a849a15fdf9e37e8bcf9e6d1dd13b32b46c642a748a0a46a9919d473"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/matplotlib/LICENSE",
+      "bytes": 63442,
+      "sha256": "822e8e528147569a41975592aee19c11992ab667ba50451cd929031d5fc74491"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/mdurl/LICENSE",
+      "bytes": 2338,
+      "sha256": "7c605df6e28667a9603118e98274f64a49ce3eed0d26fccce9534a345e0ef955"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/multidict/licenses/LICENSE",
+      "bytes": 11313,
+      "sha256": "2e4be5fc6c4c72a466fcb665d726e049a6891981fe536c4f04b6366749461d23"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/opentelemetry-exporter-http-transport/licenses/LICENSE",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/opentelemetry-exporter-otlp/licenses/LICENSE",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/opentelemetry-exporter-otlp-common/licenses/LICENSE",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/opentelemetry-exporter-otlp-proto-common/licenses/LICENSE",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/opentelemetry-exporter-otlp-proto-grpc/licenses/LICENSE",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/opentelemetry-exporter-otlp-proto-http/licenses/LICENSE",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/opentelemetry-proto/licenses/LICENSE",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/opentelemetry-sdk/licenses/LICENSE",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/opentelemetry-semantic-conventions/licenses/LICENSE",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/optuna/licenses/LICENSE",
+      "bytes": 1081,
+      "sha256": "c3df8e8523cf46be4b366ee7dd11578454b10ea5ec5159e57df849513aafe059"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/optuna/licenses/LICENSE_THIRD_PARTY",
+      "bytes": 1929,
+      "sha256": "dbff6df3cb59b7fb11de7e234630e139318ee8cada55e2f14a24d184c48954a8"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pandas/licenses/LICENSE",
+      "bytes": 1634,
+      "sha256": "9850f6b5bdef7346503065807b878deb8058b976c5c329f4c4d23bf4796ce9ae"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pandas/licenses/LICENSES/BOTTLENECK_LICENCE",
+      "bytes": 1360,
+      "sha256": "053a90e30580f5d9d79817add1567f88b4a3eeb11bcded9ecf74619d17768066"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pandas/licenses/LICENSES/DATEUTIL_LICENSE",
+      "bytes": 2889,
+      "sha256": "ba00f51a0d92823b5a1cde27d8b5b9d2321e67ed8da9bc163eff96d5e17e577e"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pandas/licenses/LICENSES/HAVEN_LICENSE",
+      "bytes": 1099,
+      "sha256": "48216b40b3d1b19452923dd6fd74655bf5c0df9d76b51eb0efade7e0b88bfbcc"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pandas/licenses/LICENSES/HAVEN_MIT",
+      "bytes": 1264,
+      "sha256": "87217d0a79195441ab615a3abb3ab6777502e57804ea83f973df975a67ebd720"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pandas/licenses/LICENSES/KLIB_LICENSE",
+      "bytes": 1104,
+      "sha256": "7463172c3a23321c1838896eba437f70a6de80ac5a840b2960966c8c5444abf1"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pandas/licenses/LICENSES/MUSL_LICENSE",
+      "bytes": 6203,
+      "sha256": "50a343c1ce9e27cd6c58023f13b91d2cd679861fe7fb6bbbbfbec3dcafc3583f"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pandas/licenses/LICENSES/NUMPY_LICENSE",
+      "bytes": 1542,
+      "sha256": "81d42da02a56b611c35abc83d2241564b46bec3a5b1960b395d55cebca68fb6f"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pandas/licenses/LICENSES/PACKAGING_LICENSE",
+      "bytes": 11519,
+      "sha256": "1871330068a18f1f07c3f147a41c008e59f367f217041ca6eb20b0298639a128"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pandas/licenses/LICENSES/PSF_LICENSE",
+      "bytes": 13936,
+      "sha256": "3b2f81fe21d181c499c59a256c8e1968455d6689d269aa85373bfb6af41da3bf"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pandas/licenses/LICENSES/PYPERCLIP_LICENSE",
+      "bytes": 1486,
+      "sha256": "eafcd440e3570c6bc7b77dcec15dec398d13bc9b5e897336b221ff81ff19f345"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pandas/licenses/LICENSES/PYUPGRADE_LICENSE",
+      "bytes": 1058,
+      "sha256": "70aedcd6928272bd176e4fdc3384af22ee759d006fb15105d994756e4f2d1b7a"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pandas/licenses/LICENSES/SAS7BDAT_LICENSE",
+      "bytes": 1059,
+      "sha256": "458d5fd4175825440ad32d6bf6af45d1a19d4adb316b557d869c6560b6692e00"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pandas/licenses/LICENSES/STATSBASE_JL_LICENSE",
+      "bytes": 1249,
+      "sha256": "f371ccf0fb892a4cd9f2e550c4b8cf4362793d17028dc642ad55c1e01a41dfe1"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pandas/licenses/LICENSES/ULTRAJSON_LICENSE",
+      "bytes": 5974,
+      "sha256": "2bfbb5bb8ec66d136ec62d836ddc0c0019d44ef4d9389f1f6cab1c1109d774a2"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pandas/licenses/LICENSES/XSIMD_LICENSE",
+      "bytes": 1606,
+      "sha256": "501352acba62cc54e8e3d293754d606f919c9b425b962193c211f9fa29cd9940"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pandas/licenses/subprojects/fast_float-8.2.10/LICENSE-APACHE",
+      "bytes": 10767,
+      "sha256": "097a889aa954d04e088b790b10a4014d6189561d0a6013935a73ce3d4ddaaf06"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pandas/licenses/subprojects/fast_float-8.2.10/LICENSE-BOOST",
+      "bytes": 1337,
+      "sha256": "8d8291caf1cee26d23acf3eb67c9f9a2d58f1c681b16a4fbe8cbfb9e3c0b5a9b"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pandas/licenses/subprojects/fast_float-8.2.10/LICENSE-MIT",
+      "bytes": 1079,
+      "sha256": "e562f3f974ced7e69dd1db77b820b36bcf8f30377f1aa105723fba449c53c4e6"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pillow/licenses/LICENSE",
+      "bytes": 78481,
+      "sha256": "988ffe8ab3480b0f4e9a0ab2702bffd73d9fb6b47198043fb3ba101a62fac236"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/primePy/LICENSE",
+      "bytes": 1070,
+      "sha256": "1a06a1576544095ade4508462bc6c795c874a499e2abe12d21557e85a3741d9e"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/propcache/licenses/LICENSE",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/propcache/licenses/NOTICE",
+      "bytes": 609,
+      "sha256": "56d6ac6c8105c0a51304c21db060e361af9a8ea0af9a75c239c28b5d13693838"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pyannote-audio/licenses/LICENSE",
+      "bytes": 1061,
+      "sha256": "a3b53644a76e70e289b25271b119c0a1aadaaf0db7a16225fb494fdc0e36c32a"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pyannote-core/licenses/LICENSE",
+      "bytes": 1119,
+      "sha256": "c1509124e929c7764871add4622d7d13ec44b3795a741f9b9206cba41a1a411c"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pyannote-database/licenses/LICENSE",
+      "bytes": 1071,
+      "sha256": "c6e4a9657fb261c467f40acdd2cc3f4aea9ac6ac8ae14ca0d31aae4107276a13"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pyannote-metrics/licenses/LICENSE",
+      "bytes": 1111,
+      "sha256": "657c7e17d7360a3e885dc0b4d05a54bc7233222648ea4f6d347a0e516c4e9bdd"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pyannote-pipeline/licenses/LICENSE",
+      "bytes": 1119,
+      "sha256": "a97ab58b8d241fadda4dd023ff7b25d801391b25631cc92a3513c58b45711ab8"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pyannoteai-sdk/licenses/LICENSE",
+      "bytes": 1067,
+      "sha256": "3d442be935725319727e27b4b04e41deeedd1185b1740998c9f0ba3b51754f4d"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pyparsing/licenses/LICENSE",
+      "bytes": 1062,
+      "sha256": "a5425f9dc14ac74d4c5f0b679e941f2442e32cca7452a4418d5b1a49893ebe4e"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/python-dateutil/licenses/LICENSE",
+      "bytes": 2889,
+      "sha256": "ba00f51a0d92823b5a1cde27d8b5b9d2321e67ed8da9bc163eff96d5e17e577e"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pytorch-lightning/licenses/LICENSE",
+      "bytes": 11349,
+      "sha256": "a41e2fae9915ae56028f8dbd0bf27995f1907613cbcd2d81a61b010ad34e9fe9"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/pytorch-metric-learning/LICENSE",
+      "bytes": 1090,
+      "sha256": "8487a9eae44e63ce55bb6d8a471a7fdadee6d1f9f2e923c2f1042e0ba9af85f9"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/rich/licenses/LICENSE",
+      "bytes": 1056,
+      "sha256": "deed7c17a4318158190a3ea239cc879a5a50271cebb98ae7025f48fbe58dca15"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/six/LICENSE",
+      "bytes": 1066,
+      "sha256": "4375ba20e2b9c6c4e7cad2940a628fd90e95cc3d50ee92aae755715d8ba1fbd0"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/sortedcontainers/LICENSE",
+      "bytes": 557,
+      "sha256": "1db7cae7fce6452e2e608e401a0f953e0133e4c2d75db69fb8ae851d2086f5b6"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/SQLAlchemy/licenses/AUTHORS",
+      "bytes": 522,
+      "sha256": "11c9de6af24a1ce9db33019364c1c2441509d7dda13dc0949f1a4b83621b2195"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/SQLAlchemy/licenses/LICENSE",
+      "bytes": 1119,
+      "sha256": "9bb754071e711cf75728b9051b170bfb8f9e3b879c08386c96a36989c42cd5f1"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/torch-audiomentations/LICENSE",
+      "bytes": 1091,
+      "sha256": "fb0fe9dfcaf39b4ee16bae34a564794c17b55b79244e96950a4c21e6e5dd3291"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/torch_pitch_shift/LICENSE",
+      "bytes": 1068,
+      "sha256": "a92e68f56640383bf6adc3412db7c5b58065487c2f00b433241fd7b9b2e59dc2"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/torchcodec/licenses/LICENSE",
+      "bytes": 1502,
+      "sha256": "af2f7ef2b384a3e15ed6ced586e1a8316701c7bd828cc6ae4164f0dba8e5ac8f"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/torchmetrics/licenses/LICENSE",
+      "bytes": 11352,
+      "sha256": "fa31f433f5b4bc1fb730fb9c678f90182d93bf76b6d98ba4d00f40454ac8b832"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/tzdata/licenses/LICENSE",
+      "bytes": 625,
+      "sha256": "df58f69ea88683035d720b5375bcef0cf5aeaa98a1d098d572e0992c378deb46"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/tzdata/licenses/licenses/LICENSE_APACHE",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/yarl/licenses/LICENSE",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "LICENSES/speaker-tracking/yarl/licenses/NOTICE",
+      "bytes": 609,
+      "sha256": "56d6ac6c8105c0a51304c21db060e361af9a8ea0af9a75c239c28b5d13693838"
+    },
+    {
+      "path": "LICENSES/speaker-tracking-dependencies.json",
+      "bytes": 93649,
+      "sha256": "710516fd829012274dacc8d1d5e13421be73ddd828a4d1887c0f0a3a6b8acf3b"
+    },
+    {
       "path": "LICENSES/upstream/ClearerVoice-Studio/LICENSE",
       "bytes": 11357,
       "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
@@ -1192,6 +1602,11 @@
       "sha256": "3398886445bb9c08b59732eaf148b423c850f39f704b2e3e4e37a854aeb67c24"
     },
     {
+      "path": "scripts/setup_speaker_tracking.py",
+      "bytes": 3120,
+      "sha256": "5b8db8846e9fde61b518e9c5c16989ec583a80cbef81337ac4c5f923e52bd29c"
+    },
+    {
       "path": "scripts/verify_archive_runtime.py",
       "bytes": 4557,
       "sha256": "8c91f2e2e8a8c98df69db5d4cb7c8b876cdccb52b4c1b472dc632f214ecf8f94"
@@ -1233,13 +1648,13 @@
     },
     {
       "path": "src/voice_platform/api.py",
-      "bytes": 27574,
-      "sha256": "449f2eb2c05e66821e8212d5b6fbc219b594acb36497ab7c3e73b433370ef93a"
+      "bytes": 28702,
+      "sha256": "5dc07821f5a53d10154f1bc96f08a2102dbaf3301d7d372abe05306a968bd988"
     },
     {
       "path": "src/voice_platform/assets.py",
-      "bytes": 13493,
-      "sha256": "877f08d3a03a7446568cd7f60c6e8903c484ebee6adebc976233b4d70dd84d20"
+      "bytes": 13634,
+      "sha256": "e9e6d9d21418910ef8258e36dc7a940c8632154dfad45ce69c2f44f2b091aee1"
     },
     {
       "path": "src/voice_platform/audio.py",
@@ -1258,8 +1673,8 @@
     },
     {
       "path": "src/voice_platform/config.py",
-      "bytes": 1753,
-      "sha256": "afd5e03e776304d26f9bcd494d568ae642813646ec9a70c7f4d603c46f5f6dc2"
+      "bytes": 2165,
+      "sha256": "fc3d1799caf2eeda05a5a91398ba47b460efdfed1803e644e6db5a536f583394"
     },
     {
       "path": "src/voice_platform/engines/__init__.py",
@@ -1323,8 +1738,8 @@
     },
     {
       "path": "src/voice_platform/reference_worker.py",
-      "bytes": 1719,
-      "sha256": "af9a6bef6c847eb2ae49bc8b65d770b712869b40117117b42de3e29d99149d5d"
+      "bytes": 2045,
+      "sha256": "ca2881bf261e286829d01a43a170813d2297b1247abadcb1703b233e31e2ec93"
     },
     {
       "path": "src/voice_platform/references.py",
@@ -1333,13 +1748,13 @@
     },
     {
       "path": "src/voice_platform/restoration.py",
-      "bytes": 17612,
-      "sha256": "8143616eed0200593a2e126b63263b1545cb14bd24b1a2998ed372b32d71230f"
+      "bytes": 26803,
+      "sha256": "ead4c168b887ff497983f263243eb6340661df5042ace6f1845f2b9c8b7a862b"
     },
     {
       "path": "src/voice_platform/schemas.py",
-      "bytes": 7060,
-      "sha256": "98c1d56c7a8780541b0a14a4f2fd5647e84fc2caf8f9cab6246561de05669bc4"
+      "bytes": 7866,
+      "sha256": "f6143ea8adf7461d138d0647a6bad31195ed63acbac0fcf4593b1de277486a7d"
     },
     {
       "path": "src/voice_platform/server.py",
@@ -1352,14 +1767,19 @@
       "sha256": "1345ecb697dff6cc3ed22ca8ae1833b44d5efc7fe2d69e31a42067ae0069eebe"
     },
     {
+      "path": "src/voice_platform/speaker_tracking.py",
+      "bytes": 17302,
+      "sha256": "283dd4c19e1fe4f05f05316424b328fd92d0ecc0bcaaf3a799dbb8214a388425"
+    },
+    {
       "path": "src/voice_platform/store.py",
       "bytes": 3693,
       "sha256": "af093a88b7139267e856a31ef85359e1d7a86ed33aa976a0b7dcd800bf9700fb"
     },
     {
       "path": "src/voice_platform/worker_runner.py",
-      "bytes": 4102,
-      "sha256": "1b54ae4f0994253da0cce8d3c5fbb826fb942fe865728399df0b92767144259b"
+      "bytes": 4380,
+      "sha256": "fa56f4b61a3d431fc93f0a41a92767bcc609ac976edcb237488a80e06377fd2b"
     },
     {
       "path": "start-voice.cmd",
@@ -1467,6 +1887,11 @@
       "sha256": "aa0784d6cd3eeb28857905c95af4c776aad2319739fd27b0e3e4177bbe4023db"
     },
     {
+      "path": "tests/test_speaker_tracking.py",
+      "bytes": 7788,
+      "sha256": "0c6ad1bf452acec37bc0b7e59e7f85f9985c98db793cba61d0dcf86ca51a3cff"
+    },
+    {
       "path": "tests/theme.test.cjs",
       "bytes": 2505,
       "sha256": "9a29355193d189a8023ecdf623de11e9c70b5485b418d76ab49bfc3b9125b983"
@@ -1483,8 +1908,8 @@
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
-      "bytes": 6455,
-      "sha256": "83c37aea9f9b445942c656d452727caa7370d898db39eec9e6c3b30d02c67437"
+      "bytes": 7929,
+      "sha256": "5759240296971eff55100211494804a35bda3a58c08689a97dc48a2996902c0b"
     },
     {
       "path": "web/app.js",
@@ -1508,8 +1933,8 @@
     },
     {
       "path": "web/index.html",
-      "bytes": 28078,
-      "sha256": "0ab56f626afe21594da21bfb33c36a9919286a948803e4fea4ea87cf1c8189a2"
+      "bytes": 28206,
+      "sha256": "b7528e94634254fb2383d98bc20b44a5ccf84385af2d245fc6c2e3403f9637be"
     },
     {
       "path": "web/jobs-ui.js",
@@ -1518,23 +1943,23 @@
     },
     {
       "path": "web/locales/en.json",
-      "bytes": 72891,
-      "sha256": "4f28548e027cbf35842a374abcffbd1b1a93622da22a3ba600b2cdc280fec42e"
+      "bytes": 77865,
+      "sha256": "f0cff2aa4acbb3c70bbc211925c7e66bf83b6c234aecc1ffb94405ef2ad17b0d"
     },
     {
       "path": "web/locales/ja.json",
-      "bytes": 83240,
-      "sha256": "b64ea4efbbdc7bf0026225dddfbfe5bfb6035d562fe94045724c30f178806039"
+      "bytes": 88818,
+      "sha256": "7820bc82cc31105b96e6292f79587a994885b6801df6f987badf2583d119ff94"
     },
     {
       "path": "web/locales/ko.json",
-      "bytes": 81016,
-      "sha256": "931aa16308e24fae1f9a656085a9ad328bdf898bae53dc3cef5ea78492cfc7e8"
+      "bytes": 86471,
+      "sha256": "25ddb9164591812ff606620762b7914177252296ed3f9c9bd0c87e293118918e"
     },
     {
       "path": "web/locales/zh-CN.json",
-      "bytes": 71261,
-      "sha256": "1cbadaf249ade03c69c678c8046faac4aeab8302cbdf1864f5525aaab76aebcd"
+      "bytes": 75985,
+      "sha256": "ec277c30b81280e482fefb450ae7907099b317c4c6cb867bd7071f98d07e9806"
     },
     {
       "path": "web/longform-ui.js",
@@ -1577,6 +2002,16 @@
       "sha256": "8712b7ab78126059b8b78b436026a72e9f56e67f418c10ea005ba5ffddbd4f0d"
     },
     {
+      "path": "web/speaker-tracking.css",
+      "bytes": 3074,
+      "sha256": "2a286b78ba210d29d8001351cb7748d711fa8b9f11c197884dc19f861c7326c0"
+    },
+    {
+      "path": "web/speaker-tracking.js",
+      "bytes": 15906,
+      "sha256": "a8b308d452f67286f5cb2aed741f29af40cd68f790aa4dae3d0deebce6387a38"
+    },
+    {
       "path": "web/style.css",
       "bytes": 12729,
       "sha256": "e0fecebcb85fcd5045b7f70dca4650b519f18e48997be9890bb5caa56c25f05e"
@@ -1593,13 +2028,13 @@
     },
     {
       "path": "web/translations.js",
-      "bytes": 292249,
-      "sha256": "078b6350d4c707245497457d86cb4fdd42ec0c789f2cf8078b437dc458e6e412"
+      "bytes": 312020,
+      "sha256": "176436d211fa30e62354d553bcfd481553c0dbc4ed41368ef504e5ae1e5ba405"
     },
     {
       "path": "web/voice-workspace.js",
-      "bytes": 41218,
-      "sha256": "369037925ff4def8fdefef7f723f4f8dfb2c71620044feaddbf16fd3a4a26af8"
+      "bytes": 41291,
+      "sha256": "468f5785f0edd460c8e61b22cc1d814048a8bc96c4638d20f57e05424c450d7c"
     },
     {
       "path": "web/workflow-ui.js",

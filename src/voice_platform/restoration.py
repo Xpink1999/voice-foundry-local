@@ -34,6 +34,14 @@ class AudioRestoration:
         for operation,key,label,limit in [('remove_music','music_dir','去背景音乐','音乐人声与伴奏两轨，不保证完全去除'),('denoise','enhancement_dir','语音降噪','可能损伤细节，请与原录音比较'),('separate','separation_dir','重叠人声分离','最多两路同时说话；匿名轨道不代表身份，长静音后可能换位')]:
             path=Path(self.options.get(key,''));path=path if path.is_absolute() else Path(self.config['root'])/path
             models.append(dict(operation=operation,label=label,available=self.options.get('enabled',False) and (path/'provenance.json').exists(),note=limit))
+        tracking=self.config.get('speaker_tracking',{})
+        model=Path(tracking.get('model_dir','models/pyannote-community-1'))
+        python=Path(tracking.get('python','runtime/diarization-env/Scripts/python.exe'))
+        model=model if model.is_absolute() else Path(self.config['root'])/model
+        python=python if python.is_absolute() else Path(self.config['root'])/python
+        models.append(dict(operation='track_speakers',label='按人物整理',
+            available=self.options.get('enabled',False) and (model/'provenance.json').is_file() and python.is_file(),
+            note='全程人物标注、独白筛选；最多两路重叠单独分离，模糊归属保留待确认'))
         return dict(enabled=self.options.get('enabled',False),device=self.options.get('device'),operations=models,originals_preserved=True)
 
     def submit(self,request,workflow_root=None):
@@ -49,9 +57,20 @@ class AudioRestoration:
             item=dict(id=uid(),recording_id=source['id'],root_recording_id=source.get('root_recording_id',source['id']),
                 source_snapshot=copy.deepcopy(source),operations=request.operations,analyze_outputs=request.analyze_outputs,
                 workflow_root=workflow_root,status='queued',progress=0,message='等待处理；原件保留',outputs=[],child_recording_ids=[],import_errors=[],created_at=now(),error=None)
+            item['speaker_count']=request.speaker_count
+            if request.source_processing_id:
+                item['source_processing_id']=request.source_processing_id
+                parent=self.store.get('audio_processing',request.source_processing_id)
+                if parent.get('deleted_at') or parent['status']!='succeeded' or parent['recording_id']!=source['id']:
+                    raise ValueError('请选择同一录音已完成的处理结果')
+                cleaned=next((o for o in parent['outputs'] if o['stage']=='remove_music' and o['role']=='speech'),None)
+                if cleaned:item['tracking_source']=dict(cleaned,source_processing_id=parent['id'])
             item['options_snapshot']=copy.deepcopy(self.options)
+            if request.operations==['track_speakers']:
+                item['tracking_options_snapshot']=copy.deepcopy(self.config['speaker_tracking'])
             item['model_snapshots']={}
             for operation in request.operations:
+                if operation=='track_speakers':continue
                 key={'remove_music':'music_dir','separate':'separation_dir','denoise':'enhancement_dir'}[operation]
                 path=Path(self.options[key]);path=path if path.is_absolute() else Path(self.config['root'])/path
                 item['model_snapshots'][key]=json.loads((path/'provenance.json').read_text(encoding='utf-8'))
@@ -82,10 +101,11 @@ class AudioRestoration:
             self.store.update('audio_processing',item['id'],status='running',progress=1,message='解码录音，等待可用计算设备',started_at=now())
         source=self._decode(item,folder)
         config=copy.deepcopy(self.config);config['audio_processing']=item['options_snapshot']
+        if item.get('tracking_options_snapshot'):config['speaker_tracking']=item['tracking_options_snapshot']
         for key,expected in item['model_snapshots'].items():
             path=Path(item['options_snapshot'][key]);path=path if path.is_absolute() else Path(self.config['root'])/path
             if json.loads((path/'provenance.json').read_text(encoding='utf-8'))!=expected:raise ValueError('模型版本已变化，请新建处理任务；原件保留')
-        use_gpu=item['options_snapshot']['device'].startswith('cuda');acquired=False
+        use_gpu=item['options_snapshot']['device'].startswith('cuda') and not item.get('assembly_inputs');acquired=False
         try:
             if use_gpu:
                 while not acquired:
@@ -93,7 +113,16 @@ class AudioRestoration:
                     acquired=self.platform.engine_lock.acquire(timeout=.5)
                 if self.stop_event.is_set() or self.store.get('audio_processing',item['id'])['status']=='cancel_requested':raise InterruptedError('处理已停止，原件保留')
                 self.platform.unload()  # RLock: release the TTS weights before this owned GPU worker loads its models.
-            result=self._run_worker(dict(mode='process',input_path=str(source),operations=item['operations'],config_snapshot=config),folder,'audio_processing',item['id'])
+            tracked=item['operations']==['track_speakers']
+            if tracked and item.get('tracking_source'):
+                source=self.data/item['tracking_source']['path']
+                if sha256(source)!=item['tracking_source']['sha256']:raise ValueError('去音乐输入校验失败，原件保留')
+            request=dict(mode='track' if tracked else 'process',input_path=str(source),
+                speaker_count=item.get('speaker_count'),operations=item['operations'],config_snapshot=config)
+            if item.get('assembly_inputs'):
+                request.update(mode='assemble',assembly_inputs=item['assembly_inputs'],assembly_name=item['assembly_name'],
+                    gap_ms=item['gap_ms'],assembly_models=item['assembly_models'])
+            result=self._run_worker(request,folder,'audio_processing',item['id'])
             if self.stop_event.is_set() or self.store.get('audio_processing',item['id'])['status']=='cancel_requested':raise InterruptedError('处理已停止，已有文件保留')
         finally:
             if acquired:self.platform.engine_lock.release()
@@ -103,7 +132,9 @@ class AudioRestoration:
             path.relative_to(folder.resolve())
             output=dict(output,id=uid(),path=str(path.relative_to(self.data)),processing_id=item['id'],recording_id=None)
             outputs.append(output)
-        self.store.update('audio_processing',item['id'],status='succeeded',outputs=outputs,progress=100,message='处理完成，可比较原件与各个结果',model_sources=result['model_sources'],device=result['device'],note=result['note'],finished_at=now())
+        extra=dict(tracking=result['tracking']) if 'tracking' in result else {}
+        self.store.update('audio_processing',item['id'],status='succeeded',outputs=outputs,progress=100,message='人物整理完成，请试听并命名' if extra else '处理完成，可比较原件与各个结果',model_sources=result['model_sources'],device=result['device'],note=result['note'],finished_at=now(),**extra)
+        if extra:return
         errors=[]
         if item['analyze_outputs']:
             for output in outputs:
@@ -118,6 +149,7 @@ class AudioRestoration:
             if item.get('deleted_at'):raise ValueError('处理记录已在回收站，请先恢复')
             output=next((o for o in item['outputs'] if o['id']==output_id),None)
             if not output:raise KeyError('处理输出不存在')
+            if output.get('reference_eligible') is False:raise ValueError('合并试听文件不能直接作为克隆参考，请选择独立片段')
             if output['role']!='speech':raise ValueError('背景音乐轨不能用作人物声音参考')
             if output.get('recording_id'):
                 recording=self.store.get('recordings',output['recording_id'])
@@ -132,6 +164,83 @@ class AudioRestoration:
             output['recording_id']=recording['id']
             self.store.update('audio_processing',identity,outputs=item['outputs'],child_recording_ids=item['child_recording_ids']+[recording['id']])
             return recording
+
+    def name_speaker(self,identity,speaker_id,name):
+        with self.store.lock:
+            item=self.store.get('audio_processing',identity)
+            if item.get('deleted_at'):raise ValueError('处理记录已在回收站，请先恢复')
+            tracking=copy.deepcopy(item.get('tracking',{}))
+            speaker=next((s for s in tracking.get('speakers',[]) if s['id']==speaker_id),None)
+            if not speaker:raise KeyError('人物不存在')
+            speaker['name']=name
+            # A run-local name never changes another run or an existing voice automatically.
+            for output in item['outputs']:
+                if output.get('speaker_id')==speaker_id and output.get('reference_id'):
+                    reference=self.store.get('references',output['reference_id'])
+                    if not reference.get('deleted_at'):
+                        self.store.update('references',reference['id'],speaker_name=name)
+            return self.store.update('audio_processing',identity,tracking=tracking)
+
+    def assemble(self,identity,request):
+        with self.store.lock:
+            if self.platform.shutdown.is_set():raise ValueError('服务正在停止，请重新启动后提交')
+            if sum(i['status'] not in TERMINAL for i in self.store.list('audio_processing'))>=self.options['max_pending']:
+                raise ValueError('音频处理队列已满，请稍后再试')
+            parent=self.store.get('audio_processing',identity)
+            source=self.store.get('recordings',parent['recording_id'])
+            if parent.get('deleted_at') or source.get('deleted_at') or parent['status']!='succeeded':
+                raise ValueError('请选择已完成的人物整理，或先恢复原录音')
+            outputs={o['id']:o for o in parent['outputs']}
+            chosen=[outputs.get(i) for i in dict.fromkeys(request.output_ids)]
+            if any(o is None or o.get('kind')!='clip' for o in chosen):raise ValueError('请选择本次整理的独立语音片段')
+            inputs=[dict(o,file=str(self.data/o['path'])) for o in chosen]
+            item=dict(id=uid(),recording_id=source['id'],root_recording_id=parent['root_recording_id'],
+                source_snapshot=copy.deepcopy(source),source_processing_id=identity,operations=['assemble_clips'],
+                assembly_inputs=inputs,assembly_name=request.name,gap_ms=request.gap_ms,assembly_models=parent['model_sources'],
+                analyze_outputs=False,options_snapshot=copy.deepcopy(self.options),model_snapshots={},
+                status='queued',progress=0,message='等待合并所选片段',outputs=[],child_recording_ids=[],import_errors=[],created_at=now(),error=None)
+            self.store.save('audio_processing',item);self.wake.set();return item
+
+    def save_tracked(self,identity,output_ids,scenario=''):
+        with self.store.lock:
+            item=self.store.get('audio_processing',identity)
+            if item.get('deleted_at') or item['status']!='succeeded':raise ValueError('请等待人物整理完成，或先恢复处理记录')
+            source=self.store.get('recordings',item['recording_id'])
+            if source.get('deleted_at'):raise ValueError('原录音已在回收站，请先恢复')
+            outputs={o['id']:o for o in item['outputs']}
+            chosen=[outputs.get(o) for o in dict.fromkeys(output_ids)]
+            if any(o is None or o.get('kind')!='clip' for o in chosen):raise ValueError('只可保存本次整理的独立参考片段')
+            profiles={s['id']:s for s in item['tracking']['speakers']}
+            for o in chosen:
+                if not o.get('speaker_id'):raise ValueError('人物归属不明确，请先选择其他明确归属的片段')
+                if o['duration']<.5:raise ValueError('短于 0.5 秒的片段仅供试听或手动合并，请选择较长片段作为参考')
+                if o.get('reference_id') and self.store.get('references',o['reference_id']).get('deleted_at'):
+                    raise ValueError('已保存的片段在回收站，请先恢复')
+                if sha256(self.data/o['path'])!=o['sha256']:raise ValueError('参考片段校验失败')
+            references=[];candidate_ids=list(source['candidate_ids'])
+            for o in chosen:
+                if o.get('reference_id'):
+                    reference=self.store.get('references',o['reference_id'])
+                    if reference.get('deleted_at'):raise ValueError('已保存的片段在回收站，请先恢复')
+                    references.append(reference);continue
+                speaker=profiles[o['speaker_id']];name=speaker['name'] or speaker['id']
+                span=o['source_spans'][0]
+                reference=dict(id=uid(),name=f'{name} · {span["source_start"]:.1f}–{span["source_end"]:.1f}s',
+                    speaker_name=name,speaker_id=speaker['id'],scenario=scenario,notes='',tags=[],
+                    recording_id=source['id'],processing_id=identity,processing_output_id=o['id'],
+                    original_name=source['original_name'],path=o['path'],sha256=o['sha256'],sample_rate=o['sample_rate'],
+                    duration=o['duration'],start=span['source_start'],end=o['source_spans'][-1]['source_end'],source_spans=o['source_spans'],
+                    original_path=source['original_path'],original_sha256=source['original_sha256'],
+                    source=source['source'],authorization=source['authorization'],rights_confirmed=source['rights_confirmed'],
+                    saved=True,saved_at=now(),created_at=now(),transcript=o['transcript'],transcript_history=[],
+                    embedding=o['embedding'],speaker_labels=[speaker['id']],review='pending',
+                    quality=dict(score_source='not_scored',origin=o['origin'],warnings=o.get('warnings',[])),
+                    analysis_models=item['model_sources'],source_lineage=dict(tracking_id=identity,origin=o['origin'],similarity=o.get('similarity')))
+                self.store.save('references',reference);o['reference_id']=reference['id']
+                candidate_ids.append(reference['id']);references.append(reference)
+            self.store.update('recordings',source['id'],candidate_ids=candidate_ids)
+            self.store.update('audio_processing',identity,outputs=item['outputs'])
+            return references
 
     def _work(self):
         while not self.stop_event.is_set():

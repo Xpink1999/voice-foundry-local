@@ -73,5 +73,16 @@
     "import_batch_segments": 1000,
     "pause_ms": 180,
     "block_frames": 65536
+  },
+  "speaker_tracking": {
+    "model_dir": "models/pyannote-community-1",
+    "python": "runtime/diarization-env/Scripts/python.exe",
+    "match_threshold": 0.65,
+    "match_margin": 0.08,
+    "min_turn_seconds": 0.15,
+    "max_clip_seconds": 30.0,
+    "gap_ms": 180,
+    "trim_pause_ms": 120,
+    "edge_padding_ms": 60
   }
 }

@@ -86,3 +86,23 @@ Core tests use temporary databases and a test engine. Real-model checks run sepa
 ## Related guides
 
 [README](../README.en.md) · [Installation](INSTALL.en.md) · [Long-form narration](LONGFORM.en.md) · [Audio processing](AUDIO_RESTORATION.en.md) · [Maintenance](MAINTENANCE.en.md)
+
+## Speaker tracking and manual assembly
+
+In Advanced audio processing, select a recording and choose Organize selected recording by speaker. Starting from an existing processing record reuses its music-removed speech when available. Originals and earlier results are kept.
+
+Enter the known speaker count, or leave it blank for detection. The system labels speaker activity, builds voice anchors from solo speech, and separates only overlapping regions. Speaker IDs apply to this run only. Similarity scores are not identity probabilities. Ambiguous separated clips remain available for review.
+
+Listen to each speaker, enter a name, and select individual clips to save to the reference library. Each clip retains source offsets, processing history and an unconfirmed transcript. Saving does not approve the audio or confirm the transcript. Clips under five seconds can be kept as alternatives.
+
+Long gaps are removed from individual clips; short pauses default to 120 ms. Speech is not assembled automatically. Select clips and choose Combine selected in source order, with a gap of 0–1000 ms. Listen to or download the new file. Original clips remain separate, and the combined file is not automatically used for cloning. Compare original and speaker timeline to check assignments and omissions.
+
+### Optional tracking model setup
+
+Accept the access conditions on the [Community-1 model page](https://huggingface.co/pyannote/speaker-diarization-community-1), then authorize local downloads through the official Hugging Face login flow. Keep access tokens out of project configuration and Git. From the platform folder, run:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/setup_speaker_tracking.py
+```
+
+The script creates `runtime/diarization-env`, reuses the platform's compatible PyTorch, and downloads and verifies a pinned model revision. Inference uses local files; stopping a task ends its worker. Recordings are not uploaded. This optional environment depends on the platform's `.venv`; do not move it alone. Paths and filtering parameters belong to the `speaker_tracking` configuration section.

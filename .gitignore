@@ -1,4 +1,5 @@
 /.venv/
+/.taste-skill/
 /runtime/
 /models/
 /data/

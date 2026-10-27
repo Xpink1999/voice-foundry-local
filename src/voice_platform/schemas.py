@@ -74,13 +74,29 @@ class ReferenceMetadataInput(StrictModel):
 
 class ProcessingInput(StrictModel):
     recording_id: str
-    operations: list[Literal['remove_music','denoise','separate']] = Field(default_factory=lambda:['remove_music','denoise','separate'],min_length=1,max_length=3)
+    operations: list[Literal['remove_music','denoise','separate','track_speakers']] = Field(default_factory=lambda:['remove_music','denoise','separate'],min_length=1,max_length=3)
     analyze_outputs: bool = True
+    source_processing_id: str | None = None
+    speaker_count: int | None = Field(default=None, ge=1, le=12)
 
     @model_validator(mode='after')
     def unique_operations(self):
         if len(set(self.operations))!=len(self.operations):raise ValueError('同一次处理不能重复执行同一操作')
+        if 'track_speakers' in self.operations and self.operations!=['track_speakers']:
+            raise ValueError('人物跟踪需单独提交；只有重叠片段会进行分离')
         return self
+
+class TrackedSpeakerInput(StrictModel):
+    name: str = Field(min_length=1, max_length=100)
+
+class TrackedClipsInput(StrictModel):
+    output_ids: list[str] = Field(min_length=1, max_length=40)
+    scenario: str = Field(default='', max_length=80)
+
+class AssembleClipsInput(StrictModel):
+    output_ids: list[str] = Field(min_length=1, max_length=200)
+    name: str = Field(default='所选语音', min_length=1, max_length=100)
+    gap_ms: int = Field(default=180, ge=0, le=1000)
 
 class ResultRecordingInput(StrictModel):
     result_id: str

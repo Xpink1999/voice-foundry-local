@@ -14,6 +14,11 @@ def load_config(path=None):
     cfg = json.loads(source.read_text(encoding="utf-8-sig"))
     cfg["root"] = str(ROOT)
     cfg["config_path"] = str(source)
+    cfg.setdefault('speaker_tracking', {})
+    for key,value in dict(model_dir='models/pyannote-community-1', python='runtime/diarization-env/Scripts/python.exe',
+                          match_threshold=.65, match_margin=.08, min_turn_seconds=.15, max_clip_seconds=30.,
+                          gap_ms=180, trim_pause_ms=120, edge_padding_ms=60).items():
+        cfg['speaker_tracking'].setdefault(key,value)
     cfg.setdefault('cache_dir', 'runtime/model-cache')
     for key in ("data_dir", "model_dir", "log_dir", "cache_dir"):
         p = Path(cfg[key])

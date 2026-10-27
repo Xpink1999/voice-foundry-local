@@ -51,3 +51,13 @@ Git、uv、Python、NVIDIA 驱动也由用户从各自官方渠道安装，本�
 请只导入自己有权使用的录音和文本，并保留声音来源与授权记录。把视频中的人声分离出来，或用开源模型克隆声音，都不会自动取得原录音、人物声音、音乐和书稿的权利。测试通过、审核通过，也不等于获得版权或人物授权。
 
 核查日期：2026-10-22。许可原文的来源与哈希见 [LICENSES/source-records.json](LICENSES/source-records.json)。这些记录用于追踪来源，不是对训练数据、输出内容或所有使用场景的法律保证。
+
+
+## Optional speaker tracking
+
+- [pyannote.audio](https://github.com/pyannote/pyannote-audio), version 4.0.4: MIT. Optional environment dependency licenses are recorded in [LICENSES/speaker-tracking-dependencies.json](LICENSES/speaker-tracking-dependencies.json); available upstream license texts are under [LICENSES/speaker-tracking](LICENSES/speaker-tracking).
+- [pyannote Community-1](https://huggingface.co/pyannote/speaker-diarization-community-1), revision `3533c8cf8e369892e6b79ff1bf80f7b0286a54ee`: CC BY 4.0. Model by the pyannote team. Original model card and attribution are retained in the downloaded model directory. Access requires accepting the upstream model conditions. Weights are downloaded separately and are not included in this repository.
+- [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/): retain attribution and indicate changes when redistributing the model or modified versions. This integration uses the model for local inference; it does not modify its weights.
+- TorchCodec and its dependencies are optional Python distributions. Their license files do not replace the licenses of any separately supplied FFmpeg libraries. Inference here supplies predecoded waveforms, so TorchCodec's built-in media decoder is not required.
+
+Recordings, extracted speaker embeddings and analysis outputs remain local. No recording or voiceprint is sent to the model publisher. Optional dependency review: 2026-10-27.

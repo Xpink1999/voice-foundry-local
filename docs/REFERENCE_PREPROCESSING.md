@@ -78,3 +78,23 @@ MCP 新增 `voice_upload_recording`、`voice_recording`、`voice_save_reference_
 ## 相关说明
 
 [README](../README.md) · [安装说明](INSTALL.md) · [长文配音](LONGFORM.md) · [音频处理](AUDIO_RESTORATION.md) · [维护说明](MAINTENANCE.md)
+
+## 按人物整理与手动合并
+
+在「高级音频处理」选择录音，点「按人物整理所选录音」。已有去音乐结果时，可以从该处理记录下方开始人物分析，复用去音乐人声，保留原件和旧结果。
+
+已知说话人数时填写数量；留空由模型判断。系统标注人物时间、建立独白声纹依据，只对重叠区域运行双人分离。人物编号仅在本次录音内有效，声纹相似度不是身份概率。归属模糊的分离片段单独保留待确认。
+
+逐个人物试听、填写名称，勾选片段后保存到参考库。每段保留原录音偏移、处理来源和自动转写；保存后仍待试听确认，转写不会自动标为已核对。短于 5 秒的片段可保留备选。
+
+长空白会从独立片段中去除，短停顿默认保留 120 毫秒。系统不自动把同一人物的全部讲话拼成参考。需要组合时自行勾选，点「按原顺序合并所选」；片段间隔可设为 0～1000 毫秒。合并文件可试听和下载，原片段保留，且不会自动用作克隆参考。「原件对比与合并间隔」用于核对人物归属与遗漏。
+
+### 安装可选人物跟踪模型
+
+先在 [Community-1 页面](https://huggingface.co/pyannote/speaker-diarization-community-1)接受访问条件，并通过 Hugging Face 官方登录方式在本机授权下载。不要把访问令牌写入项目配置或提交到 Git。然后在平台目录运行：
+
+```powershell
+.\.venv\Scripts\python.exe scripts/setup_speaker_tracking.py
+```
+
+脚本建立独立的 `runtime/diarization-env`，复用本平台兼容的 PyTorch，下载并校验固定模型版本。推理只读本机模型，关闭任务会结束工作进程；不会上传录音。该可选环境依赖平台的 `.venv`，不应单独移动。路径和筛选参数统一放在 `speaker_tracking` 配置段。

@@ -70,6 +70,8 @@ class Assets:
                 related('recordings','parent_recording_id',identity);related('references','recording_id',identity);related('audio_processing','recording_id',identity)
             elif kind=='audio_processing':
                 for child in row.get('child_recording_ids',[]):queue.append(('recordings',child))
+                related('references','processing_id',identity)
+                related('audio_processing','source_processing_id',identity)
         return chosen
     def _blocked(self,db,chosen):
         errors=[]

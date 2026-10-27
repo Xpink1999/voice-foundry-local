@@ -22,7 +22,12 @@ def run_worker(owner,request,folder,kind,identity):
     environment=dict(os.environ,OMP_NUM_THREADS=str(owner.options['cpu_threads']),MKL_NUM_THREADS=str(owner.options['cpu_threads']),OPENBLAS_NUM_THREADS=str(owner.options['cpu_threads']),
                      HF_HUB_OFFLINE='1',TRANSFORMERS_OFFLINE='1',PYTHONUTF8='1',VOICE_WORKER_OWNED='1',NUMBA_CACHE_DIR=str(Path(owner.config['cache_dir'])/'numba'))
     with (folder/'worker.log').open('wb') as log_file:
-        process=subprocess.Popen([sys.executable,'-m','voice_platform.reference_worker',str(path)],cwd=owner.config['root'],env=environment,
+        python=sys.executable
+        if request['mode']=='track':
+            python=Path(owner.config['speaker_tracking']['python'])
+            python=str(python if python.is_absolute() else Path(owner.config['root'])/python)
+        environment['PYANNOTE_METRICS_ENABLED']='0'
+        process=subprocess.Popen([python,'-m','voice_platform.reference_worker',str(path)],cwd=owner.config['root'],env=environment,
             stdout=log_file,stderr=log_file,stdin=subprocess.PIPE,creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
         owner.process=process;started=time.monotonic();last=None;lease=None
         try:
