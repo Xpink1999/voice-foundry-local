@@ -74,10 +74,10 @@ class ReferenceMetadataInput(StrictModel):
 
 class ProcessingInput(StrictModel):
     recording_id: str
-    operations: list[Literal['remove_music','denoise','separate','track_speakers']] = Field(default_factory=lambda:['remove_music','denoise','separate'],min_length=1,max_length=3)
+    operations: list[Literal['remove_music','denoise','separate','track_speakers']] = Field(default_factory=lambda:['track_speakers'],min_length=1,max_length=3)
     analyze_outputs: bool = True
     source_processing_id: str | None = None
-    speaker_count: int | None = Field(default=None, ge=1, le=12)
+    speaker_count: int | None = Field(default=None, ge=1, le=3)
 
     @model_validator(mode='after')
     def unique_operations(self):
@@ -97,6 +97,21 @@ class AssembleClipsInput(StrictModel):
     output_ids: list[str] = Field(min_length=1, max_length=200)
     name: str = Field(default='所选语音', min_length=1, max_length=100)
     gap_ms: int = Field(default=180, ge=0, le=1000)
+    purpose: Literal['audition','reference'] = 'audition'
+    speaker_confirmed: bool = False
+    expected_revision: int | None = Field(default=None,ge=1)
+
+class AssignClipInput(StrictModel):
+    speaker_id: str | None = None
+    confirmed: bool = False
+    excluded: bool = False
+    reason: str = Field(default='',max_length=1000)
+    expected_revision: int = Field(ge=1)
+
+class SaveCompositeInput(StrictModel):
+    listened: bool = False
+    name: str = Field(min_length=1,max_length=100)
+    scenario: str = Field(default='',max_length=80)
 
 class ResultRecordingInput(StrictModel):
     result_id: str
@@ -106,6 +121,7 @@ class OutputRecordingInput(StrictModel):
 
 class ReferenceVoiceInput(StrictModel):
     reference_id: str
+    reference_ids: list[str] = Field(default_factory=list,max_length=40)
     name: str = Field(default='',max_length=100)
     voice_id: str | None = None
     scenario: str = Field(default='',max_length=80)
@@ -157,7 +173,12 @@ class LongformImportRetry(StrictModel):
 class LongformAction(StrictModel):
     chapter_no: int | None = Field(default=None,ge=1)
 
+class SegmentIssueInput(StrictModel):
+    note: str = Field(default='',max_length=1000)
+    resolved: bool = False
+
 class RegenerationInput(StrictModel):
+    text: str | None = Field(default=None,min_length=1,max_length=60000)
     reference_id: str | None = None
     style: str | None = Field(default=None, max_length=1000)
     clone_mode: Literal['reference','hifi'] | None = None

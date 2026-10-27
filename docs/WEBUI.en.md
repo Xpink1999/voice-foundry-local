@@ -4,7 +4,9 @@
 
 [Back to README](../README.en.md) · [Installation](INSTALL.en.md)
 
-Screenshots use a separate, empty data directory. They contain no user files, recordings, voices or tasks.
+Screenshots use an empty installation or synthetic test data. They contain no user files or real recordings.
+
+The interface language applies to system defaults, processing progress and validation messages. Filenames, voice names, scripts, transcripts and custom authorization records remain in their original language.
 
 ![Generate audio in the light theme](images/studio-en.jpg)
 
@@ -16,7 +18,7 @@ Screenshots use a separate, empty data directory. They contain no user files, re
 | Production | Task queue, Listen & review, Exports |
 | Resources | Projects, Asset management, Models & settings |
 
-On narrow screens, open the top-left menu for the full navigation. Voice workspace tabs scroll horizontally.
+On narrow screens, open the top-left menu for the full navigation. The voice workspace keeps three main entries.
 
 ## Generate a line
 
@@ -37,19 +39,16 @@ Continuous comparison plays every selected item, including selections on other p
 
 ## Create and reuse voices
 
-Open Voice design & library and choose a tab:
+The voice workspace has three entries: Create voice, Voice library and Reference clips.
 
-- Reference clips: name and annotate individual clips, then add them to a voice for different scenes.
-- Quick reference setup: upload a recording you have permission to use, listen to the recommended clips and save a voice.
-- Voice library: find, listen to and edit saved voices. Start narration sends a voice to the generation workspace.
-- Voice design: describe a voice, generate a sample and send it to reference preparation.
-- Audio processing: remove music, separate two overlapping voices or reduce noise; compare the output before choosing a reference.
+- Create voice: upload recordings to organize speakers and clips, or design a voice with text. Saved recordings can be processed without uploading again.
+- Voice library: listen, edit and reuse voices; manage default and scene references.
+- Reference clips: search, name and annotate clips, then set up a voice and start narration.
 
-Original recordings are kept. A voice can have several references, but generation uses one clip at a time. See [reference audio](REFERENCE_PREPROCESSING.en.md) and [audio processing](AUDIO_RESTORATION.en.md).
+Candidates use one checkbox selection. After saving, create a voice, add to an existing voice, or keep clips only. Choose the default when creating a voice. Composite references require explicit same-speaker selection, checks and listening confirmation. Listening assemblies never become clone references automatically. See the [reference and narration workflow](WORKFLOW_GUIDE.en.md).
 
-In Quick reference setup, the radio selection chooses the voice's default reference; checkboxes select independent clips to name and save in the library. For audio processing, choose a recording and explicitly select at least one operation. If no recording exists, use the upload shortcut in the prompt.
+![Speaker clips with synthetic test data](images/reference-en.jpg)
 
-![Quick reference setup](images/reference-en.jpg)
 
 ## Batch and long-form work
 
@@ -80,3 +79,8 @@ Archive finished tasks manually or through the automatic archive setting. Delete
 <img src="images/reference-mobile-en.jpg" alt="Reference workspace on a narrow screen" width="390">
 
 </details>
+
+
+## Reference and narration workflow
+
+[Reference and narration workflow](WORKFLOW_GUIDE.en.md)

@@ -1,0 +1,7 @@
+/* Availability is separate from loaded/idle. Install failures are caught before submission. */
+(()=>{
+ 'use strict';
+ function check(form,engine){if(!form)return;const model=state.models.find(m=>m.id===engine)||state.models[0],blocked=model?.readiness?.available===false;let notice=form.querySelector('[data-model-readiness]');if(!notice){notice=document.createElement('p');notice.dataset.modelReadiness='';notice.className='reference-warnings';notice.setAttribute('role','status');form.querySelector('[type=submit]').before(notice);}notice.hidden=!blocked;if(blocked){notice.textContent=tr(model.readiness.reason)+' ';const button=document.createElement('button');button.type='button';button.className='text-link';button.textContent=tr('模型与系统');button.onclick=()=>navigate('settings');notice.append(button);}const submit=form.querySelector('[type=submit]');if(blocked){submit.disabled=true;submit.dataset.notReady='true';}else if(submit.dataset.notReady){submit.disabled=!!form.dataset.pending;delete submit.dataset.notReady;}}
+ function sync(){check($('generate-form'),$('gen-engine').value);check($('design-voice-form'),$('design-engine').value);const voice=state.voices.find(v=>v.id===$('lf-voice')?.value);check($('lf-import-form'),voice?.engine);}
+ document.addEventListener('change',event=>{if(['gen-engine','gen-voice','design-engine','lf-voice'].includes(event.target.id))sync();});window.addEventListener('voice-page-change',sync);document.addEventListener('workflow-form-settled',sync);setInterval(sync,2500);sync();
+})();

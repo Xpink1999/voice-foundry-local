@@ -73,6 +73,10 @@ class ProcessEngine:
     def capabilities(self):
         return self.metadata.capabilities()
 
+    def readiness(self):
+        check=getattr(self.metadata,'readiness',None)
+        return check() if check else dict(available=True,check='adapter_not_declared')
+
     @property
     def pid(self):
         process = self.process

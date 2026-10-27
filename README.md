@@ -82,3 +82,5 @@ bin\voice.cmd health
 平台自己的代码和文档采用 [Apache-2.0](LICENSE)。模型和依赖保留各自的许可，见 [第三方声明](THIRD_PARTY_NOTICES.md)和 [许可资料](LICENSES/README.md)。本项目不是 VoxCPM 或其他上游项目的官方产品。
 
 请使用有权使用的录音和文本。模型开源不代表已获得某个人的声音授权，也不代表可以公开分发导入的书稿、录音或克隆结果。
+
+[参考整理与配音流程](docs/WORKFLOW_GUIDE.md)

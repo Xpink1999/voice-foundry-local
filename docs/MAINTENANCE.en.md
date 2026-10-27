@@ -78,3 +78,8 @@ Core tests use synthetic test waveforms to check service contracts. Real-model o
 ## Related guides
 
 [README](../README.en.md) · [Installation](INSTALL.en.md) · [Long-form narration](LONGFORM.en.md) · [Reference audio](REFERENCE_PREPROCESSING.en.md) · [Audio processing](AUDIO_RESTORATION.en.md)
+
+
+## Reference and narration workflow
+
+[Reference and narration workflow](WORKFLOW_GUIDE.en.md)

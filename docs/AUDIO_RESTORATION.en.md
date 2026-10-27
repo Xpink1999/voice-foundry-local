@@ -2,22 +2,17 @@
 
 # Audio processing and quick references
 
-Quick reference setup keeps the short upload-to-recommendation workflow. Use the Audio processing tab when you want to choose individual processing operations. The [WebUI guide](WEBUI.en.md) explains the tabs with screenshots.
+The voice workspace has three entries: Create voice, Voice library and Reference clips. Voice design and advanced processing sit within creation. See the [WebUI guide](WEBUI.en.md) for screenshots.
 
 ## Quick workflow
 
-In voice design and the voice library, choose quick reference creation: upload an authorized recording, let the service separate voices, remove music/noise and recommend clips, then listen, name the character and save. Model settings are not required for this workflow. Recommended clips are 5–30 seconds; clips under 5 seconds receive a warning rather than being padded to meet the recommendation.
+Upload an authorized recording → analyze speakers and speech clips → listen and select → name and save clips → create a voice or add a scene reference → start dubbing. When speaker tracking is available, clips are organized by speaker. Music removal and denoising depend on detected problems and installed models; they are not forced on every recording. Missing models are listed before submission.
 
-The original recording stays intact. Recommendations consider both original and processed clips; a cleaned version is not always better. Open other candidates to choose one yourself. References are saved separately, and each generation uses one reference. Adding a scene reference to an existing voice preserves its primary reference and confirmation state.
+Recommended references are 5–30 seconds. Shorter clips receive a warning; silence is not added to meet the target. Originals and previous results remain available for comparison. Processing does not always improve a recording.
 
-The workspace shows one area at a time:
+References are stored separately. To combine short utterances, explicitly confirm that selected clips belong to the same person, then check speech duration, duplicate coverage and the final transcript before saving a composite reference. Different speakers are never combined automatically. Adding a scene reference preserves the existing primary reference. After saving clips, continue to voice setup or keep them in the reference library.
 
-- Quick reference creation: the default workflow for an existing recording.
-- Voice library: find, edit and listen to voices; reference comparison is optional.
-- Voice design: generate a sample from a description and send it directly to reference preparation.
-- Advanced audio processing: select music removal, two-speaker separation or denoising, compare originals/results and send a final voice track to clip selection.
-
-Saving a recommendation creates a draft voice. Check and explicitly confirm its transcript. Generated results still require listening and approval.
+Recommendations are not approval. Confirm the transcript and listen to generated results before approving them. See the [workflow guide](WORKFLOW_GUIDE.en.md).
 
 ## Local models
 
@@ -82,3 +77,6 @@ Routes use the `/api/v1` prefix. See the running service's `/docs` and `/openapi
 ## Related guides
 
 [README](../README.en.md) · [Installation](INSTALL.en.md) · [Long-form narration](LONGFORM.en.md) · [Reference audio](REFERENCE_PREPROCESSING.en.md) · [Maintenance](MAINTENANCE.en.md)
+
+
+[Reference and narration workflow](WORKFLOW_GUIDE.en.md)

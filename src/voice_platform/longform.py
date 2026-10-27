@@ -168,9 +168,36 @@ class Longform:
         result=self.db.rows('lf_segments',where,args,limit=limit,offset=offset);book=self.db.book(identity)
         for item in result['items']:item['text']=self.text(book,item)
         return result
+
+    def mark_issue(self,identity,number,request):
+        with self.store.lock,self.store.connect() as db:
+            self.ensure_idle_export(identity);segment=self.db.segment(identity,number)
+            db.execute('INSERT INTO lf_segment_issues VALUES (?,?,?,?,?) ON CONFLICT(book_id,segment_no) DO UPDATE SET note=excluded.note,resolved=excluded.resolved,updated_at=excluded.updated_at',
+                       (identity,number,request.note,int(request.resolved),now()))
+            if not request.resolved:
+                db.execute("UPDATE lf_chapters SET review='pending',revision=revision+1 WHERE book_id=? AND no=?",(identity,segment['chapter_no']))
+        return dict(book_id=identity,segment_no=number,note=request.note,resolved=request.resolved)
+
+    def issues(self,identity,limit=50,offset=0):
+        self.book(identity)
+        clause="s.book_id=? AND s.deleted_batch IS NULL AND c.deleted_batch IS NULL AND (s.status='failed' OR i.resolved=0)"
+        base=' FROM lf_segments s JOIN lf_chapters c ON c.book_id=s.book_id AND c.no=s.chapter_no LEFT JOIN lf_segment_issues i ON i.book_id=s.book_id AND i.segment_no=s.no WHERE '+clause
+        with self.store.connect() as db:
+            total=db.execute('SELECT COUNT(*)'+base,(identity,)).fetchone()[0]
+            rows=db.execute('SELECT s.no,s.chapter_no,s.status,s.error,i.note,i.resolved'+base+' ORDER BY s.no LIMIT ? OFFSET ?',(identity,limit,offset)).fetchall()
+        return dict(total=total,items=[dict(segment_no=r[0],chapter_no=r[1],status=r[2],error=r[3],note=r[4] or '',manual=r[5]==0) for r in rows])
+
+    def locate(self,identity,number):
+        segment=self.db.segment(identity,number)
+        with self.store.connect() as db:
+            count=db.execute('SELECT COUNT(*) FROM lf_segments WHERE book_id=? AND chapter_no=? AND no<? AND deleted_batch IS NULL',(identity,segment['chapter_no'],number)).fetchone()[0]
+        return dict(chapter_no=segment['chapter_no'],segment_no=number,offset=count//25*25)
     def text(self,book,segment):
         with (self.data/book['normalized_path']).open('rb') as f:f.seek(segment['start_byte']);value=f.read(segment['end_byte']-segment['start_byte'])
         if hashlib.sha256(value).hexdigest()!=segment['text_sha256']:raise ValueError('分段文本校验失败，停止生成')
+        if segment.get('profile_id'):
+            profile=self.generation_snapshot(book,segment)
+            if 'production_text' in profile:return profile['production_text']
         return value.decode('utf-8')
     def ensure_idle_export(self,identity):
         self.book(identity)
@@ -199,6 +226,9 @@ class Longform:
             snapshot=book['snapshot'] if request.use_book_defaults else self.generation_snapshot(book,segment)
             prepared=self.platform.prepare_revision(snapshot,request,text=self.text(book,segment))
             profile={key:prepared[key] for key in ('request','engine','model','voice_snapshot','reference_snapshot','style','seed','runtime','pipeline')}
+            # Voice defaults and production text are independent. Restoring a
+            # reference must not silently discard an earlier text correction.
+            profile['production_text']=prepared['text']
             if request.seed is not None:profile['segment_seed']=request.seed
             elif not request.use_book_defaults and 'segment_seed' in snapshot:profile['segment_seed']=snapshot['segment_seed']
             body=json.dumps(profile,ensure_ascii=False,sort_keys=True);profile_id=hashlib.sha256(body.encode()).hexdigest()
@@ -262,6 +292,8 @@ class Longform:
             if not row['segments']:raise ValueError('本章没有可试听的有效分段')
             if row['done']!=row['segments'] or row['failed']:raise ValueError('本章尚未全部生成成功，不能审核完整章节')
             if request.status=='approved' and not request.listened:raise ValueError('请实际试听本章后确认')
+            if request.status=='approved' and db.execute('SELECT 1 FROM lf_segment_issues i JOIN lf_segments s ON s.book_id=i.book_id AND s.no=i.segment_no WHERE i.book_id=? AND s.chapter_no=? AND s.deleted_batch IS NULL AND i.resolved=0 LIMIT 1',(identity,chapter)).fetchone():
+                raise ValueError('本章仍有未解决的问题，请先处理并标记解决')
             db.execute('UPDATE lf_chapters SET review=?,review_version=revision,review_note=?,reviewer=?,reviewed_at=? WHERE book_id=? AND no=?',(request.status,request.note,request.reviewer,now(),identity,chapter))
             db.execute('INSERT INTO lf_reviews VALUES (?,?,?,?,?)',(uid(),identity,chapter,row['revision'],json.dumps(dict(**request.model_dump(),created_at=now()),ensure_ascii=False)))
         return self.db.chapter(identity,chapter)

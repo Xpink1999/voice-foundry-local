@@ -67,3 +67,8 @@ bin\voice.cmd backup
 ## 相关说明
 
 [README](../README.md) · [安装说明](INSTALL.md) · [长文配音](LONGFORM.md) · [参考音频](REFERENCE_PREPROCESSING.md) · [音频处理](AUDIO_RESTORATION.md)
+
+
+## 参考整理与配音流程
+
+[参考整理与配音流程](WORKFLOW_GUIDE.md)

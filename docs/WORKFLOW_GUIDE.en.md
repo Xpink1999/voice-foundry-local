@@ -1,0 +1,48 @@
+[简体中文](WORKFLOW_GUIDE.md) | **English** | [日本語](WORKFLOW_GUIDE.ja.md) | [한국어](WORKFLOW_GUIDE.ko.md)
+
+# Reference and narration workflow
+
+## Create a voice from a recording
+
+1. Upload recordings in Create voice and confirm usage rights. Each original is kept separately.
+2. When speaker tracking is available, choose Continue with speaker clips. Otherwise listen to original candidates, or start tracking under Speakers and audio.
+3. Listen to each speaker and select clips. Each row has one selection control; playback, hover and focus do not change it.
+4. Save clips separately, or create a composite reference from one speaker.
+5. Create a voice or add the references to an existing voice in the same flow. Choose the default for a new voice; existing defaults stay unchanged.
+6. Choose Use this voice. The studio opens with the voice selected, ready for your script.
+
+## Combine short clips into a reference
+
+A composite uses clips explicitly selected by the user. The platform does not silently combine all speech from a person. It checks duplicate source ranges, rights, per-output speech detection and duration before creating a draft. Defaults are at least 5 seconds of estimated speech and at most 30 seconds including gaps, configured under `speaker_tracking`.
+
+File duration and speech estimates are separate. Duplicate source coverage and silence do not count toward the speech minimum. Listen to the combined draft before saving it. Transcribe the final audio again, then check the transcript before Hi-Fi mode. Saving never approves a reference or generated take automatically.
+
+Combine for listening only allows arbitrary clips. It does not qualify the output as a single-speaker reference. Changing order, clips or gaps creates a new file and preserves earlier versions.
+
+## Correct speakers and compare tracks
+
+Expand Speaker assignment and analysis to reassign, leave unassigned, exclude or undo. Names are separate from identity. Corrections retain history; earlier references and voice snapshots are not rewritten. Derived items show source changes, and earlier timelines are marked as earlier versions.
+
+Solo and full speaker timelines are separate. Full tracks restore every source-map interval, including assigned separated overlap. Unresolved regions remain available in the original. Silence does not prove a speaker was absent. Speech coverage is estimated; voice similarity is not an identity probability.
+
+New tasks accept Auto, 1, 2 or 3 speakers. Automatic results above three are flagged, never forced into three identities. Optional [SepFormer WSJ0-3Mix](https://huggingface.co/speechbrain/sepformer-wsj03mix) uses native 8 kHz three-source weights. Upsampling does not restore high frequencies or establish Chinese-language quality. Missing models leave overlap unresolved while reliable solo clips stay available.
+
+```powershell
+.\.venv\Scripts\python.exe scripts/setup_three_speakers.py
+```
+
+Install speaker tracking first. This optional step downloads weights and records revision and hashes; it sends no recordings. Model loading is not listening acceptance.
+
+## Review, revise and export
+
+The redo dialog accepts edited production text and a different reference for both ordinary takes and book segments. Originals and previous takes remain intact. A book edit affects that segment and invalidates its chapter review; adopting an older take restores its production text too.
+
+Flag individual book segments and use the book issue list to navigate across chapters and pages. Successful generation does not clear a manual issue. Resolving an issue does not approve a chapter. Reopening an ordinary take restores its related revision task and comparison instead of generating again.
+
+Review shows the next action: review first, then export. Format, deletion and other settings are under More actions. Ordinary exports run in the background. Return to Export after a reload to inspect, cancel, retry or download the existing task. Unreviewed work requires an explicit draft export.
+
+## Existing data and maintenance
+
+Stop the service and back up database and configuration before upgrading. Event sequence and issue tables are additive. Existing recordings, entities and tracks are not rewritten. Old assemblies remain listening outputs; old timelines remain solo tracks. Missing measurements and confirmations remain unknown. Roll back by restoring the matching database, configuration and source backup while stopped; do not delete tables individually.
+
+Readiness distinguishes installed files from loaded models. Missing files preserve drafts and point to installation. Event cursors replay task events; they do not imply inference can resume at any audio sample.

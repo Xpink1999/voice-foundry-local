@@ -421,3 +421,11 @@ dialog h2{font-size:19px}
   .jump-dialog{padding:0}
 }
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.sidebar{transition:none}}
+
+/* Working controls remain readable at normal and enlarged desktop scale. */
+.header-control,.nav-group-label,.workspace-label{font-size:12px;letter-spacing:0}.preset-row button,.pill,.stream-audio p{font-size:13px}.reference-library-row{padding-block:16px}.reference-library-main>p{margin-block:6px}.reference-library-main audio{margin-block:8px}#reference-clear-filter{margin-block:4px 12px}.regeneration-text{width:100%;font-size:15px;line-height:1.65}.export-task-list:empty{display:none}.tracking-selection{background:var(--white)}
+
+.review-more-actions{margin-left:auto;position:relative}.review-more-actions>div{padding:16px;background:var(--surface-soft);min-width:220px;display:grid;gap:12px}.review-more-actions summary{cursor:pointer;min-height:40px;display:flex;align-items:center}.review-export-bridge .toolbar{align-items:center}.tracking-heading p{overflow-wrap:anywhere}.tracking-person,.tracking-row-player{min-width:0}
+
+.creation-mode{display:flex;align-items:center;gap:20px;margin-bottom:24px}.workspace-back{margin-bottom:16px}.voice-workspace-tabs{flex-wrap:nowrap}@media(max-width:760px){.voice-workspace-tabs button{flex:1;white-space:normal;min-width:0}.tracking-tabs{flex-wrap:wrap;overflow:visible;gap:12px}.tracking-tabs button{min-width:0;flex:1;white-space:normal}.tracking-tabs button span{display:block;margin:4px 0 0}.creation-mode{flex-wrap:wrap;gap:12px}}
+html[lang="ko"] h1,html[lang="ko"] h2,html[lang="ko"] h3{word-break:keep-all}

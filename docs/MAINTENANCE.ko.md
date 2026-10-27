@@ -78,3 +78,8 @@ DB와 파일 시점을 맞추려면 전체 데이터 복사 중 서비스를 멈
 ## 관련 안내
 
 [README](../README.ko.md) · [설치](INSTALL.ko.md) · [장문 음성 제작](LONGFORM.ko.md) · [참조 오디오](REFERENCE_PREPROCESSING.ko.md) · [오디오 처리](AUDIO_RESTORATION.ko.md)
+
+
+## 참조 정리와 더빙 작업 흐름
+
+[참조 정리와 더빙 작업 흐름](WORKFLOW_GUIDE.ko.md)

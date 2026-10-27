@@ -63,7 +63,7 @@ print(job)
 
 CLI：`voice jobs --archived`、`voice archive-job <UUID>`、`voice restore-job <UUID>`。MCP：`voice_archive_jobs(job_ids, restore=false)`，restore=true 恢复。所有工具共用同一服务。
 
-SSE 的 audio_chunk 事件包含片段事件 UUID、segment、chunk、duration。收到后立即 GET /events/{id}/audio 获取独立 WAV 块；块按事件顺序拼接。SSE 结束事件为 end。客户端重连可重新读历史事件并按 UUID 去重。流式是固定文本输入的增量音频输出，不是边输入文本边解码。
+SSE 的 audio_chunk 事件包含片段事件 UUID、segment、chunk、duration。收到后立即 GET /events/{id}/audio 获取独立 WAV 块；块按事件顺序拼接。SSE 结束事件为 end。客户端用 after_seq 或 Last-Event-ID 追赶本任务增量；事件保留 UUID，并返回持久 seq。兼容旧 UUID 游标。流式是固定文本输入的增量音频输出，不是边输入文本边解码。
 
 审核 approved 要求 listened=true 和实际用户确认；系统不能用自动化测试或波形验证代替用户听感。所有最初结果为 pending。MCP 故意不暴露批准工具。
 
@@ -156,3 +156,34 @@ MCP 工具名称以 voice_ 开头。接口不依赖 Codex；其他 MCP 客户端
 ## 模型资源与关闭
 
 推理适配器默认运行于独立进程，空闲超时后退出。`POST /models/unload` 在生成空闲时结束推理进程；忙碌时返回错误，不中断任务。`GET /health` 的 `engine_process_ids` 列出本服务的推理进程。`POST /maintenance/stop` 返回关闭请求，随后停止后台工作与服务；HTTP 202 本身不表示进程已退出。CLI `voice stop` 和 MCP `voice_stop_service` 会等候退出，不自动启动服务。关闭网页不取消后台任务。
+
+
+## 素材工作流增量
+
+所有路径接在 `/api/v1` 后。音频、身份与人工审核状态互相独立。
+
+| 操作 | 接口 | 请求要点 |
+|---|---|---|
+| 人物整理 | POST /audio-processing | operations=["track_speakers"]，speaker_count 为 null/1/2/3；source_processing_id 可复用去音乐结果 |
+| 摘要与分页片段 | GET /audio-processing/{id}/summary | limit / offset；不返回 embedding |
+| 人物归属纠正 | PUT /audio-processing/{id}/clips/{output}/assignment | speaker_id 可为 null，confirmed，excluded，expected_revision，reason |
+| 同人复合参考 | POST /audio-processing/{id}/assemble | purpose="reference"，output_ids，name，gap_ms，speaker_confirmed，expected_revision |
+| 自由试听合并 | 同上 | purpose="audition"，不能直接用作单人参考 |
+| 保存复合草稿 | POST /audio-processing/{id}/save-reference | name、scenario、listened；必须已实际试听，不自动批准 |
+| 参考到人物 | POST /reference-voices | reference_id 为默认参考，reference_ids 为其他所选；voice_id 指定追加目标 |
+| 普通重做历史 | GET /results/{id}/revisions | 返回关联任务 ID、状态及结果，不重新生成 |
+| 本次台词修订 | POST /results/{id}/regenerate 或 /longform/books/{book}/segments/{n}/regenerate | 可传 text；原文与旧音频不覆盖 |
+| 长文问题清单 | GET /longform/books/{id}/issues | limit / offset；人工问题不因生成成功清除 |
+| 标记或解决问题 | PUT /longform/books/{id}/segments/{n}/issue | note、resolved；未解决问题阻止该章批准 |
+| 分页定位 | GET /longform/books/{id}/segments/{n}/locate | chapter_no、segment_no、offset，分段页大小 25 |
+| 后台普通导出 | POST /export-tasks | ExportInput，HTTP 202；可传 Idempotency-Key |
+| 导出状态与取消 | GET /export-tasks/{id}，POST /export-tasks/{id}/cancel | 成功后 export_id 指向原有 ZIP 下载接口 |
+
+人物整理与合并同样支持 `Idempotency-Key`；同键不同内容拒绝。旧 `POST /exports` 保留同步兼容，新 WebUI 使用后台接口。刷新查询任务不会重新推理或打包。事件列表支持 `after_seq`、`limit`；SSE 优先使用持久序号，终态在积压事件发送后返回。模型就绪信息在 `/models` 的 readiness 与 `/audio-processing/capabilities` 的 stages 中，文件存在检查不等于音质验收。
+
+
+## CLI / MCP 对等入口
+
+CLI：`voice track-speakers RECORDING_ID --speakers 2`、`voice tracking-summary PROCESSING_ID --limit 30 --offset 0`、`voice name-speaker PROCESSING_ID SPEAKER_ID NAME`。`assign-clip ID request.json OUTPUT_ID`、`compose-reference ID request.json`、`save-composite ID request.json` 和 `save-tracked ID request.json` 的 JSON 与上表一致。命令名使用英文，不读取当前游戏工程。
+
+MCP：`voice_track_speakers`、`voice_tracking_summary`、`voice_name_speaker`、`voice_assign_clip`、`voice_compose_reference`、`voice_save_composite`、`voice_save_tracked_clips`。传入的确认必须来自用户实际试听，工具不能代替听审。已有 `voice_process_recording` 增加 speaker_count/source_processing_id，默认走人物整理；显式双路 separate 保留为旧匿名轨道工具。

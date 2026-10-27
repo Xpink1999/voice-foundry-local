@@ -10,7 +10,7 @@
   direct.type = 'button'; direct.className = 'primary'; direct.id = 'review-approve-export'; direct.textContent = tr('批准并准备导出'); approval.after(direct);
   const message = document.createElement('p'); message.id = 'review-action-message'; message.className = 'reference-warnings'; message.setAttribute('role', 'alert'); dialog.querySelector('.dialog-actions').before(message);
   const bar = document.createElement('div'); bar.className = 'panel review-export-bridge';
-  bar.innerHTML = `<div class="workspace-intro"><h2>${tr('审核与导出')}</h2><button class="text-link" id="review-export-advanced">${tr('高级导出设置 ↗')}</button></div><div id="review-scope" class="hint"></div><div class="toolbar"><button id="review-batch-approve" class="secondary">${tr('审核所选')}</button><button id="review-delete-selected" class="secondary">${tr('删除所选')}</button><button id="review-clear-selected" class="text-link">${tr('清空选择')}</button><label class="checkbox"><input id="review-selected-only" type="checkbox">${tr('只看所选')}</label><label>${tr('音频格式')}<select id="review-export-format"><option value="wav">WAV</option><option value="mp3">MP3</option><option value="flac">FLAC</option><option value="ogg">OGG</option></select></label><button id="review-export-now" class="primary">${tr('导出所选已审核音频')}</button></div><div id="review-selection-summary" class="selection-summary" role="status"></div><div id="review-export-ready" role="status"></div>`;
+  bar.innerHTML = `<div class="workspace-intro"><h2>${tr('审核与导出')}</h2></div><div id="review-scope" class="hint"></div><div class="toolbar"><button id="review-batch-approve" class="primary">${tr('审核所选')}</button><button id="review-export-now" class="primary">${tr('导出所选已审核音频')}</button><details class="review-more-actions"><summary>${tr('更多操作')}</summary><div><label>${tr('音频格式')}<select id="review-export-format"><option value="wav">WAV</option><option value="mp3">MP3</option><option value="flac">FLAC</option><option value="ogg">OGG</option></select></label><label class="checkbox"><input id="review-selected-only" type="checkbox">${tr('只看所选')}</label><button id="review-delete-selected" class="text-link">${tr('删除所选')}</button><button id="review-clear-selected" class="text-link">${tr('清空选择')}</button><button class="text-link" id="review-export-advanced">${tr('高级导出设置 ↗')}</button></div></details></div><div id="review-selection-summary" class="selection-summary" role="status"></div><div id="review-export-ready" role="status"></div>`;
   $('result-list').before(bar);
   let resultPage=0, filterSignature='';
   const pager=document.createElement('div');pager.className='lf-pager';pager.id='result-pagination';$('result-list').after(pager);
@@ -30,6 +30,8 @@
     if (exportSignature && exportSignature !== JSON.stringify(current().sort())) {exportSignature = null; $('review-export-ready').replaceChildren();}
     const summary = VoiceWorkflow.selectionSummary(state.results, state.selected, pageSlice(filteredResults()).map(result => result.id));
     $('review-selection-summary').innerHTML = summary.items.length ? `<p>${e(tr('已选 {0} 条 · 已审核 {1} 条', [summary.items.length, summary.approved]))}${summary.hidden ? ' · '+e(tr('其中 {0} 条被当前筛选隐藏', [summary.hidden])) : ''}</p><details><summary>${tr('查看所选音频')}</summary><ul>${summary.items.slice(0, 30).map(item => `<li>${e(item.title)} · ${e(labels[item.review])}</li>`).join('')}</ul></details>` : `<p>${e(tr('选择音频后可批量试听、审核和导出。'))}</p>`;
+    $('review-export-now').hidden=!summary.items.length||summary.approved!==summary.items.length;
+    $('review-batch-approve').hidden=!summary.items.length||summary.approved===summary.items.length;
     $('review-export-now').disabled = exporting || !summary.items.length || summary.approved !== summary.items.length;
     $('review-batch-approve').disabled = !summary.items.length || summary.approved === summary.items.length;
     $('review-delete-selected').disabled = !summary.items.length;
@@ -78,10 +80,9 @@
     if (ids.some(id => state.results.find(result => result.id === id)?.review !== 'approved')) return;
     exporting = true; counts();
     try {
-      const item = await api('/exports', {method: 'POST', body: {result_ids: ids, format: $('review-export-format').value}});
-      exportSignature = JSON.stringify([...ids].sort());
-      $('review-export-ready').innerHTML = `<p>${tr('导出包已准备好：')}<a href="/api/v1/exports/${e(item.id)}/download" class="text-link" download>${tr('下载 {0} 条已审核音频（ZIP）', [ids.length])}</a></p>`;
-      await refresh(true); toast(tr('导出包已生成，可直接下载'));
+      await window.exportTasks.start({result_ids:ids,format:$('review-export-format').value});
+      exportSignature=JSON.stringify([...ids].sort());
+      $('review-export-ready').textContent=tr('导出在后台进行，关闭页面后可回来下载。');
     } catch (error) {$('review-export-ready').textContent = error.message;}
     finally {exporting = false; counts();}
   };

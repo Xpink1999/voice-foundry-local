@@ -95,9 +95,9 @@ class ReferenceLibrary:
 
     def _work(self):
         while not self.stop_event.is_set():
-            recordings=[r for r in self.store.list('recordings') if r['status']=='queued']
+            recordings=self.store.by_status('recordings',['queued'],limit=1)
             comparisons=[c for c in self.store.list('reference_comparisons') if c['status']=='generating' and self._comparison_ready(c)]
-            item=recordings[-1] if recordings else comparisons[-1] if comparisons else None
+            item=recordings[0] if recordings else comparisons[-1] if comparisons else None
             if not item:self.wake.wait(.7);self.wake.clear();continue
             kind='recordings' if recordings else 'reference_comparisons'
             try:

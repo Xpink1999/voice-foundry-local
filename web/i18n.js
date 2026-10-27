@@ -26,14 +26,48 @@
     return String(message).replace(/\{(\d+)\}/g, (token, index) =>
       values[index] === undefined ? token : String(values[index]));
   }
-  function serviceMessage(value) {
+  const serviceTemplates = Object.keys(catalogs['zh-CN']).filter(key => /[\u3400-\u9fff]/.test(key) && /\{\d+\}/.test(key)).map(key => {
+    const slots = [], pieces = key.split(/(\{\d+\})/g);
+    const pattern = pieces.map(piece => {
+      const slot = piece.match(/^\{(\d+)\}$/);
+      if (slot) { slots.push(Number(slot[1])); return '([\\s\\S]*?)'; }
+      return piece.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }).join('');
+    return {key, slots, pattern: new RegExp('^' + pattern + '$'), specificity: key.replace(/\{\d+\}/g, '').length};
+  }).sort((a, b) => b.specificity - a.specificity);
+  function serviceMessage(value, depth = 0) {
     const text = String(value ?? '');
-    // A small explicit bridge for numeric legacy service messages, not user content.
-    for (const [pattern, key] of [[/^声线 (\d+)$/, '声线 {0}'], [/^已合成 (\d+) 章$/, '已合成 {0} 章']]) {
-      const match = text.match(pattern);
-      if (match) return translate(key, [match[1]]);
+    if (Object.hasOwn(catalogs['zh-CN'], text)) return translate(text);
+    if (depth < 3 && text.includes(' → ')) return text.split(' → ').map(part => serviceMessage(part, depth + 1)).join(' → ');
+    // Only service-owned messages use this bridge. Never pass names, scripts or transcripts here.
+    if (depth < 3 && text.length < 10000 && /[\u3400-\u9fff]/.test(text)) {
+      for (const template of serviceTemplates) {
+        const match = text.match(template.pattern);
+        if (!match) continue;
+        const values = [];
+        template.slots.forEach((slot, index) => { values[slot] = serviceMessage(match[index + 1], depth + 1); });
+        return translate(template.key, values);
+      }
     }
-    return translate(text);
+    return text;
+  }
+  const defaultFields = {
+    'reference-source': '本机上传的参考录音',
+    'reference-auth': '用户确认拥有此次语音参考用途所需授权',
+    'design-text': '这是一段用于试听音色的示例文本。',
+    'compare-text': '这是一段用于比较音色的示例文本。'
+  };
+  function defaultKey(field, value) {
+    const key = field.dataset?.i18nValue || defaultFields[field.id];
+    return key && supported.some(code => catalogs[code]?.[key] === value) ? key : null;
+  }
+  function validationMessage(item) {
+    const ctx = item.ctx || {};
+    const simple = {missing:'必填项',int_parsing:'需要整数',int_type:'需要整数',float_parsing:'需要数字',float_type:'需要数字',bool_parsing:'需要有效的布尔值',bool_type:'需要有效的布尔值',string_type:'需要文本',literal_error:'请选择有效选项',enum:'请选择有效选项',string_pattern_mismatch:'命名规则不匹配',list_type:'数据格式不正确',dict_type:'数据格式不正确'};
+    if (simple[item.type]) return translate(simple[item.type]);
+    const limits = {string_too_short:['至少需要 {0} 个字符','min_length'],string_too_long:['最多允许 {0} 个字符','max_length'],too_short:['至少需要 {0} 项','min_length'],too_long:['最多允许 {0} 项','max_length'],greater_than_equal:['数值至少为 {0}','ge'],less_than_equal:['数值最多为 {0}','le'],greater_than:['数值必须大于 {0}','gt'],less_than:['数值必须小于 {0}','lt']};
+    if (limits[item.type] && ctx[limits[item.type][1]] !== undefined) return translate(limits[item.type][0], [ctx[limits[item.type][1]]]);
+    return serviceMessage(String(item.msg || translate('请求失败')).replace(/^Value error, /, ''));
   }
   const escape = value => String(value ?? '').replace(/[&<>"']/g, character =>
     ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[character]));
@@ -55,7 +89,8 @@
     document.querySelectorAll('input[id], textarea[id], select[id]').forEach(input => {
       // Listening confirmations are deliberately never restored as approval.
       if (['file', 'password', 'checkbox', 'radio', 'hidden'].includes(input.type) || input.id === 'ui-language') return;
-      fields[input.id] = input.value;
+      // Rebuild untouched system defaults in the destination language; keep authored text verbatim.
+      if (!defaultKey(input, input.value)) fields[input.id] = input.value;
     });
     return {
       fields,
@@ -107,7 +142,7 @@
     }
     for (const [id, value] of Object.entries(draft.fields)) {
       const field = document.getElementById(id);
-      if (field && field.tagName !== 'SELECT' && !['file', 'password', 'checkbox', 'radio', 'hidden'].includes(field.type)) field.value = value;
+      if (field && field.tagName !== 'SELECT' && !['file', 'password', 'checkbox', 'radio', 'hidden'].includes(field.type)) field.value = defaultKey(field, value) ? translate(defaultKey(field, value)) : value;
     }
     if (typeof state !== 'undefined') {
       state.selected = new Set(draft.selected.filter(id => state.results.some(result => result.id === id)));
@@ -128,7 +163,7 @@
     draft = null;
     } finally { restoringDraft = false; }
   }
-  window.VoiceI18n = {translate, message: serviceMessage, locale, normalize, detect, changeLanguage, applyStatic, escape, captureDraft,
+  window.VoiceI18n = {translate, message: serviceMessage, validationMessage, locale, normalize, detect, changeLanguage, applyStatic, escape, captureDraft,
     get changingLanguage() {return changingLanguage;}, get restoringDraft() {return restoringDraft;}};
   window.tr = translate;
   window.uiMessage = serviceMessage;

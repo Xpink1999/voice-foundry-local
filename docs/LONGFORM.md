@@ -118,3 +118,8 @@ config/platform.json 的 longform 集中管理 max_source_bytes、segment_chars�
 ## 相关说明
 
 [README](../README.md) · [安装说明](INSTALL.md) · [参考音频](REFERENCE_PREPROCESSING.md) · [音频处理](AUDIO_RESTORATION.md) · [维护说明](MAINTENANCE.md)
+
+
+## 参考整理与配音流程
+
+[参考整理与配音流程](WORKFLOW_GUIDE.md)

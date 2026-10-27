@@ -82,3 +82,5 @@ Finished tasks are archived after 7 days by default, or manually in batches. Del
 The platform's own code and documentation use [Apache-2.0](LICENSE). Models and dependencies retain their own licenses; see the [third-party notices](THIRD_PARTY_NOTICES.md) and [license records](LICENSES/README.md), both in Chinese. This is not an official product of VoxCPM or other upstream projects.
 
 Use recordings and texts you have permission to use. An open model license does not grant permission to use a person's voice or redistribute imported manuscripts, recordings or cloned results.
+
+[Reference and narration workflow](docs/WORKFLOW_GUIDE.en.md)

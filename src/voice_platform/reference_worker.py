@@ -29,6 +29,8 @@ def main():
         from .speaker_tracking import assemble_clips
         result=assemble_clips(request,source.parent,progress)
     elif request['mode']=='track':
+        from .processing_readiness import verify_frozen
+        verify_frozen(request.get('tracking_model_snapshots',{}))
         from .speaker_tracking import SpeakerTracker
         result=SpeakerTracker(request['config']).run(request,source.parent,progress)
     elif request['mode']=='process':

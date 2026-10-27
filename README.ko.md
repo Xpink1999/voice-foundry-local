@@ -82,3 +82,5 @@ bin\voice.cmd health
 플랫폼 자체 코드와 문서는 [Apache-2.0](LICENSE)을 따릅니다. 모델과 의존성은 각각의 라이선스를 유지합니다. [제삼자 고지](THIRD_PARTY_NOTICES.md)와 [라이선스 자료](LICENSES/README.md)는 중국어입니다. 이 프로젝트는 VoxCPM 등 상위 프로젝트의 공식 제품이 아닙니다.
 
 사용 권한이 있는 녹음과 텍스트를 사용하세요. 모델의 공개 라이선스가 개인의 목소리 사용이나 가져온 원고, 녹음, 복제 결과의 재배포 권한까지 부여하지는 않습니다.
+
+[참조 정리와 더빙 작업 흐름](docs/WORKFLOW_GUIDE.ko.md)

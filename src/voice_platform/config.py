@@ -17,8 +17,10 @@ def load_config(path=None):
     cfg.setdefault('speaker_tracking', {})
     for key,value in dict(model_dir='models/pyannote-community-1', python='runtime/diarization-env/Scripts/python.exe',
                           match_threshold=.65, match_margin=.08, min_turn_seconds=.15, max_clip_seconds=30.,
-                          gap_ms=180, trim_pause_ms=120, edge_padding_ms=60).items():
+                          gap_ms=180, trim_pause_ms=120, edge_padding_ms=60,
+                          reference_min_speech_seconds=5.,reference_max_seconds=30.).items():
         cfg['speaker_tracking'].setdefault(key,value)
+    cfg.setdefault('audio_processing',{}).setdefault('three_separation_dir','models/sepformer-wsj03mix')
     cfg.setdefault('cache_dir', 'runtime/model-cache')
     for key in ("data_dir", "model_dir", "log_dir", "cache_dir"):
         p = Path(cfg[key])

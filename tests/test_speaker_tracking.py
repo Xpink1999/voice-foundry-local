@@ -28,7 +28,8 @@ def test_voice_anchors_match_swapped_sources_without_adjacent_waveform():
     assert [r['speaker'] for r in result]==['B','A']
     result=match_sources([[.7,.7,0],[.7,.7,0]],anchors,['A','B'],.65,.08)
     assert all(r['speaker'] is None for r in result)
-    assert match_sources([[1,0,0],[0,1,0]],{'A':[1,0,0]},['A','B'],.65,.08)[0]['speaker'] is None
+    partial=match_sources([[1,0,0],[0,1,0]],{'A':[1,0,0]},['A','B'],.65,.08)
+    assert [m['speaker'] for m in partial]==['A',None]
 
 
 def test_compact_removes_gaps_preserves_source_and_maps_offsets():
@@ -70,7 +71,7 @@ def test_short_turns_and_brief_overlaps_are_not_discarded(cfg,tmp_path,monkeypat
     monkeypatch.setattr(tracker.analyzer,'embedding',lambda _: [1.,0.,0.])
     monkeypatch.setattr(tracker.analyzer,'transcribe',lambda _: dict(text='test',low_confidence=False,confirmed=False))
     monkeypatch.setattr(tracker.analyzer,'models',lambda :{'speaker_dir':{}})
-    monkeypatch.setattr(ProcessingEngines,'separate',lambda self,y,sr,progress:[('A',y[0]*.6,sr),('B',y[0]*.4,sr)])
+    monkeypatch.setattr(ProcessingEngines,'separate',lambda self,y,sr,progress,retain=False:[('A',y[0]*.6,sr),('B',y[0]*.4,sr)])
     result=tracker.run(dict(input_path=str(path)),tmp_path,lambda *_:None)
     clips=[o for o in result['outputs'] if o['kind']=='clip']
     assert any(o['origin']=='overlap' and o['duration']<1 for o in clips)

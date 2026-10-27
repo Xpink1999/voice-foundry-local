@@ -4,6 +4,7 @@ from collections import Counter
 from .store import now,uid
 
 KINDS={'projects':'项目','voices':'人物音色','voice_versions':'音色历史版本','references':'参考片段','recordings':'参考录音','jobs':'生成任务','results':'试听结果','exports':'导出记录','audio_processing':'音频处理','reference_comparisons':'参考对比','longform_books':'长文作品','longform_chapters':'长文章节','longform_segments':'长文分段','longform_exports':'长文导出'}
+KINDS['export_tasks']='导出任务'
 LF={'longform_books':'lf_books','longform_chapters':'lf_chapters','longform_segments':'lf_segments','longform_exports':'lf_exports'}
 ACTIVE={'queued','running','generating','cancel_requested','uploading','indexing'}
 class Assets:
@@ -76,6 +77,9 @@ class Assets:
     def _blocked(self,db,chosen):
         errors=[]
         for (kind,identity),row in chosen.items():
+            if kind=='results':
+                busy=db.execute("SELECT 1 FROM entities e,json_each(e.body,'$.request.result_ids') j WHERE e.kind='export_tasks' AND json_extract(e.body,'$.status') IN ('queued','running','cancel_requested') AND j.value=? LIMIT 1",(identity,)).fetchone()
+                if busy:errors.append('所选音频正在导出，请先取消或等待导出结束')
             state=row.get('status') or row.get('state')
             if state in ACTIVE and kind not in {'voices','voice_versions'}:errors.append(self.summary(kind,row)['name']+'：请先停止或等待当前任务结束')
             if kind=='recordings' and row.get('smart_reference',{}).get('status') in {'analyzing','processing','analyzing_outputs'}:errors.append('该录音正在自动整理，请先停止')

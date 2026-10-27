@@ -97,9 +97,14 @@ def write_srt(path, segments):
     text = "\n\n".join(f"{i+1}\n{srt_time(s['start'])} --> {srt_time(s['end'])}\n{s['text']}" for i, s in enumerate(segments))
     Path(path).write_text(text + "\n", encoding="utf-8")
 
-def convert_audio(source, target, options, ffmpeg):
+def convert_audio(source, target, options, ffmpeg,stop_event=None):
     if options["format"] == "wav" and options["sample_rate"] == sf.info(source).samplerate and options["channels"] == sf.info(source).channels and not options["normalize"] and not options["trim_silence"]:
-        shutil.copy2(source, target)
+        if stop_event:
+            with Path(source).open('rb') as input_file,Path(target).open('wb') as output_file:
+                while block:=input_file.read(1024*1024):
+                    if stop_event.is_set():raise InterruptedError('导出已停止，原始音频保留')
+                    output_file.write(block)
+        else:shutil.copy2(source, target)
         return
     filters = []
     if options["trim_silence"]:
@@ -112,7 +117,10 @@ def convert_audio(source, target, options, ffmpeg):
     codec = dict(wav="pcm_s24le", mp3="libmp3lame", flac="flac", ogg="libvorbis")[options["format"]]
     command += ["-ar", str(options["sample_rate"]), "-ac", str(options["channels"]), "-c:a", codec, str(target)]
     try:
-        result = subprocess.run(command, capture_output=True, timeout=300)
+        if stop_event:
+            from .worker_runner import run_command
+            result=run_command(command,stop_event,timeout=300)
+        else:result = subprocess.run(command, capture_output=True, timeout=300)
     except (FileNotFoundError, subprocess.TimeoutExpired) as error:
         raise ValueError("音频编码工具不可用或处理超时，请检查 FFmpeg 配置") from error
     if result.returncode:

@@ -13,6 +13,7 @@ import soundfile as sf
 
 from .audio import sha256, write_wav
 from .reference_analysis import Analyzer, silence_metrics
+from .tracking_quality import coverage, clip_stats, restore_timeline
 
 
 def assemble_clips(request, folder, progress):
@@ -32,9 +33,17 @@ def assemble_clips(request, folder, progress):
                 output_start=position,output_end=position+len(pcm)/rate,source_spans=item['source_spans']))
             out.write(pcm);position+=len(pcm)/rate
             progress(100*(index+1)/len(inputs),'合并用户选择的有效语音')
-    return dict(outputs=[dict(file=str(target),label=request['assembly_name'],role='speech',stage='assemble_clips',
+    output=dict(file=str(target),label=request['assembly_name'],role='speech',stage='assemble_clips',
         kind='assembly',final=True,sample_rate=rate,channels=1,duration=position,sha256=sha256(target),
-        source_spans=mapping,reference_eligible=False,review='pending')],model_sources=request['assembly_models'],
+        source_spans=mapping,reference_eligible=False,review='pending',purpose=request.get('purpose','audition'))
+    if request.get('purpose')=='reference':
+        analyzer=Analyzer(request['config_snapshot'] if 'config_snapshot' in request else request['config'])
+        pcm,_=sf.read(target,dtype='float32')
+        output['transcript']=dict(analyzer.transcribe(pcm),confirmed=False,audio_sha256=output['sha256'])
+        output['embedding']=analyzer.embedding(pcm)
+        output['qc']=request['reference_qc']
+        output['reference_state']='draft'
+    return dict(outputs=[output],model_sources=request['assembly_models'],
         device='cpu',note='按用户选择顺序合并；原片段保留，合并文件不自动用作人物参考。')
 
 
@@ -71,15 +80,20 @@ def match_sources(embeddings, anchors, allowed, threshold, margin):
     scores = [{label: float(np.dot(unit(e), unit(anchors[label]))) for label in allowed if label in anchors}
               for e in embeddings]
     labels = [label for label in allowed if label in anchors]
-    if len(labels) < len(embeddings):
-        return [dict(speaker=None, score=None, margin=None) for _ in embeddings]
-    choices = sorted(((sum(scores[i][label] for i, label in enumerate(order)), order)
-                      for order in itertools.permutations(labels, len(embeddings))), reverse=True)
+    if not labels:return [dict(speaker=None,score=None,margin=None) for _ in embeddings]
+    # Explicit unknown slots permit partial matching without inferring the missing person.
+    orders=set(itertools.permutations(labels+[None]*len(embeddings),len(embeddings)))
+    choices=sorted(((sum(scores[i][label]-threshold if label else 0. for i,label in enumerate(order)),order)
+                    for order in orders if len([x for x in order if x])==len(set(x for x in order if x))),
+                   key=lambda item:item[0],reverse=True)
     result = []
     for index, label in enumerate(choices[0][1]):
+        if label is None:
+            result.append(dict(speaker=None,score=None,margin=None));continue
         score = scores[index][label]
         runner_up = max((v for other, v in scores[index].items() if other != label), default=-1.)
-        difference = score-runner_up
+        competing=max((s[label] for i,s in enumerate(scores) if i!=index),default=-1.)
+        difference = min(score-runner_up,score-competing)
         result.append(dict(speaker=label if score >= threshold and difference >= margin else None,
                            score=score, margin=difference))
     return result
@@ -106,6 +120,17 @@ def compact_pcm(pcm, sr, spans, gap_ms=180):
         pieces.append(part)
         position += len(part)
     return (np.concatenate(pieces) if pieces else np.zeros(0, dtype=np.float32)), mapping
+
+
+def mapped_speech(spans, mapping):
+    result=[]
+    for a,b in spans:
+        for m in mapping:
+            start=max(a,m['output_start']);end=min(b,m['output_end'])
+            if end>start:
+                result.append(dict(source_start=m['source_start']+start-m['output_start'],
+                                   source_end=m['source_start']+end-m['output_start']))
+    return result
 
 
 class SpeakerTracker:
@@ -192,6 +217,10 @@ class SpeakerTracker:
                                  status='anchored' if values else 'needs_reference'))
         progress(30, '建立全程人物声纹依据，筛选独白片段')
         saved, segments, unresolved = [], [], []
+        used_separators=set()
+        if len(labels)>3:
+            unresolved.append(dict(start=0.,end=duration,reason='speaker_count_out_of_scope',detected=len(labels)))
+        separator=None
         folder = Path(folder)
         def save(audio, label, kind, spans, **extra):
             key=f'track-{len(saved)+1:04}'
@@ -209,25 +238,38 @@ class SpeakerTracker:
                 label=piece['speakers'][0]
                 score=float(np.clip(np.dot(unit(self.analyzer.embedding(audio)), anchors[label]),-1.,1.)) if label in anchors and len(audio)>=self.sr else None
                 candidates=[(audio, label, score, None, 'solo')]
-            elif len(piece['speakers']) == 2:
+            elif len(piece['speakers']) in {2,3}:
                 from .processing_engines import ProcessingEngines
-                engine=ProcessingEngines(self.config)
+                if separator is None:separator=ProcessingEngines(self.config)
                 # Context gives the separator and voice encoder evidence around a
                 # brief interruption. Only the actual overlapping span is retained.
                 context_start=max(0.,start-.7);context_end=min(duration,end+.7)
                 context_audio=pcm[round(context_start*self.sr):round(context_end*self.sr)]
-                split=engine.separate(context_audio[None, :], self.sr, lambda _:None)
+                try:
+                    if len(piece['speakers'])==3:
+                        split=separator.separate_three(context_audio[None,:],self.sr,lambda _:None)
+                    else:split=separator.separate(context_audio[None, :], self.sr, lambda _:None,retain=True)
+                    used_separators.add(len(piece['speakers']))
+                except (FileNotFoundError,ValueError,ImportError) as error:
+                    unresolved.append(dict(start=start,end=end,speakers=piece['speakers'],reason='separator_unavailable',detail=str(error)))
+                    continue
+                split=[(name,separator.resample(audio,rate,self.sr),self.sr) for name,audio,rate in split]
                 matches=match_sources([self.analyzer.embedding(s[1]) for s in split], anchors, piece['speakers'],
                                       self.options['match_threshold'], self.options['match_margin'])
                 first,last=round((start-context_start)*self.sr),round((end-context_start)*self.sr)
                 candidates=[(s[1][first:last], m['speaker'], m['score'], m['margin'], 'overlap') for s,m in zip(split,matches)]
-                del engine
             else:
                 unresolved.append(dict(start=start, end=end, speakers=piece['speakers'], reason='more_than_two_overlapping'))
                 continue
             for audio,label,score,margin,kind in candidates:
-                cuts=[(max(0.,a-start-padding),min(len(audio)/self.sr,b-start+padding))
-                      for a,b in speech if a<end and b>start]
+                own_speech=self.speech_spans(audio)
+                cuts=[(max(0.,a-padding),min(len(audio)/self.sr,b+padding)) for a,b in own_speech]
+                # Merge padded neighbouring ranges to avoid duplicating their overlap.
+                merged=[]
+                for a,b in cuts:
+                    if merged and a<=merged[-1][1]:merged[-1]=(merged[-1][0],max(b,merged[-1][1]))
+                    else:merged.append((a,b))
+                cuts=merged
                 cleaned,mapping=compact_pcm(audio,self.sr,cuts,self.options.get('trim_pause_ms',120))
                 if len(cleaned):
                     audio=cleaned
@@ -245,13 +287,17 @@ class SpeakerTracker:
                           transcript=transcript,embedding=self.analyzer.embedding(audio),
                           recommended=bool(label and kind=='solo' and 5<=len(audio)/self.sr<=30
                               and score is not None and score>=self.options['match_threshold'] and not transcript['low_confidence']),
-                          review='pending', warnings=warnings)
+                          review='pending', warnings=warnings,revision=1,assignment_confirmed=False,
+                          native_sample_rate=8000 if kind=='overlap' and len(piece['speakers'])==3 else self.sr,
+                          speech_spans=mapped_speech(self.speech_spans(audio),mapping))
+                item['speech_stats']=clip_stats(item)
                 segments.append(dict(output_key=item['key'],start=start,end=end,speaker_id=label,origin=kind,
                                      similarity=score,match_margin=margin,review='pending'))
                 if not label:
                     unresolved.append(dict(start=start,end=end,output_key=item['key'],reason='ambiguous_voice_match'))
             progress(30+50*(index+1)/max(1,len(pieces)), '按全程声纹归属独白与重叠片段')
-        # Keep clips independent. A user explicitly chooses which speech to assemble.
+        if separator:separator.close()
+        # Preserve the solo-only product and publish a separately named complete mapped track.
         for profile in profiles:
             selected=[s for s in segments if s['speaker_id']==profile['id'] and s['origin']=='solo']
             spans=[(s['start'],s['end']) for s in selected]
@@ -263,21 +309,34 @@ class SpeakerTracker:
                 for a,b in spans:
                     first,last=round(a*self.sr),round(b*self.sr)
                     timeline[first:last]=pcm[first:last]
-                profile['timeline_key']=save(timeline,profile['id']+' · 原时间轴','timeline',
+                profile['timeline_key']=save(timeline,profile['id']+' · 独白时间轴','timeline',
                     [dict(source_start=a,source_end=b) for a,b in spans],speaker_id=profile['id'],
-                    reference_eligible=False,review='pending')['key']
+                    reference_eligible=False,timeline_type='solo_timeline',review='pending')['key']
+            clips=[o for o in saved if o.get('kind')=='clip' and o.get('speaker_id')==profile['id']]
+            full=restore_timeline(clips,len(pcm),self.sr,lambda c:sf.read(c['file'],dtype='float32')[0])
+            profile['full_timeline_key']=save(full,profile['id']+' · 完整人物时间轴','full_speaker_timeline',
+                [dict(output_key=c['key'],source_spans=c['source_spans']) for c in clips],
+                speaker_id=profile['id'],reference_eligible=False,review='pending',
+                completeness='partial' if unresolved else 'complete',unresolved=unresolved)['key']
             profile['recommended_keys']=[o['key'] for o in saved if o.get('speaker_id')==profile['id'] and o.get('recommended')]
             profile['clip_count']=sum(s['speaker_id']==profile['id'] for s in segments)
-            profile['effective_seconds']=sum(o['duration'] for o in saved if o.get('kind')=='clip' and o.get('speaker_id')==profile['id'])
+            profile['file_seconds']=sum(c['duration'] for c in clips)
+            profile['effective_seconds']=coverage([s for c in clips for s in c['speech_spans']])
+            profile['effective_seconds_estimated']=True
         similarities=[dict(left=a,right=b,cosine=float(np.dot(anchors[a],anchors[b])))
                       for a,b in itertools.combinations(anchors,2)]
         progress(92,'整理人物试听、有效语音与来源时间映射')
         overlap_seconds=sum(r['end']-r['start'] for r in regions if len(r['speakers'])>1)
         sources=dict(diarization=model,speaker=self.analyzer.models()['speaker_dir'])
-        if overlap_seconds:
+        if used_separators:
             from .processing_engines import ProcessingEngines
-            path=ProcessingEngines(self.config).source('separation_dir')
-            sources['separation']=json.loads((path/'provenance.json').read_text(encoding='utf-8'))
+            for count in used_separators:
+                key='separation_dir' if count==2 else 'three_separation_dir'
+                path=separator.source(key)
+                if (path/'provenance.json').is_file():sources[key]=json.loads((path/'provenance.json').read_text(encoding='utf-8'))
+        for key in ('whisper_dir','speaker_dir'):
+            path=self.analyzer.path(key)/'provenance.json'
+            if path.is_file():sources[key]=json.loads(path.read_text(encoding='utf-8'))
         return dict(outputs=saved,model_sources=sources,
             device=self.config['audio_processing']['device'],
             note='人物编号仅对本次录音有效；声纹分数不是身份概率。片段去除长空白，合并由用户选择；参考片段独立保存。重叠结果需检查串音。',

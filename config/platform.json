@@ -30,7 +30,8 @@
     "music_window_seconds": 8,
     "separation_dir": "models/MossFormer2_SS_16K",
     "enhancement_dir": "models/MossFormer2_SE_48K",
-    "music_dir": "models/MelBandRoformer"
+    "music_dir": "models/MelBandRoformer",
+    "three_separation_dir": "models/sepformer-wsj03mix"
   },
   "reference_preprocessing": {
     "enabled": true,
@@ -83,6 +84,9 @@
     "max_clip_seconds": 30.0,
     "gap_ms": 180,
     "trim_pause_ms": 120,
-    "edge_padding_ms": 60
-  }
+    "edge_padding_ms": 60,
+    "reference_min_speech_seconds": 5.0,
+    "reference_max_seconds": 30.0
+  },
+  "max_pending_exports": 10
 }

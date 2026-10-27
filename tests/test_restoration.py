@@ -110,7 +110,7 @@ def test_smart_reference_one_upload_ready_and_single_reference_voice(client,monk
     assert result['smart_reference']['status']=='ready',result['smart_reference']
     assert result['recommendations'] and len(result['candidates'])==6
     task=client.get('/api/v1/audio-processing/'+result['smart_reference']['processing_id']).json()
-    assert task['operations']==['remove_music','separate','denoise']
+    assert task['operations']==['remove_music','denoise']
     ref=next(r for r in result['candidates'] if r.get('processing_id')==task['id'])
     assert client.post('/api/v1/recordings/'+item['id']+'/save',json={'reference_ids':[ref['id']]}).status_code==200
     voice=client.post('/api/v1/reference-voices',json={'reference_id':ref['id'],'name':'quick person'}).json()

@@ -57,3 +57,17 @@
 - `process_engine.py`：语音适配器进程隔离与有界音频传输；卸载时结束整个推理进程。
 - `process_owner.py`：Windows 子进程所有权与退出确认，服务强制退出时回收所属工作进程。
 - 引擎配置默认 `execution: "process"`；`inprocess` 仅供受控测试或明确不需要隔离的适配器。能力与身份查询不得加载模型。
+
+
+## 素材与制作流程
+
+- `tracking_quality.py`：来源覆盖去重、独立人声估计、复合参考门槛、逐段恢复完整时间轴。
+- `processing_readiness.py`：按阶段查询本机资源、冻结和校验任务模型记录。
+- `export_queue.py`：普通导出后台队列、幂等、取消和中断状态；同步导出兼容入口保留。
+- `web/reference-handoff.js`：快速候选、人物整理、参考库共用的片段到人物交接。
+- `web/speaker-tracking.js`：单套片段选择、归属纠正、问题导航、试听合并与复合参考草稿。
+- `web/longform-issues-ui.js`：持久问题清单与跨章分页定位。
+- `web/export-tasks-ui.js`：后台导出查询和恢复；`web/model-readiness-ui.js` 在提交前显示安装阻断。
+- SQLite 只增加 `event_sequence`、`lf_segment_issues` 和相关索引；长文生产文本修订保存在不可变 generation profile，原文切片校验保留。
+
+工作流与四语说明：[参考整理与配音](WORKFLOW_GUIDE.md)。

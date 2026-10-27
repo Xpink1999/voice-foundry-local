@@ -89,12 +89,14 @@ class ProcessingEngines:
     def clearvoice(self):
         namespace('vf_clearvoice',self.root/'vendor/ClearerVoice-Studio/clearvoice/clearvoice')
 
-    def separate(self,y,sr,progress):
+    def separate(self,y,sr,progress,retain=False):
         import torch
         self.clearvoice()
         cls=importlib.import_module('vf_clearvoice.models.mossformer2_ss.mossformer2').MossFormer2_SS_16K
         args=SimpleNamespace(encoder_embedding_dim=512,mossformer_sequence_dim=512,num_mossformer_layer=24,encoder_kernel_size=16,num_spks=2)
-        model=self.load_weights(cls(args).model,'separation_dir','last_best_checkpoint.pt')
+        if not hasattr(self,'separator'):
+            self.separator=self.load_weights(cls(args).model,'separation_dir','last_best_checkpoint.pt')
+        model=self.separator
         mono=self.resample(y.mean(axis=0),sr,16000);rms=float(np.sqrt(np.mean(mono**2)))
         scale=max(rms,.01)
         def predict(chunk):
@@ -104,8 +106,36 @@ class ProcessingEngines:
         output=overlap_add(mono,16000,self.options['speech_window_seconds'],predict,progress,True)
         output,gains=restore_source_scale(output,mono)
         self.stage_info=dict(scale_policy='least_squares_mixture_consistency',estimated_gains=gains)
-        del model;self.release()
+        del model
+        if not retain:self.close()
         return [('分离人声 A',output[0],16000),('分离人声 B',output[1],16000)]
+
+    def separate_three(self,y,sr,progress):
+        """Native three-source weights, 8 kHz output; never pretend resampling adds detail."""
+        import torch
+        path=self.source('three_separation_dir')
+        manifest=json.loads((path/'provenance.json').read_text(encoding='utf-8'))
+        for entry in manifest['files']:
+            if sha256(path/entry['file'])!=entry['sha256']:raise ValueError('三人分离模型校验失败')
+        if not hasattr(self,'separator_three'):
+            from speechbrain.inference.separation import SepformerSeparation
+            self.separator_three=SepformerSeparation.from_hparams(source=str(path),savedir=str(path),
+                run_opts={'device':self.device},download_only=False)
+        mono=self.resample(y.mean(axis=0),sr,8000)
+        def predict(chunk):
+            with torch.inference_mode():
+                value=self.separator_three.separate_batch(torch.from_numpy(chunk).to(self.device))
+            return value[0].float().cpu().numpy().T
+        # One overlap piece is <= 8 seconds; preserve the three native outputs.
+        output=predict(mono[None,:]);progress(1.)
+        if output.shape!=(3,len(mono)) or not np.isfinite(output).all():raise ValueError('三人模型输出无效')
+        output,_=restore_source_scale(output,mono)
+        return [(f'三人分离 {i+1}',audio,8000) for i,audio in enumerate(output)]
+
+    def close(self):
+        for key in ('separator','separator_three'):
+            if hasattr(self,key):delattr(self,key)
+        self.release()
 
     def denoise(self,y,sr,progress):
         import torch

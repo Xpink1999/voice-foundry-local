@@ -109,8 +109,14 @@ def parser():
     reference.add_argument("--rights-confirmed", action="store_true")
     reference.add_argument('--direct',action='store_true',help='旧版短音频直传；默认自动预处理并返回录音任务')
     reference.add_argument('--analyze-only',action='store_true',help='仅切分转写，不进入智能分离和清理流程')
-    process=commands.add_parser('process-audio');process.add_argument('recording_id');process.add_argument('--operations',nargs='+',choices=['remove_music','separate','denoise'],default=['remove_music','separate','denoise'])
+    process=commands.add_parser('process-audio');process.add_argument('recording_id');process.add_argument('--operations',nargs='+',choices=['track_speakers','remove_music','separate','denoise'],default=['track_speakers']);process.add_argument('--speakers',type=int,choices=[1,2,3]);process.add_argument('--source-processing')
     processing=commands.add_parser('processing');processing.add_argument('id')
+    track=commands.add_parser('track-speakers');track.add_argument('recording_id');track.add_argument('--speakers',type=int,choices=[1,2,3]);track.add_argument('--source-processing')
+    summary=commands.add_parser('tracking-summary');summary.add_argument('id');summary.add_argument('--limit',type=int,default=30);summary.add_argument('--offset',type=int,default=0)
+    name=commands.add_parser('name-speaker');name.add_argument('id');name.add_argument('speaker_id');name.add_argument('name')
+    for name in ('assign-clip','compose-reference','save-composite','save-tracked'):
+        command=commands.add_parser(name);command.add_argument('id');command.add_argument('file',help='UTF-8 JSON request');
+        if name=='assign-clip':command.add_argument('output_id')
     export = commands.add_parser("export")
     export.add_argument("--ids", nargs="+", required=True)
     export.add_argument("--dest", required=True)
@@ -188,8 +194,19 @@ def main():
             output=client.request('GET','/recordings/'+args.id)
         elif command=='processing':
             output=client.request('GET','/audio-processing/'+args.id)
+        elif command=='track-speakers':
+            output=client.request('POST','/audio-processing',json=dict(recording_id=args.recording_id,operations=['track_speakers'],speaker_count=args.speakers,source_processing_id=args.source_processing,analyze_outputs=False))
+        elif command=='tracking-summary':
+            output=client.request('GET','/audio-processing/'+args.id+'/summary',params=dict(limit=args.limit,offset=args.offset))
+        elif command=='name-speaker':
+            output=client.request('PUT',f'/audio-processing/{args.id}/speakers/{args.speaker_id}',json=dict(name=args.name))
+        elif command in {'assign-clip','compose-reference','save-composite','save-tracked'}:
+            body=json.loads(Path(args.file).read_text(encoding='utf-8-sig'))
+            route=f'clips/{args.output_id}/assignment' if command=='assign-clip' else {'compose-reference':'assemble','save-composite':'save-reference','save-tracked':'save-clips'}[command]
+            if command=='compose-reference':body['purpose']='reference'
+            output=client.request('PUT' if command=='assign-clip' else 'POST',f'/audio-processing/{args.id}/{route}',json=body)
         elif command=='process-audio':
-            output=client.request('POST','/audio-processing',json=dict(recording_id=args.recording_id,operations=args.operations,analyze_outputs=True))
+            output=client.request('POST','/audio-processing',json=dict(recording_id=args.recording_id,operations=args.operations,analyze_outputs=True,speaker_count=args.speakers,source_processing_id=args.source_processing))
         elif command in {'archive-job','restore-job'}:
             output=client.request('POST','/jobs/'+('archive' if command=='archive-job' else 'restore'),json={'job_ids':[args.id]})
         elif command in {"create-voice", "update-voice", "create-project"}:

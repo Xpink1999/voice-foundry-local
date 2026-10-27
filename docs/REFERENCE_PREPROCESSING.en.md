@@ -2,7 +2,7 @@
 
 # Reference audio preparation
 
-Open Create → Voice design & library → Quick reference setup. Library management, text-based voice design and audio processing have separate tabs. Manage voices on Generate opens the library; Start narration brings a voice back. See the [WebUI guide](WEBUI.en.md) for screenshots and steps.
+Open Create → Voice design & library → Create voice. Voice and reference libraries have their own entries; text design and saved-recording processing stay inside creation. Save references, set up a voice and continue directly to narration. See the [WebUI guide](WEBUI.en.md).
 
 Recording analysis and generation run locally. Uploaded audio is not sent to a third-party service.
 
@@ -20,7 +20,7 @@ Use a clear, stable everyday recording as the default, with separate clips for s
 2. A separate CPU queue runs voice activity detection, approximate speaker grouping, music/noise classification and transcription. Recommended references are 5–30 seconds. Default candidates are at most about 20 seconds, with up to 24 candidates, favoring longer usable clips. The original remains available to listen to and download.
 3. Filter by temporary speaker labels such as S1/S2, listen and select clips to save. Each clip is one continuous interval of the recording. Short pauses are kept; long silence and speaker changes split clips. Nonadjacent intervals are not joined. Unselected candidates do not enter the usable reference library.
 4. Edit the automatic transcript; version history is retained. Confirm it only after checking it yourself. Hi-Fi previews can use an unconfirmed transcript, but metadata remains marked as draft.
-5. Create a voice with a primary reference and optional alternatives with scene labels. Generation uses the primary reference by default or one selected alternative, never a concatenation.
+5. Create a voice with a primary reference and optional alternatives with scene labels. Generation uses the primary reference by default or one selected alternative, without automatically combining references. Explicitly selected, checked clips can form a new composite reference draft.
 6. Compare at least two saved references for the same character. The system clones the same text with default seeds 42 and 84 and ranks reference similarity, consistency across seeds, ASR character error and source quality. Apply the recommendation explicitly to create a new draft voice version. Other references and scene labels stay intact. If the voice changed during comparison, applying the old recommendation is rejected.
 
 Comparison samples and Hi-Fi results remain pending review. Scores and recommendations do not approve audio.
@@ -89,7 +89,7 @@ Core tests use temporary databases and a test engine. Real-model checks run sepa
 
 ## Speaker tracking and manual assembly
 
-In Advanced audio processing, select a recording and choose Organize selected recording by speaker. Starting from an existing processing record reuses its music-removed speech when available. Originals and earlier results are kept.
+In Create voice, choose Process a saved recording, select a recording and organize it by speaker. Starting from an existing processing record reuses its music-removed speech when available. Originals and earlier results are kept.
 
 Enter the known speaker count, or leave it blank for detection. The system labels speaker activity, builds voice anchors from solo speech, and separates only overlapping regions. Speaker IDs apply to this run only. Similarity scores are not identity probabilities. Ambiguous separated clips remain available for review.
 
@@ -106,3 +106,8 @@ Accept the access conditions on the [Community-1 model page](https://huggingface
 ```
 
 The script creates `runtime/diarization-env`, reuses the platform's compatible PyTorch, and downloads and verifies a pinned model revision. Inference uses local files; stopping a task ends its worker. Recordings are not uploaded. This optional environment depends on the platform's `.venv`; do not move it alone. Paths and filtering parameters belong to the `speaker_tracking` configuration section.
+
+
+## Reference and narration workflow
+
+[Reference and narration workflow](WORKFLOW_GUIDE.en.md)

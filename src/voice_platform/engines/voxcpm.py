@@ -22,6 +22,23 @@ class VoxEngine:
         path = Path(self.config["model_dir"]) / "provenance.json"
         return json.loads(path.read_text(encoding="utf-8")) if path.exists() else dict(model="openbmb/VoxCPM2", revision="not-installed")
 
+    def readiness(self):
+        root=Path(self.config['root']);model=Path(self.config['model_dir']);missing=[]
+        if not (root/'vendor/VoxCPM/src/voxcpm').is_dir():missing.append('VoxCPM inference source')
+        if not (model/'model.safetensors').is_file():missing.append('model.safetensors')
+        manifest=model/'provenance.json'
+        if not manifest.is_file():missing.append('model provenance')
+        else:
+            try:
+                for entry in json.loads(manifest.read_text(encoding='utf-8')).get('files',[]):
+                    path=(model/entry['file']).resolve();path.relative_to(model.resolve())
+                    if not path.is_file() or entry.get('bytes') is not None and path.stat().st_size!=entry['bytes']:
+                        missing.append(entry['file'])
+            except (OSError,ValueError,KeyError):missing.append('invalid model manifest')
+        return dict(available=not missing,check='local_files_and_sizes',missing=missing,
+            reason='语音引擎尚未安装完整，请运行安装程序补齐模型。' if missing else '',
+            action='install-voice.cmd',hash_verification='installation and frozen inference records')
+
     def load(self):
         if self.model is None:
             root = Path(self.config['root'])

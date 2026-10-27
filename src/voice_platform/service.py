@@ -20,6 +20,7 @@ from .references import ReferenceLibrary
 from .restoration import AudioRestoration
 from .longform import Longform
 from .assets import Assets
+from .export_queue import ExportQueue
 
 log = logging.getLogger(__name__)
 TERMINAL = {"succeeded", "failed", "cancelled"}
@@ -45,6 +46,7 @@ class Platform:
         self.restoration = AudioRestoration(self)
         self.longform = Longform(self)
         self.assets = Assets(self)
+        self.export_queue = ExportQueue(self)
         self.last_archive_check = 0
 
     def start(self):
@@ -69,12 +71,14 @@ class Platform:
         self.references.start()
         self.restoration.start()
         self.longform.start()
+        self.export_queue.start()
 
     def stop(self):
         self.request_stop()
         self.longform.stop()
         self.restoration.stop()
         self.references.stop()
+        self.export_queue.stop()
         if self.worker:
             self.worker.join(timeout=10)
         self.unload()
@@ -82,7 +86,7 @@ class Platform:
     def request_stop(self):
         self.shutdown.set()
         self.wake.set()
-        for producer in (self.longform, self.restoration, self.references):
+        for producer in (self.longform, self.restoration, self.references,self.export_queue):
             producer.stop_event.set()
             producer.wake.set()
         for engine in self.engines.values():
@@ -92,6 +96,7 @@ class Platform:
 
     def models(self):
         return [dict(id=k, label=self.config["engines"][k].get("label", k), loaded=k == self.loaded_engine(),
+                     readiness=getattr(e,'readiness',lambda:dict(available=True,check='adapter_not_declared'))(),
                      capabilities=e.capabilities(), identity=e.identity()) for k, e in self.engines.items()]
 
     def loaded_engine(self):
@@ -225,6 +230,8 @@ class Platform:
         if reference and (not reference['rights_confirmed'] or not reference.get('saved',True)):
             raise ValueError('参考片段未保存或使用授权尚未确认')
         caps = self.engines[engine_id].capabilities()
+        readiness=getattr(self.engines[engine_id],'readiness',lambda:dict(available=True))()
+        if not readiness['available']:raise ValueError(readiness['reason'])
         parameter_specs = caps.get("parameters", {})
         options = {**(voice.get("engine_options", {}) if voice else {}), **values["engine_options"]}
         values["engine_options"] = options
@@ -278,7 +285,7 @@ class Platform:
                       style=snapshot['style'], seed=snapshot['seed'], candidates=1)
         reference=snapshot.get('reference_snapshot')
         values['reference_id']=reference['id'] if reference else None
-        fields=changes.model_dump(exclude_unset=True,include={'reference_id','style','clone_mode','seed'})
+        fields=changes.model_dump(exclude_unset=True,include={'reference_id','style','clone_mode','seed','text'})
         fields={key:value for key,value in fields.items() if value is not None or key=='reference_id'}
         values.update(fields)
         frozen_style=None
@@ -523,7 +530,7 @@ class Platform:
             db.executemany("UPDATE entities SET body=? WHERE kind='results' AND id=?",[(json.dumps(item,ensure_ascii=False),item['id']) for item in items])
         return dict(reviewed=len(items),status=request.status)
 
-    def export(self, request):
+    def validate_export(self,request):
         values = request.model_dump()
         if request.adapter not in self.config["export_adapters"]:
             raise ValueError("未知导出适配器")
@@ -541,11 +548,16 @@ class Platform:
         allowed_fields = {"title", "candidate", "id", "voice_id", "project_id"}
         if any(field is not None and (field not in allowed_fields or spec or conversion) for _, field, spec, conversion in fields):
             raise ValueError("命名规则仅支持 {title} {candidate} {id} {voice_id} {project_id}，不支持格式表达式")
+        return values,adapter,results
+
+    def export(self, request,stop_event=None,progress=None):
+        values,adapter,results=self.validate_export(request)
         identity = uid()
         folder = self.data / "exports" / identity
         folder.mkdir(parents=True)
         entries = []
         for result in results:
+            if stop_event and stop_event.is_set():raise InterruptedError('导出已停止，原始音频保留')
             source = self.data / result["path"]
             if sha256(source) != result["sha256"]:
                 raise ValueError("原始音频哈希不匹配，已停止导出")
@@ -561,12 +573,14 @@ class Platform:
             target_dir.mkdir(parents=True, exist_ok=True)
             name = ("DRAFT_" if request.draft else "") + name + "_" + result["id"][:8]
             target = target_dir / f"{name}.{request.format}"
-            convert_audio(source, target, values, self.config["ffmpeg"])
+            if stop_event:convert_audio(source,target,values,self.config['ffmpeg'],stop_event=stop_event)
+            else:convert_audio(source, target, values, self.config["ffmpeg"])
             if request.subtitles:
                 write_srt(target_dir / f"{name}.srt", result["segments"])
             metadata = dict(result, export_options=values, exported_sha256=sha256(target), asset_status="draft" if request.draft else "approved")
             target.with_suffix(".json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
             entries.append(dict(result_id=result["id"], file=str(target.relative_to(folder)), sha256=sha256(target), review=result["review"]))
+            if progress:progress(90*len(entries)/len(results))
         manifest = dict(id=identity, version=1, created_at=now(), options=values, results=entries,
                         timestamp_note="字幕为真实分段时长边界，不是词级对齐")
         (folder / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -574,8 +588,17 @@ class Platform:
         with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as package:
             for path in folder.rglob("*"):
                 if path.is_file():
-                    package.write(path, path.relative_to(folder))
-        return self.store.save("exports", dict(manifest, path=str(archive.relative_to(self.data)), sha256=sha256(archive)))
+                    if stop_event and stop_event.is_set():raise InterruptedError('导出已停止，原始音频保留')
+                    with path.open('rb') as source,package.open(str(path.relative_to(folder)),'w',force_zip64=True) as target:
+                        while chunk:=source.read(1024*1024):
+                            if stop_event and stop_event.is_set():raise InterruptedError('导出已停止，原始音频保留')
+                            target.write(chunk)
+        with self.store.lock:
+            for result in results:
+                current=self.store.get('results',result['id'])
+                if current.get('deleted_at') or not request.draft and current['review']!='approved':
+                    raise ValueError('导出期间审核状态已变化，请重新确认所选结果')
+            return self.store.save("exports", dict(manifest, path=str(archive.relative_to(self.data)), sha256=sha256(archive)))
 
     def backup(self):
         identity = uid()

@@ -5,6 +5,8 @@ class LongformStore:
     def __init__(self,store):
         self.store=store
         with store.connect() as db:
+            db.execute('CREATE TABLE IF NOT EXISTS lf_segment_issues(book_id TEXT,segment_no INTEGER,note TEXT NOT NULL,resolved INTEGER NOT NULL DEFAULT 0,updated_at TEXT,PRIMARY KEY(book_id,segment_no))')
+            db.execute('CREATE INDEX IF NOT EXISTS lf_issue_open ON lf_segment_issues(book_id,resolved,segment_no)')
             db.executescript('''
             CREATE TABLE IF NOT EXISTS lf_books (
               id TEXT PRIMARY KEY, body TEXT NOT NULL, phase TEXT NOT NULL, state TEXT NOT NULL,

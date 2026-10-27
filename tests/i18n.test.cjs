@@ -105,6 +105,55 @@ test('real unsaved form changes survive a language change', () => {
   assert.equal(settings.dataset.dirty,undefined);
 });
 
+test('language changes rebuild system defaults and preserve authored Chinese text', () => {
+  const fields = [
+    {id:'reference-source',type:'text',value:'本机上传的参考录音'},
+    {id:'reference-auth',type:'text',value:'授权书编号：甲字第 8 号'},
+    {id:'design-text',type:'textarea',value:'这是一段用于试听音色的示例文本。'},
+    {id:'project-kind',type:'text',dataset:{i18nValue:'通用'},value:'通用'},
+    {id:'gen-text',type:'textarea',value:'保留这段中文台词'},
+    {id:'voice-name',type:'text',value:'示例人物 A'}
+  ];
+  const result = page({fields});
+  result.i18n.changeLanguage('en');
+  const draft = JSON.parse(result.session.get('voice-foundry-language-draft'));
+  assert.deepEqual(draft.fields, {'reference-auth':'授权书编号：甲字第 8 号','gen-text':'保留这段中文台词','voice-name':'示例人物 A'});
+});
+
+test('legacy drafts do not restore Chinese defaults into English, Japanese or Korean', () => {
+  for (const saved of ['en','ja','ko']) {
+    const fields = [
+      {id:'reference-source',tagName:'INPUT',type:'text',value:''},
+      {id:'reference-auth',tagName:'INPUT',type:'text',value:''},
+      {id:'gen-text',tagName:'TEXTAREA',type:'textarea',value:'',dispatchEvent(){}}
+    ];
+    const result = page({saved,fields,initialDraft:{fields:{'reference-source':'本机上传的参考录音','reference-auth':'用户确认拥有此次语音参考用途所需授权','gen-text':'用户台词不变'},selected:[],page:'studio',savedAt:Date.now()}});
+    result.handlers['voice-data-ready']();
+    assert.equal(fields[0].value,result.i18n.translate('本机上传的参考录音'));
+    assert.equal(fields[1].value,result.i18n.translate('用户确认拥有此次语音参考用途所需授权'));
+    assert.equal(fields[2].value,'用户台词不变');
+  }
+});
+
+test('service templates localize progress, errors and nested labels while preserving parameters', () => {
+  const {i18n} = page({saved:'en'});
+  assert.equal(i18n.message('转写并分析候选 2/8'),'Transcribing and analyzing candidate 2/8');
+  assert.equal(i18n.message('正在执行 去背景音乐 · 1/2'),'Running Remove background music · 1/2');
+  assert.equal(i18n.message('引擎参数 temperature 超出允许范围'),'Engine parameter temperature is outside the allowed range');
+  assert.equal(i18n.message('参考仍被人物「林先生」使用，请先解除绑定或同时删除人物'),'Reference is used by “林先生”. Unlink it or delete the voice together');
+  assert.equal(i18n.message('未知的原始诊断内容'),'未知的原始诊断内容');
+  assert.equal(i18n.translate('本机上传的参考录音.wav'),'本机上传的参考录音.wav');
+});
+
+test('validation details use the selected language and retain numeric limits', () => {
+  for (const saved of ['zh-CN','en','ja','ko']) {
+    const {i18n} = page({saved});
+    assert.equal(i18n.validationMessage({type:'string_too_long',ctx:{max_length:300}}),i18n.translate('最多允许 {0} 个字符',[300]));
+    assert.equal(i18n.validationMessage({type:'missing'}),i18n.translate('必填项'));
+    assert.equal(i18n.validationMessage({type:'value_error',msg:'Value error, 请先恢复原候选'}),i18n.translate('请先恢复原候选'));
+  }
+});
+
 test('all four catalogs have matching nonempty messages and placeholders', () => {
   const catalogs = Object.fromEntries(['zh-CN', 'en', 'ja', 'ko'].map(code =>
     [code, JSON.parse(fs.readFileSync(path.join(web, 'locales', code + '.json'), 'utf8'))]));
@@ -113,6 +162,7 @@ test('all four catalogs have matching nonempty messages and placeholders', () =>
     assert.deepEqual(Object.keys(catalog).sort(), keys, code);
     for (const [key, message] of Object.entries(catalog)) {
       assert.ok(message.trim(), `${code}: ${key}`);
+      if (['en','ko'].includes(code)) assert.ok(!/[\u3400-\u9fff]/.test(message), `${code}: untranslated Chinese in ${key}`);
       assert.deepEqual((message.match(/\{\d+\}/g) || []).sort(), (key.match(/\{\d+\}/g) || []).sort(), `${code}: ${key}`);
     }
   }

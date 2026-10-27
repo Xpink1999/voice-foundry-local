@@ -323,10 +323,16 @@ def create_app(config=None):
     def processing_capabilities():return platform.restoration.capabilities()
 
     @app.post('/api/v1/audio-processing',status_code=202)
-    def processing(request:ProcessingInput):return platform.restoration.submit(request)
+    def processing(request:ProcessingInput,http_request:Request):return platform.restoration.submit(request,key=http_request.headers.get('idempotency-key'))
 
     @app.get('/api/v1/audio-processing')
-    def processing_list():return platform.store.list('audio_processing')
+    def processing_list(recording_id:str|None=None,source_processing_id:str|None=None):
+        where="kind='audio_processing' AND COALESCE(json_extract(body,'$.deleted_at'),'')=''";args=[]
+        for field,value in (('recording_id',recording_id),('source_processing_id',source_processing_id)):
+            if value:where+=" AND json_extract(body,'$."+field+"')=?";args.append(value)
+        with platform.store.connect() as db:
+            rows=db.execute('SELECT body FROM entities WHERE '+where+' ORDER BY rowid DESC',args).fetchall()
+        return [json.loads(row[0]) for row in rows]
 
     @app.get('/api/v1/audio-processing/{identity}')
     def processing_detail(identity:str):return platform.store.get('audio_processing',identity)
@@ -362,8 +368,40 @@ def create_app(config=None):
         return platform.restoration.save_tracked(identity,request.output_ids,request.scenario)
 
     @app.post('/api/v1/audio-processing/{identity}/assemble',status_code=202)
-    def assemble_tracked_clips(identity:str,request:AssembleClipsInput):
-        return platform.restoration.assemble(identity,request)
+    def assemble_tracked_clips(identity:str,request:AssembleClipsInput,http_request:Request):
+        return platform.restoration.assemble(identity,request,key=http_request.headers.get('idempotency-key'))
+
+    from .schemas import AssignClipInput,SaveCompositeInput,SegmentIssueInput
+
+    @app.get('/api/v1/longform/books/{identity}/issues')
+    def longform_issues(identity:str,limit:int=Query(50,ge=1,le=100),offset:int=Query(0,ge=0)):
+        return platform.longform.issues(identity,limit,offset)
+
+    @app.put('/api/v1/longform/books/{identity}/segments/{number}/issue')
+    def mark_segment_issue(identity:str,number:int,request:SegmentIssueInput):
+        return platform.longform.mark_issue(identity,number,request)
+
+    @app.get('/api/v1/longform/books/{identity}/segments/{number}/locate')
+    def locate_segment(identity:str,number:int):return platform.longform.locate(identity,number)
+
+    @app.put('/api/v1/audio-processing/{identity}/clips/{output_id}/assignment')
+    def assign_tracked_clip(identity:str,output_id:str,request:AssignClipInput):
+        return platform.restoration.assign_clip(identity,output_id,request)
+
+    @app.post('/api/v1/audio-processing/{identity}/save-reference',status_code=201)
+    def save_composite_reference(identity:str,request:SaveCompositeInput):
+        return platform.restoration.save_composite(identity,request)
+
+    @app.get('/api/v1/audio-processing/{identity}/summary')
+    def tracking_summary(identity:str,limit:int=Query(30,ge=1,le=100),offset:int=Query(0,ge=0)):
+        item=platform.store.get('audio_processing',identity)
+        if item.get('deleted_at'):raise ValueError('请先恢复处理记录')
+        tracking=item.get('tracking',{})
+        clips=[o for o in item['outputs'] if o.get('kind')=='clip']
+        return dict(id=identity,status=item['status'],completeness=item.get('completeness'),
+            revision=tracking.get('revision',1),speakers=tracking.get('speakers',[]),
+            unresolved_count=len(tracking.get('unresolved',[])),total=len(clips),
+            clips=[{k:v for k,v in o.items() if k not in {'embedding','assignment_history'}} for o in clips[offset:offset+limit]])
 
     @app.post('/api/v1/reference-voices',status_code=201)
     def reference_voice(request:ReferenceVoiceInput):return platform.restoration.create_reference_voice(request)
@@ -448,20 +486,22 @@ def create_app(config=None):
         return platform.retry(identity)
 
     @app.get("/api/v1/jobs/{identity}/events")
-    def events(identity: str):
+    def events(identity: str,after_seq:int=Query(0,ge=0),limit:int=Query(1000,ge=1,le=1000)):
         platform.store.get("jobs", identity)
-        return [e for e in reversed(platform.store.list("events")) if e["job_id"] == identity]
+        return platform.store.events(identity,after_seq,limit)
 
     @app.get("/api/v1/jobs/{identity}/stream")
-    async def stream(identity: str, request: Request):
+    async def stream(identity: str, request: Request,after_seq:int=Query(0,ge=0)):
         platform.store.get("jobs", identity)
+        cursor=max(after_seq,platform.store.event_cursor(identity,request.headers.get('last-event-id','')))
         async def iterator():
-            seen = set()
+            position=cursor
             while not platform.shutdown.is_set() and not await request.is_disconnected():
-                items = [e for e in reversed(platform.store.list("events")) if e["job_id"] == identity and e["id"] not in seen]
+                items = platform.store.events(identity,position)
                 for item in items:
-                    seen.add(item["id"])
-                    yield f"id: {item['id']}\nevent: {item['event']}\ndata: {json.dumps(item, ensure_ascii=False)}\n\n"
+                    position=item['seq']
+                    yield f"id: {item['seq']}\nevent: {item['event']}\ndata: {json.dumps(item, ensure_ascii=False)}\n\n"
+                if len(items)==1000:continue
                 if platform.store.get("jobs", identity)["status"] in TERMINAL:
                     yield "event: end\ndata: {}\n\n"
                     break
@@ -489,10 +529,27 @@ def create_app(config=None):
         item = platform.store.get("results", identity)
         return FileResponse(platform.data / item["path"], media_type="audio/wav", filename=f"{identity}.wav")
 
+    @app.get('/api/v1/results/{identity}/revisions')
+    def result_revisions(identity:str):
+        item=platform.store.get('results',identity)
+        if item.get('deleted_at'):raise ValueError('请先恢复原候选')
+        with platform.store.connect() as db:
+            rows=db.execute("SELECT body FROM entities WHERE kind='jobs' AND json_extract(body,'$.regenerated_from')=? AND COALESCE(json_extract(body,'$.deleted_at'),'')='' ORDER BY rowid DESC LIMIT 20",(identity,)).fetchall()
+        return [{key:json.loads(row[0]).get(key) for key in ('id','status','results','error','created_at')} for row in rows]
+
     @app.get('/api/v1/results/{identity}/waveform')
     def waveform(identity: str):
         item = platform.store.get('results', identity)
-        return waveform_peaks(platform.data / item['path'])
+        cache=Path(config['cache_dir'])/'waveforms';cache.mkdir(parents=True,exist_ok=True)
+        path=cache/(item['sha256']+'.json')
+        if path.is_file():
+            try:return json.loads(path.read_text(encoding='utf-8'))
+            except (OSError,ValueError):pass
+        value=waveform_peaks(platform.data/item['path'])
+        from .store import uid
+        temporary=cache/(item['sha256']+'-'+uid()+'.tmp')
+        temporary.write_text(json.dumps(value),encoding='utf-8');temporary.replace(path)
+        return value
 
     @app.get("/api/v1/results/{identity}/subtitles")
     def subtitles(identity: str):
@@ -506,6 +563,20 @@ def create_app(config=None):
     @app.post("/api/v1/exports", status_code=201)
     def export(request: ExportInput):
         return platform.export(request)
+
+    @app.post('/api/v1/export-tasks',status_code=202)
+    def submit_export_task(body:ExportInput,request:Request):
+        return platform.export_queue.submit(body,request.headers.get('idempotency-key'))
+
+    @app.get('/api/v1/export-tasks')
+    def export_tasks(limit:int=Query(50,ge=1,le=100),offset:int=Query(0,ge=0)):
+        return platform.store.list('export_tasks',limit=limit,offset=offset)
+
+    @app.get('/api/v1/export-tasks/{identity}')
+    def export_task(identity:str):return platform.store.get('export_tasks',identity)
+
+    @app.post('/api/v1/export-tasks/{identity}/cancel')
+    def cancel_export_task(identity:str):return platform.export_queue.cancel(identity)
 
     @app.get("/api/v1/exports")
     def exports():

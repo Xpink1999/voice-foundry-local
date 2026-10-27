@@ -22,7 +22,18 @@ class Store:
         with self.connect() as db:
             db.execute("PRAGMA journal_mode=WAL")
             db.execute("CREATE TABLE IF NOT EXISTS entities (kind TEXT, id TEXT, body TEXT NOT NULL, PRIMARY KEY(kind,id))")
-            db.execute("PRAGMA user_version=1")
+            migrate_events=not db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='event_sequence'").fetchone()
+            db.execute('CREATE TABLE IF NOT EXISTS event_sequence(seq INTEGER PRIMARY KEY AUTOINCREMENT,event_id TEXT UNIQUE NOT NULL,job_id TEXT NOT NULL)')
+            db.execute('CREATE INDEX IF NOT EXISTS event_job_cursor ON event_sequence(job_id,seq)')
+            db.execute("CREATE INDEX IF NOT EXISTS regeneration_parent ON entities(kind,json_extract(body,'$.regenerated_from'))")
+            db.execute("CREATE INDEX IF NOT EXISTS entity_status ON entities(kind,json_extract(body,'$.status'))")
+            db.execute("CREATE INDEX IF NOT EXISTS entity_request_key ON entities(kind,json_extract(body,'$.idempotency_key'))")
+            db.execute("CREATE INDEX IF NOT EXISTS recording_workflow ON entities(kind,json_extract(body,'$.smart_reference.status'))")
+            db.execute("CREATE INDEX IF NOT EXISTS processing_recording ON entities(kind,json_extract(body,'$.recording_id'))")
+            db.execute("CREATE INDEX IF NOT EXISTS processing_parent ON entities(kind,json_extract(body,'$.source_processing_id'))")
+            if migrate_events:
+                db.execute("INSERT INTO event_sequence(event_id,job_id) SELECT id,json_extract(body,'$.job_id') FROM entities WHERE kind='events' ORDER BY rowid")
+            db.execute("PRAGMA user_version=2")
 
     @contextmanager
     def connect(self):
@@ -46,9 +57,25 @@ class Store:
             raise KeyError(f"{kind} 不存在: {identity}")
         return json.loads(row[0])
 
-    def list(self, kind, include_deleted=False):
+    def list(self, kind, include_deleted=False,limit=None,offset=0):
         with self.connect() as db:
-            rows = db.execute("SELECT body FROM entities WHERE kind=?"+("" if include_deleted else " AND COALESCE(json_extract(body,'$.deleted_at'),'')=''")+" ORDER BY rowid DESC", (kind,)).fetchall()
+            query="SELECT body FROM entities WHERE kind=?"+("" if include_deleted else " AND COALESCE(json_extract(body,'$.deleted_at'),'')=''")+" ORDER BY rowid DESC"
+            rows=db.execute(query+(' LIMIT ? OFFSET ?' if limit is not None else ''),(kind,limit,offset) if limit is not None else (kind,)).fetchall()
+        return [json.loads(row[0]) for row in rows]
+
+    def by_status(self,kind,statuses,limit=None,count=False):
+        marks=','.join('?' for _ in statuses)
+        query=('SELECT COUNT(*)' if count else 'SELECT body')+" FROM entities WHERE kind=? AND json_extract(body,'$.status') IN ("+marks+") AND COALESCE(json_extract(body,'$.deleted_at'),'')=''"
+        args=[kind,*statuses]
+        if not count:
+            query+=' ORDER BY rowid ASC'
+            if limit is not None:query+=' LIMIT ?';args.append(limit)
+        with self.connect() as db:rows=db.execute(query,args).fetchall()
+        return rows[0][0] if count else [json.loads(row[0]) for row in rows]
+
+    def active_reference_workflows(self):
+        with self.connect() as db:
+            rows=db.execute("SELECT body FROM entities WHERE kind='recordings' AND json_extract(body,'$.smart_reference.status') IN ('analyzing','processing','analyzing_outputs') AND COALESCE(json_extract(body,'$.deleted_at'),'')='' ").fetchall()
         return [json.loads(row[0]) for row in rows]
 
     def jobs(self, archived=False, project_id=None, status=None, limit=None, offset=0):
@@ -73,7 +100,25 @@ class Store:
             return self.save(kind, item)
 
     def event(self, job_id, event, **details):
-        return self.save("events", dict(id=uid(), job_id=job_id, event=event, created_at=now(), **details))
+        item=dict(id=uid(),job_id=job_id,event=event,created_at=now(),**details)
+        with self.lock,self.connect() as db:
+            db.execute('INSERT INTO entities VALUES (?,?,?)',('events',item['id'],json.dumps(item,ensure_ascii=False)))
+            cursor=db.execute('INSERT INTO event_sequence(event_id,job_id) VALUES (?,?)',(item['id'],job_id))
+            seq=cursor.lastrowid
+        return dict(item,seq=seq)
+
+    def events(self,job_id,after_seq=0,limit=1000):
+        with self.connect() as db:
+            rows=db.execute("SELECT s.seq,e.body FROM event_sequence s JOIN entities e ON e.kind='events' AND e.id=s.event_id WHERE s.job_id=? AND s.seq>? ORDER BY s.seq LIMIT ?",(job_id,after_seq,limit)).fetchall()
+        return [dict(json.loads(body),seq=seq) for seq,body in rows]
+
+    def event_cursor(self,job_id,value):
+        if not value:return 0
+        if value.isdecimal():return int(value)
+        with self.connect() as db:
+            row=db.execute('SELECT seq FROM event_sequence WHERE job_id=? AND event_id=?',(job_id,value)).fetchone()
+        if not row:raise ValueError('事件游标不属于此任务')
+        return row[0]
 
     def backup(self, destination):
         with self.lock, self.connect() as db, sqlite3.connect(destination) as out:

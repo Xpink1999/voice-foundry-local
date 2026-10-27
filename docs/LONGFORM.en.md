@@ -118,3 +118,8 @@ Online database backups include the long-form indexes and recycle-bin metadata. 
 ## Related guides
 
 [README](../README.en.md) · [Installation](INSTALL.en.md) · [Reference audio](REFERENCE_PREPROCESSING.en.md) · [Audio processing](AUDIO_RESTORATION.en.md) · [Maintenance](MAINTENANCE.en.md)
+
+
+## Reference and narration workflow
+
+[Reference and narration workflow](WORKFLOW_GUIDE.en.md)

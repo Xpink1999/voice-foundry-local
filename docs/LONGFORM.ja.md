@@ -116,3 +116,8 @@ REST の接頭辞は `/api/v1/longform` と `/api/v1/assets` です。完全な�
 ## 関連ガイド
 
 [README](../README.ja.md) · [インストール](INSTALL.ja.md) · [参照音声](REFERENCE_PREPROCESSING.ja.md) · [音声処理](AUDIO_RESTORATION.ja.md) · [保守](MAINTENANCE.ja.md)
+
+
+## 参照整理と音声生成の流れ
+
+[参照整理と音声生成の流れ](WORKFLOW_GUIDE.ja.md)

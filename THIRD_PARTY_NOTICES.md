@@ -61,3 +61,10 @@ Git、uv、Python、NVIDIA 驱动也由用户从各自官方渠道安装，本�
 - TorchCodec and its dependencies are optional Python distributions. Their license files do not replace the licenses of any separately supplied FFmpeg libraries. Inference here supplies predecoded waveforms, so TorchCodec's built-in media decoder is not required.
 
 Recordings, extracted speaker embeddings and analysis outputs remain local. No recording or voiceprint is sent to the model publisher. Optional dependency review: 2026-10-27.
+
+
+### Optional three-speaker separator
+
+`scripts/setup_three_speakers.py` optionally installs SpeechBrain 1.0.3 and downloads `speechbrain/sepformer-wsj03mix` from its official Hugging Face repository. The upstream toolkit and model declare Apache-2.0. This source package includes adapter code and the installer, not toolkit binaries or model weights. Installation records the selected model commit and every downloaded file hash. Native output is 8 kHz; loading the model is not a Chinese speech-quality acceptance result. Existing two-speaker separation remains the default for two-way overlap.
+
+Sources: [SpeechBrain](https://github.com/speechbrain/speechbrain), [model card](https://huggingface.co/speechbrain/sepformer-wsj03mix).

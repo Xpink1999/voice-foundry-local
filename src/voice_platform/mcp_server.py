@@ -92,16 +92,86 @@ def voice_upload_recording(path:str,source:str,authorization:str,rights_confirme
         return client.request('POST','/recordings',files={'file':(file.name,stream)},data=dict(source=source,authorization=authorization,rights_confirmed=str(rights_confirmed).lower(),smart_reference=str(smart_reference).lower()))
 
 @mcp.tool()
-def voice_process_recording(recording_id:str,operations:list[str]|None=None)->dict:
-    """独立处理已有录音。operations 可用 remove_music / separate / denoise，默认依次去音乐、双人分离、降噪。另存输出，原件不变；处理效果需试听。"""
-    return api().request('POST','/audio-processing',json=dict(recording_id=recording_id,operations=operations or ['remove_music','separate','denoise'],analyze_outputs=True))
+def voice_process_recording(recording_id:str,operations:list[str]|None=None,speaker_count:int|None=None,source_processing_id:str|None=None)->dict:
+    """独立处理已有录音，默认按人物整理。可显式选 remove_music / separate / denoise；track_speakers 需单独使用。原件保留，效果需试听。"""
+    return api().request('POST','/audio-processing',json=dict(recording_id=recording_id,operations=operations or ['track_speakers'],speaker_count=speaker_count,source_processing_id=source_processing_id,analyze_outputs=True))
+
+@mcp.tool()
+def voice_track_speakers(recording_id:str,speaker_count:int|None=None,source_processing_id:str|None=None)->dict:
+    """提交最多三人的人物整理；原件保留，三人重叠需专用模型。返回任务 ID，不代表音质通过。"""
+    item=api().request('POST','/audio-processing',json=dict(recording_id=recording_id,operations=['track_speakers'],speaker_count=speaker_count,source_processing_id=source_processing_id,analyze_outputs=False))
+    return {key:item.get(key) for key in ('id','status','message')}
+
+@mcp.tool()
+def voice_tracking_summary(processing_id:str,limit:int=30,offset:int=0)->dict:
+    """分页查询人物、有效人声估计、待解决数量和片段；不返回完整声纹向量。"""
+    return api().request('GET',f'/audio-processing/{processing_id}/summary',params=dict(limit=limit,offset=offset))
+
+@mcp.tool()
+def voice_name_speaker(processing_id:str,speaker_id:str,name:str)->dict:
+    """为本次录音的人物命名；名字相同不自动合并身份。"""
+    api().request('PUT',f'/audio-processing/{processing_id}/speakers/{speaker_id}',json=dict(name=name))
+    return dict(processing_id=processing_id,speaker_id=speaker_id,name=name)
+
+@mcp.tool()
+def voice_assign_clip(processing_id:str,output_id:str,expected_revision:int,speaker_id:str|None=None,confirmed:bool=False,excluded:bool=False,reason:str='')->dict:
+    """按用户明确选择纠正片段归属或排除。confirmed 仅可反映用户实际试听确认，不代替用户判断。"""
+    item=api().request('PUT',f'/audio-processing/{processing_id}/clips/{output_id}/assignment',json=dict(speaker_id=speaker_id,confirmed=confirmed,excluded=excluded,reason=reason,expected_revision=expected_revision))
+    return dict(id=item['id'],revision=item['tracking']['revision'])
+
+@mcp.tool()
+def voice_compose_reference(processing_id:str,output_ids:list[str],name:str,speaker_confirmed:bool=False,gap_ms:int=180,expected_revision:int|None=None)->dict:
+    """按用户选择的同人片段生成复合参考草稿。需用户确认同人、授权及有效人声质检；不自动批准。"""
+    item=api().request('POST',f'/audio-processing/{processing_id}/assemble',json=dict(output_ids=output_ids,name=name,speaker_confirmed=speaker_confirmed,gap_ms=gap_ms,expected_revision=expected_revision,purpose='reference'))
+    return {key:item.get(key) for key in ('id','status','message','reference_qc')}
+
+@mcp.tool()
+def voice_save_composite(processing_id:str,name:str,scenario:str='',listened:bool=False)->dict:
+    """用户实际试听确认后保存复合参考到片段库。转写与生成审核仍独立；不得虚构 listened。"""
+    item=api().request('POST',f'/audio-processing/{processing_id}/save-reference',json=dict(name=name,scenario=scenario,listened=listened))
+    return {key:item.get(key) for key in ('id','name','reference_kind','duration','review','transcript')}
+
+@mcp.tool()
+def voice_save_tracked_clips(processing_id:str,output_ids:list[str],scenario:str='')->dict:
+    """分别保存所选独立片段，不拼接、不自动确认人物或试听审核。"""
+    items=api().request('POST',f'/audio-processing/{processing_id}/save-clips',json=dict(output_ids=output_ids,scenario=scenario))
+    return dict(references=[{k:r.get(k) for k in ('id','name','duration','review')} for r in items])
+
+@mcp.tool()
+def voice_speaker_tracks(processing_id:str,kind:str='full_speaker_timeline')->dict:
+    """获取人物音轨试听/下载地址与完整性状态；这些处理素材不代表正式审核资产。"""
+    if kind not in {'full_speaker_timeline','timeline'}:raise ValueError('Choose full_speaker_timeline or timeline')
+    client=api();item=client.request('GET','/audio-processing/'+processing_id)
+    if item.get('deleted_at'):raise ValueError('请先恢复处理记录')
+    return dict(id=processing_id,completeness=item.get('completeness'),timelines_stale=item.get('tracking',{}).get('timelines_stale',False),
+        tracks=[dict(id=o['id'],speaker_id=o.get('speaker_id'),duration=o['duration'],review=o.get('review','pending'),
+            audio_url=client.url+f'/api/v1/audio-processing/{processing_id}/outputs/{o["id"]}') for o in item['outputs'] if o.get('kind')==kind])
+
+@mcp.tool()
+def voice_submit_export(result_ids:list[str],draft:bool=False,format:str='wav',idempotency_key:str|None=None)->dict:
+    """后台导出已审核音频；未经审核须显式 draft=true。不代表用户试听批准。"""
+    return api().request('POST','/export-tasks',headers={'Idempotency-Key':idempotency_key} if idempotency_key else {},json=dict(result_ids=result_ids,draft=draft,format=format))
+
+@mcp.tool()
+def voice_export_task(task_id:str)->dict:
+    """查询既有导出任务，刷新不重新打包。成功后返回下载地址。"""
+    client=api();item=client.request('GET','/export-tasks/'+task_id)
+    if item.get('export_id'):item['download_url']=client.url+'/api/v1/exports/'+item['export_id']+'/download'
+    return item
+
+@mcp.tool()
+def voice_cancel_export(task_id:str)->dict:
+    """取消后台导出，保留原始音频及已有正式导出。"""
+    return api().request('POST','/export-tasks/'+task_id+'/cancel')
 
 @mcp.tool()
 def voice_audio_processing(processing_id:str)->dict:
     """查询处理进度、独立输出与前后试听地址。两路分离为匿名输出，不是身份识别。"""
     client=api();item=client.request('GET','/audio-processing/'+processing_id);item.pop('source_snapshot',None)
     item['before_audio_url']=client.url+'/api/v1/audio-processing/'+processing_id+'/before'
-    for output in item['outputs']:output['audio_url']=client.url+'/api/v1/audio-processing/'+processing_id+'/outputs/'+output['id']
+    for output in item['outputs']:
+        output.pop('embedding',None)
+        output['audio_url']=client.url+'/api/v1/audio-processing/'+processing_id+'/outputs/'+output['id']
     return item
 
 @mcp.tool()

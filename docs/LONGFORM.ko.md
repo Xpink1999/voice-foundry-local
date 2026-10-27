@@ -116,3 +116,8 @@ REST 접두사는 `/api/v1/longform`과 `/api/v1/assets`입니다. 전체 계약
 ## 관련 안내
 
 [README](../README.ko.md) · [설치](INSTALL.ko.md) · [참조 오디오](REFERENCE_PREPROCESSING.ko.md) · [오디오 처리](AUDIO_RESTORATION.ko.md) · [유지 관리](MAINTENANCE.ko.md)
+
+
+## 참조 정리와 더빙 작업 흐름
+
+[참조 정리와 더빙 작업 흐름](WORKFLOW_GUIDE.ko.md)
