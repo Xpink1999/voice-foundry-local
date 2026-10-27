@@ -63,17 +63,17 @@ test('chapter playback ignores a first-audio response after navigation', async (
 
 test('submitting a new batch clears a previous single-job detail and its live stream', () => {
   const source=read('workflow-ui.js'),start=source.indexOf('  function batchSubmitted(batch)'),end=source.indexOf('  function offerLongform(',start);
-  const nodes=new Map(),pages=[];let closed=0,stopped=0;
+  const nodes=new Map(),pages=[],batches=[];let closed=0,stopped=0;
   const state={detailJob:'old-job',detailToken:1,eventSource:{close(){closed++;}}};
   const submitted=vm.runInNewContext(source.slice(start,end)+';batchSubmitted',{
     state,$:id=>{if(!nodes.has(id))nodes.set(id,{...element(),dispatchEvent(){}});return nodes.get(id);},
-    stopLiveAudio(){stopped++;},navigate:page=>pages.push(page),notice(){},tr:label=>label,Event:class {},
+    stopLiveAudio(){stopped++;},navigate:page=>pages.push(page),notice(){},tr:label=>label,Event:class {},window:{jobArchiveUI:{setBatch:id=>batches.push(id)}},
   });
-  submitted({jobs:['a','b']});
+  submitted({jobs:['a','b'],batch_id:'new-batch'});
   assert.equal(state.detailJob,null);
   assert.equal(state.eventSource,null);
   assert.equal(nodes.get('job-detail').hidden,true);
-  assert.equal(closed,1);assert.equal(stopped,1);assert.deepEqual(pages,['tasks']);
+  assert.equal(closed,1);assert.equal(stopped,1);assert.deepEqual(pages,['tasks']);assert.deepEqual(batches,['new-batch']);
 });
 
 test('a new hash navigation during route loading is applied after the old request finishes', async () => {

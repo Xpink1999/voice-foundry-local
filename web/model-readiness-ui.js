@@ -1,7 +1,25 @@
-/* Availability is separate from loaded/idle. Install failures are caught before submission. */
+/* Every generation entry uses the same metadata-only check. Playback stays available. */
 (()=>{
  'use strict';
- function check(form,engine){if(!form)return;const model=state.models.find(m=>m.id===engine)||state.models[0],blocked=model?.readiness?.available===false;let notice=form.querySelector('[data-model-readiness]');if(!notice){notice=document.createElement('p');notice.dataset.modelReadiness='';notice.className='reference-warnings';notice.setAttribute('role','status');form.querySelector('[type=submit]').before(notice);}notice.hidden=!blocked;if(blocked){notice.textContent=tr(model.readiness.reason)+' ';const button=document.createElement('button');button.type='button';button.className='text-link';button.textContent=tr('模型与系统');button.onclick=()=>navigate('settings');notice.append(button);}const submit=form.querySelector('[type=submit]');if(blocked){submit.disabled=true;submit.dataset.notReady='true';}else if(submit.dataset.notReady){submit.disabled=!!form.dataset.pending;delete submit.dataset.notReady;}}
- function sync(){check($('generate-form'),$('gen-engine').value);check($('design-voice-form'),$('design-engine').value);const voice=state.voices.find(v=>v.id===$('lf-voice')?.value);check($('lf-import-form'),voice?.engine);}
- document.addEventListener('change',event=>{if(['gen-engine','gen-voice','design-engine','lf-voice'].includes(event.target.id))sync();});window.addEventListener('voice-page-change',sync);document.addEventListener('workflow-form-settled',sync);setInterval(sync,2500);sync();
+ const fallback=()=>state.models.find(model=>model.is_default)?.id || state.models[0]?.id;
+ const blocker=engine=>VoiceWorkflow.modelBlockers([{engine:engine || fallback()}],state.models,state.voices)[0];
+ function ensure(engine){const problem=blocker(engine);if(problem)throw Error(uiMessage(problem.reason));}
+ function check(form,engine,baseDisabled=!!form?.dataset.pending){
+  if(!form)return;
+  form.dataset.readinessEngine=engine || fallback() || '';
+  const problem=blocker(engine);let notice=form.querySelector('[data-model-readiness]');
+  if(!notice){notice=document.createElement('p');notice.dataset.modelReadiness='';notice.className='reference-warnings';notice.setAttribute('role','status');form.querySelector('[type=submit]').before(notice);}
+  notice.hidden=!problem;
+  if(problem){notice.replaceChildren(document.createTextNode(uiMessage(problem.reason)+' '));const open=document.createElement('button');open.type='button';open.className='text-link';open.textContent=tr('模型与系统');open.onclick=()=>navigate('settings');notice.append(open);}
+  form.querySelector('[type=submit]').disabled=baseDisabled || !!problem;
+ }
+ function sync(){
+  if(!state.ready)return;
+  check($('generate-form'),$('gen-engine').value);check($('design-voice-form'),$('design-engine').value);
+  const voice=state.voices.find(v=>v.id===$('lf-voice')?.value);check($('lf-import-form'),$('lf-engine').value||voice?.engine);window.regenerationUI?.refreshReadiness();
+ }
+ document.addEventListener('submit',event=>{if(event.target.dataset.readinessEngine===undefined)return;try{ensure(event.target.dataset.readinessEngine);}catch(error){event.preventDefault();event.stopImmediatePropagation();toast(error.message,true);}},true);
+ document.addEventListener('change',event=>{if(['gen-engine','gen-voice','design-engine','lf-project','lf-voice','lf-engine'].includes(event.target.id))sync();});
+ window.addEventListener('voice-page-change',sync);window.addEventListener('voice-data-ready',sync);document.addEventListener('workflow-form-settled',sync);
+ window.modelReadiness={blocker,check,ensure};setInterval(sync,2500);sync();
 })();

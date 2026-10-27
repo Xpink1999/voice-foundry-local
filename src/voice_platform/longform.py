@@ -71,7 +71,12 @@ class Longform:
         self.stop_event.set();self.wake.set()
         for t in self.threads:t.join(timeout=10)
     def book(self,identity):
-        return self.db.public(self.db.book(identity))
+        book=self.db.book(identity)
+        result=self.db.public(book)
+        result['engine']=book['snapshot']['engine']
+        engine=self.platform.engines.get(result['engine'])
+        result['readiness']=getattr(engine,'readiness',lambda:dict(available=engine is not None))()
+        return result
     def _body(self,identity,**values):
         with self.store.lock,self.store.connect() as db:
             row=db.execute('SELECT body FROM lf_books WHERE id=?',(identity,)).fetchone()
@@ -268,6 +273,9 @@ class Longform:
         with self.store.lock:
             book=self.db.book(identity);self.ensure_idle_export(identity)
             if book['phase']!='ready':raise ValueError('请等待文本解析完成')
+            engine=self.platform.engines.get(book['snapshot']['engine'])
+            readiness=getattr(engine,'readiness',lambda:dict(available=engine is not None))()
+            if not readiness['available']:raise ValueError(readiness.get('reason','语音引擎不可用，请检查模型设置。'))
             if chapter is not None:self.db.chapter(identity,chapter)
             self.db.update(identity,state='running',active_chapter=chapter,active_segment=None,error=None);self.wake.set();return self.book(identity)
     def pause(self,identity):
@@ -312,7 +320,11 @@ class Longform:
                 if not self.generate_next(row[0]):self.wake.wait(.1)
             except Paused:pass
             except Exception as error:
-                log.exception('longform scheduler');self.db.update(row[0],state='attention',error=str(error)[:2000])
+                # A book can be paused or moved to Trash after the queue lookup.
+                # Reporting that race must not terminate the shared scheduler.
+                with self.store.lock,self.store.connect() as db:
+                    changed=db.execute("UPDATE lf_books SET state='attention',error=? WHERE id=? AND state='running' AND deleted_batch IS NULL",(str(error)[:2000],row[0])).rowcount
+                if changed:log.exception('longform scheduler')
             self.stop_event.wait(.03)
     def generate_next(self,identity):
         book=self.db.book(identity);self.check(identity);where="book_id=? AND status='pending' AND deleted_batch IS NULL";args=[identity]
@@ -321,7 +333,10 @@ class Longform:
         with self.store.connect() as db:next_row=db.execute('SELECT no FROM lf_segments WHERE '+where+' ORDER BY no LIMIT 1',args).fetchone()
         if not next_row:
             state='completed' if book['done']==book['segments'] else 'attention' if book['failed'] else 'paused'
-            self.db.update(identity,state=state,active_segment=None);return False
+            with self.store.lock:
+                self.check(identity)
+                self.db.update(identity,state=state,active_segment=None)
+            return False
         item=self.db.segment(identity,next_row[0]);attempt=item['attempt']+1;folder=self.root/identity/'audio'/f'{item["no"]:09d}'/uid();folder.mkdir(parents=True)
         with self.store.lock,self.store.connect() as db:
             self.check(identity)  # Pause and segment claim share the same lock; no late claim after pause.
@@ -336,7 +351,7 @@ class Longform:
                 self.check(identity);self.platform.last_use=time.monotonic()
                 self.platform.load_engine(snapshot['engine'])
                 request=snapshot['request'];seed=snapshot.get('segment_seed',(snapshot['seed']+item['no']-1+item['variant']*1000003)%2147483647)
-                generation=dict(text=text,style=snapshot['style'],seed=seed,engine_options=request['engine_options'],clone_mode=request['clone_mode'],prompt_text=reference.get('transcript',{}).get('text') if reference else None,streaming=True if engine.capabilities().get('streaming') else False,reference_path=str(reference_path) if reference else None)
+                generation=dict(text=text,language=request.get('language','auto'),style=snapshot['style'],seed=seed,engine_options=request['engine_options'],clone_mode=request['clone_mode'],prompt_text=reference.get('transcript',{}).get('text') if reference else None,streaming=True if engine.capabilities().get('streaming') else False,reference_path=str(reference_path) if reference else None)
                 chunks=[];stream=engine.synthesize(generation)
                 try:
                     for chunk in stream:self.check(identity);chunks.append(np.asarray(chunk,dtype=np.float32).reshape(-1))

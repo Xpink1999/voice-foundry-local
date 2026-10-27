@@ -149,7 +149,7 @@
       updateSelection();
     }
     document.querySelector(`[data-page="${draft.page}"]`)?.click();
-    if (draft.page === 'voices' && ['quick', 'library', 'design', 'processing'].includes(draft.pane))
+    if (draft.page === 'voices' && ['quick', 'library', 'references', 'design', 'processing'].includes(draft.pane))
       document.querySelector(`[data-voice-pane="${draft.pane}"]`)?.click();
     document.getElementById('gen-text')?.dispatchEvent(new Event('input'));
     for (const id of ['settings-form', 'voice-form']) {
@@ -164,6 +164,7 @@
     } finally { restoringDraft = false; }
   }
   window.VoiceI18n = {translate, message: serviceMessage, validationMessage, locale, normalize, detect, changeLanguage, applyStatic, escape, captureDraft,
+    isSystemDefault: (field,value) => !!defaultKey(field,value),
     get changingLanguage() {return changingLanguage;}, get restoringDraft() {return restoringDraft;}};
   window.tr = translate;
   window.uiMessage = serviceMessage;

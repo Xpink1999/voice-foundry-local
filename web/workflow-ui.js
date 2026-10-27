@@ -3,8 +3,8 @@
   'use strict';
   const draftKey = 'voice-foundry-work-draft', maxDraftBytes = 400000;
   const fields = ['gen-title','gen-text','gen-style','gen-seed','gen-project','gen-voice','gen-language','gen-candidates','gen-reference','gen-clone-mode',
-    'batch-text','batch-project','batch-voice','batch-candidates','batch-clone-mode','design-description','design-text','design-count','design-engine',
-    'lf-title','lf-project','lf-voice','lf-style','lf-encoding','lf-clone-mode',
+    'batch-text','batch-project','batch-voice','batch-candidates','batch-clone-mode','batch-reference','batch-engine','batch-language','batch-style','batch-seed','design-description','design-text','design-count','design-engine',
+    'lf-title','lf-project','lf-voice','lf-style','lf-encoding','lf-clone-mode','lf-reference','lf-engine','lf-language','lf-seed',
     'review-project','review-status','review-search','voice-search','voice-scope','task-project','task-status','task-archive-view'];
   const defaults = Object.fromEntries(fields.map(id => [id, $(id)?.value || '']));
   let ready = false, applying = false, restoring = false, savedDraft = null, saveTimer, routeTimer, draftWarning = false, routeWritePending = false;
@@ -18,7 +18,7 @@
   function saveDraft() {
     if (!ready || restoring) return;
     try {
-      const values = Object.fromEntries(fields.filter(id => $(id)).map(id => [id, $(id).value]));
+      const values = Object.fromEntries(fields.filter(id => $(id) && !window.VoiceI18n.isSystemDefault($(id),$(id).value)).map(id => [id, $(id).value]));
       const json = JSON.stringify({at: Date.now(), values, selection: [...state.selected], batchRoles: window.batchUI?.roles()});
       if (json.length > maxDraftBytes) throw Error('quota');
       sessionStorage.setItem(draftKey, json);
@@ -36,6 +36,7 @@
     for (const id of ordered) {
       const input = $(id), value = savedDraft.values[id];
       if (!input || typeof value !== 'string') continue;
+      if(window.VoiceI18n.isSystemDefault(input,value))continue;
       if (input.tagName === 'SELECT' && ![...input.options].some(option => option.value === value)) continue;
       input.value = value;
       input.dispatchEvent(new Event(input.tagName === 'SELECT' ? 'change' : 'input', {bubbles: true}));
@@ -66,7 +67,9 @@
     let path = state.page;
     if (path === 'voices') {const context = window.voiceWorkspace?.context(); path += '/' + (context?.pane || 'quick'); if (context?.id) path += '/' + encodeURIComponent(context.id);}
     else if (path === 'longform') {const context = window.longformUI?.context(); if (context?.book) {path += '/' + encodeURIComponent(context.book); if (context.chapter) path += '/' + context.chapter;}}
-    else if (path === 'tasks' && state.detailJob && !$('job-detail').hidden) path += '/' + encodeURIComponent(state.detailJob);
+    else if(path==='tasks'){if(state.detailJob&&!$('job-detail').hidden)path+='/'+encodeURIComponent(state.detailJob);else if(window.jobArchiveUI?.context().batch)path+='/batch/'+encodeURIComponent(window.jobArchiveUI.context().batch);}
+    else if(path==='review'&&state.reviewIds)path+='/selection';
+    else if(path==='review'&&state.reviewBatch)path+='/batch/'+encodeURIComponent(state.reviewBatch);
     else if (path === 'review' && state.reviewJob) path += '/' + encodeURIComponent(state.reviewJob);
     else if (path === 'assets') {const context = window.assetUI.context(); path += '/' + context.kind + '/' + (context.deleted ? 'trash' : 'active'); if (context.book) path += '/' + encodeURIComponent(context.book);}
     return '#' + path;
@@ -92,8 +95,8 @@
         if (target.id) {await window.longformUI.openBook(target.id); if (target.chapter) await window.longformUI.openChapter(target.chapter);}
         else window.longformUI.library();
       }
-      if (target.page === 'tasks' && target.id) await showJob(target.id);
-      if (target.page === 'review') {state.reviewJob = target.id; renderResults();}
+      if(target.page==='tasks'){if(target.id)await showJob(target.id);else await window.jobArchiveUI.setBatch(target.batch||null);}
+      if(target.page==='review')await openReviewScope({job:target.id||null,batch:target.batch||null,ids:target.selection?[...state.selected]:null});
       if (target.page === 'assets') await window.assetUI.restoreContext(target);
     } catch (error) {notice(tr('无法恢复该工作位置：{0}', [error.message]));}
     finally {applying=false;if(location.hash!==requestedHash)scheduleRoute();else history.replaceState(null,'',route());}
@@ -133,30 +136,35 @@
   function batchSubmitted(batch) {
     state.detailJob=null;state.detailToken=(state.detailToken||0)+1;state.eventSource?.close();state.eventSource=null;stopLiveAudio();$('job-detail').hidden=true;
     $('task-project').value = ''; $('task-status').value = ''; $('task-archive-view').value = 'current'; $('task-archive-view').dispatchEvent(new Event('change'));
-    navigate('tasks');
+    navigate('tasks');window.jobArchiveUI.setBatch(batch.batch_id);
     notice(tr('已提交 {0} 条台词，任务在后台继续。', [batch.jobs.length]), [{label: tr('返回批量台词'), run: () => navigate('batch')}]);
   }
-  function offerLongform(file = null) {
-    notice(tr('这份内容更适合长文配音，可按章节生成、续作和审核。'), [{label: tr('转到长文导入'), run: () => {
-      navigate('longform'); window.longformUI.prepareImport({file});
-      if (file) document.querySelectorAll('input[type="file"]').forEach(input => {if (input.id !== 'lf-file' && input.files?.[0] === file) input.value = '';});
+  function productionContext(prefix='gen') {
+    return {project:$(prefix+'-project').value,voice:$(prefix+'-voice').value,reference:$(prefix+'-reference').value,engine:$(prefix+'-engine').value,language:$(prefix+'-language').value,seed:$(prefix+'-seed').value,mode:$(prefix+'-clone-mode').value,style:$(prefix+'-clone-mode').value==='hifi'?'':$(prefix+'-style').value};
+  }
+  function offerLongform(file = null, source='gen') {
+    const context=productionContext(source);
+    const structured=source==='batch'&&window.batchUI.preview().roles?.length;
+    notice(tr(structured?'长文作品使用一个默认人物。请先确认人物和参考；不会自动沿用多角色分配。':'这份内容更适合长文配音，可按章节生成、续作和审核。'), [{label: tr('转到长文导入'), run: () => {
+      const accepted=window.longformUI.prepareImport({...context,file,title:source==='gen'?$('gen-title').value.slice(0,100):'',...(structured?{voice:'',reference:'',engine:'',mode:'reference',style:''}:{})});
+      if(accepted){navigate('longform');if(file)document.querySelectorAll('input[type="file"]').forEach(input=>{if(input.id!=='lf-file'&&input.files?.[0]===file)input.value='';});notice(tr('已带入当前声音设置，请核对后导入。'));}
     }}]);
   }
   $('text-file').onchange = async () => {
     const file = $('text-file').files[0]; if (!file) return;
     if (file.size > 4 * 1024 * 1024) return offerLongform(file);
     try {const text = VoiceWorkflow.decodeText(await file.arrayBuffer()); if (text.length > 60000) return offerLongform(file); $('gen-text').value = text; $('gen-text').dispatchEvent(new Event('input', {bubbles: true})); $('text-file').form.dataset.uploaded = 'true';}
-    catch (error) {notice(tr('文本编码无法识别，请在长文导入中选择编码。'), [{label: tr('转到长文导入'), run: () => {navigate('longform'); window.longformUI.prepareImport({file});}}]);}
+    catch (error) {notice(tr('文本编码无法识别，请在长文导入中选择编码。'), [{label: tr('转到长文导入'), run: () => {if(window.longformUI.prepareImport({...productionContext(),file}))navigate('longform');}}]);}
   };
   for (const [id, limit] of [['gen-text',60000], ['batch-text',1000000]]) $(id).addEventListener('paste', event => {
     const text = event.clipboardData?.getData('text/plain'); if (!text) return;
     const input = $(id), combined = input.value.slice(0, input.selectionStart) + text + input.value.slice(input.selectionEnd);
-    if (combined.length > limit) {event.preventDefault(); offerLongform(new File([combined], 'narration.txt', {type: 'text/plain;charset=utf-8'}));}
+    if (combined.length > limit) {event.preventDefault(); offerLongform(new File([combined], 'narration.txt', {type: 'text/plain;charset=utf-8'}),id==='batch-text'?'batch':'gen');}
   });
   const shortcuts = document.createElement('div'); shortcuts.className = 'workflow-shortcuts';
   shortcuts.innerHTML = `<button type="button" data-workflow="reference" class="text-link">${tr('从录音创建音色')}</button><button type="button" data-workflow="batch" class="text-link">${tr('多条台词 → 批量配音')}</button><button type="button" data-workflow="longform" class="text-link">${tr('整本内容 → 长文配音')}</button>`;
   $('generate-form').before(shortcuts);
-  shortcuts.addEventListener('click', event => {const action = event.target.dataset.workflow; if (action === 'reference') {navigate('voices'); window.voiceWorkspace.showPane('quick');} else if (action === 'batch') navigate('batch'); else if (action === 'longform') {navigate('longform'); window.longformUI.prepareImport({project: $('gen-project').value, voice: $('gen-voice').value});}});
+  shortcuts.addEventListener('click', event => {const action = event.target.dataset.workflow; if (action === 'reference') {navigate('voices'); window.voiceWorkspace.showPane('quick');} else if(action==='batch')window.batchUI.prepareImport({...productionContext(),text:$('gen-text').value,candidates:$('gen-candidates').value});else if(action==='longform'){const text=$('gen-text').value;if(window.longformUI.prepareImport({...productionContext(),file:text.trim()?new File([text],'narration.txt',{type:'text/plain;charset=utf-8'}):null,title:$('gen-title').value.slice(0,100)})){navigate('longform');notice(tr('已带入当前声音设置，请核对后导入。'));}}});
   const exportSummary = document.createElement('div'); exportSummary.id = 'export-selection'; exportSummary.className = 'selection-summary'; $('export-form').querySelector('.panel-title').after(exportSummary);
   const listPages = new Map();
   const listTargets = {voices: ['voice-list', renderVoices, 12], projects: ['project-list', renderProjects, 12], exports: ['export-list', renderExports, 20]};
@@ -172,10 +180,13 @@
     controls.querySelector('[data-list-next]').onclick = () => {context.page++; render(); if (kind === 'projects') decorateProjects();};
     return items.slice(context.page * size, context.page * size + size);
   }};
+  let exportSummarySignature='';
   function refreshExport() {
     const items = state.results.filter(result => state.selected.has(result.id)), pending = items.filter(result => result.review !== 'approved').length;
-    exportSummary.innerHTML = `<p>${e(tr('已选 {0} 条 · 待审核 {1} 条', [items.length, pending]))}</p>${items.length ? `<details><summary>${tr('查看所选音频')}</summary><ul>${items.slice(0, 30).map(item => `<li>${e(item.title)} · ${e(labels[item.review])}</li>`).join('')}</ul></details>` : ''}<button type="button" class="text-link" id="export-back-review">${tr(items.length ? '返回试听与审核' : '选择要导出的音频')}</button>`;
-    $('export-back-review').onclick = () => navigate('review');
+    const summarySignature=JSON.stringify(items.map(item=>[item.id,item.review,item.title]));
+    if(summarySignature!==exportSummarySignature){const wasOpen=exportSummary.querySelector('details')?.open;exportSummarySignature=summarySignature;exportSummary.innerHTML = `<p>${e(tr('已选 {0} 条 · 待审核 {1} 条', [items.length, pending]))}</p>${items.length ? `<details><summary>${tr('查看所选音频')}</summary><ul>${items.slice(0, 30).map(item => `<li>${e(item.title)} · ${e(labels[item.review])}</li>`).join('')}</ul></details>` : ''}<button type="button" class="text-link" id="export-back-review">${tr(items.length ? '返回试听与审核' : '选择要导出的音频')}</button>`;
+    if(wasOpen&&exportSummary.querySelector('details'))exportSummary.querySelector('details').open=true;
+    $('export-back-review').onclick = () => navigate('review');}
     const submit = $('export-form').querySelector('[type="submit"]'); submit.disabled = !!$('export-form').dataset.pending || !items.length || (!!pending && !$('export-draft').checked);
   }
   const priorSelection = updateSelection; updateSelection = function () {priorSelection(); refreshExport();};

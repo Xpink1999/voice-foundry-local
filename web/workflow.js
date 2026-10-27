@@ -1,9 +1,22 @@
 /* Shared workflow rules. No audio, approvals, credentials or network state are persisted here. */
 (() => {
   'use strict';
+  const eligibleVoice = (voice, project) => voice && voice.status !== 'archived' && !voice.deleted_at && (!voice.project_id || voice.project_id === project);
+  const roleKey = (project, role) => 'scope:' + JSON.stringify([project || '', role]);
+  function modelBlockers(items, models = [], voices = []) {
+    const fallback = models.find(model => model.is_default) || models[0], blocked = new Map();
+    for (const item of items) {
+      const engine = item.engine || voices.find(voice => voice.id === item.voice_id)?.engine || fallback?.id;
+      const voice=voices.find(voice=>voice.id===item.voice_id);
+      if(item.engine&&voice?.engine&&item.engine!==voice.engine){blocked.set(engine,{engine,reason:'音色与引擎不匹配；请选择同一引擎或建立新音色'});continue;}
+      const model = models.find(model => model.id === engine);
+      if (!model || model.readiness?.available === false) blocked.set(engine || '', {engine, reason:model?.readiness?.reason || '语音引擎不可用，请检查模型设置。'});
+    }
+    return [...blocked.values()];
+  }
   function parseBatch(text, options = {}) {
     const {voices = [], references = [], projects = [], defaults = {}, roles = {}} = options;
-    const errors = [], unresolved = new Set(), roleNames = new Set();
+    const errors = [], unresolved = new Set(), roleNames = new Set(), bindings = new Map();
     const input = String(text || '').trim();
     let rows = [];
     if (!input) return {items: [], errors: [], unresolved: [], totalCandidates: 0};
@@ -32,12 +45,21 @@
       for (const key of ['style','language','engine','reference_id','voice_id','project_id','role']) if (item[key] != null && typeof item[key] !== 'string') fail('type', {field: key});
       if (typeof item.role === 'string' && item.role) {
         roleNames.add(item.role);
-        const matches = voices.filter(v => v.id === item.role || v.name === item.role);
-        if (Object.hasOwn(roles, item.role) && typeof roles[item.role] === 'string' && roles[item.role]) item.voice_id = roles[item.role];
-        else if (matches.length === 1) item.voice_id = matches[0].id;
-        else {unresolved.add(item.role); fail('role', {role: item.role});}
+        const key = roleKey(item.project_id, item.role), available = voices.filter(v => eligibleVoice(v, item.project_id));
+        const matches = available.filter(v => v.id === item.role || v.name === item.role);
+        const assigned = roles[key] || roles[item.role], explicit = typeof assigned === 'string' && !!assigned;
+        const chosen = explicit ? available.find(v => v.id === assigned) : matches.length === 1 ? matches[0] : null;
+        bindings.set(key, {key, role:item.role, project_id:item.project_id || null, voice_id:chosen?.id || '', resolved:!!chosen, explicit});
+        if (chosen) item.voice_id = chosen.id;
+        else {item.voice_id = null; unresolved.add(item.role); fail('role', {role: item.role, key});}
       }
       delete item.role;
+      // A shared scene reference belongs to the default voice. Explicit per-row
+      // references/engines remain authoritative when casting another character.
+      if (item.voice_id !== defaults.voice_id) {
+        if (!Object.hasOwn(row,'reference_id')) item.reference_id = null;
+        if (!Object.hasOwn(row,'engine')) item.engine = null;
+      }
       item.title = item.title || '';
       item.candidates = Number(item.candidates ?? 1);
       item.clone_mode = item.clone_mode || 'reference';
@@ -58,7 +80,7 @@
       }
       return item;
     });
-    return {items, errors, unresolved: [...unresolved], roles: [...roleNames], totalCandidates: items.reduce((sum, row) => sum + (Number.isFinite(row.candidates) ? row.candidates : 0), 0)};
+    return {items, errors, unresolved: [...unresolved], roles: [...roleNames], roleBindings:[...bindings.values()], totalCandidates: items.reduce((sum, row) => sum + (Number.isFinite(row.candidates) ? row.candidates : 0), 0)};
   }
   function selectionSummary(results, selected, visible) {
     const ids = new Set(selected), shown = new Set(visible);
@@ -72,6 +94,8 @@
       if (page === 'voices') return {page, pane: ['quick','library','references','design','processing'].includes(item) ? item : 'quick', id: chapter || null};
       if (page === 'longform') return {page, id: item || null, chapter: /^[1-9]\d*$/.test(chapter || '') && Number.isSafeInteger(Number(chapter)) ? Number(chapter) : null};
       if (page === 'assets') return {page, kind: item || 'results', trash: chapter === 'trash', book: book || ''};
+      if(page==='review'&&item==='selection')return {page,selection:true};
+      if(['tasks','review'].includes(page)&&item==='batch')return {page,batch:chapter||null};
       return {page, id: ['tasks','review'].includes(page) ? item || null : null};
     } catch {return {page: 'studio'};}
   }
@@ -82,7 +106,7 @@
     try {return new TextDecoder('utf-8', {fatal: true}).decode(data);}
     catch {return new TextDecoder('gb18030', {fatal: true}).decode(data);}
   }
-  const rules = {parseBatch, selectionSummary, decodeRoute, decodeText};
+  const rules = {parseBatch, eligibleVoice, roleKey, modelBlockers, selectionSummary, decodeRoute, decodeText};
   if (typeof module !== 'undefined' && module.exports) module.exports = rules;
   else window.VoiceWorkflow = rules;
 })();

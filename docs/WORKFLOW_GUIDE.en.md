@@ -46,3 +46,13 @@ Review shows the next action: review first, then export. Format, deletion and ot
 Stop the service and back up database and configuration before upgrading. Event sequence and issue tables are additive. Existing recordings, entities and tracks are not rewritten. Old assemblies remain listening outputs; old timelines remain solo tracks. Missing measurements and confirmations remain unknown. Roll back by restoring the matching database, configuration and source backup while stopped; do not delete tables individually.
 
 Readiness distinguishes installed files from loaded models. Missing files preserve drafts and point to installation. Event cursors replay task events; they do not imply inference can resume at any audio sample.
+
+## Moving between workspaces
+
+The studio’s batch and book actions carry the current script, project, voice, reference, cloning mode and delivery settings. Check the reference, engine, language and seed under Reference and generation settings. Existing unsubmitted drafts require confirmation before replacement. A book uses one default voice; batch role assignments are not converted into a single voice.
+
+Batch roles match only available, unarchived voices in the row’s project. Choose a replacement when no match is available. Other characters use their own default references; explicit JSON references remain authoritative. Submission opens the batch’s task list. Choose Review this batch to continue. Batch task and review scopes survive a page reload through their URLs.
+
+Opening candidates from a project or task resets stale filters and preserves explicit selections, including a count of hidden selections. Search export history by project, title or filename, expand its contents and return to surviving source candidates. Deleted sources are marked unavailable. Refreshing preserves unchanged selection details.
+
+Missing models block batch submission, book continuation and retakes with a specific reason. Playback and export of existing audio remain available.

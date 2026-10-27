@@ -27,6 +27,7 @@ class Store:
             db.execute('CREATE INDEX IF NOT EXISTS event_job_cursor ON event_sequence(job_id,seq)')
             db.execute("CREATE INDEX IF NOT EXISTS regeneration_parent ON entities(kind,json_extract(body,'$.regenerated_from'))")
             db.execute("CREATE INDEX IF NOT EXISTS entity_status ON entities(kind,json_extract(body,'$.status'))")
+            db.execute("CREATE INDEX IF NOT EXISTS job_batch ON entities(kind,json_extract(body,'$.batch_id'))")
             db.execute("CREATE INDEX IF NOT EXISTS entity_request_key ON entities(kind,json_extract(body,'$.idempotency_key'))")
             db.execute("CREATE INDEX IF NOT EXISTS recording_workflow ON entities(kind,json_extract(body,'$.smart_reference.status'))")
             db.execute("CREATE INDEX IF NOT EXISTS processing_recording ON entities(kind,json_extract(body,'$.recording_id'))")
@@ -78,10 +79,10 @@ class Store:
             rows=db.execute("SELECT body FROM entities WHERE kind='recordings' AND json_extract(body,'$.smart_reference.status') IN ('analyzing','processing','analyzing_outputs') AND COALESCE(json_extract(body,'$.deleted_at'),'')='' ").fetchall()
         return [json.loads(row[0]) for row in rows]
 
-    def jobs(self, archived=False, project_id=None, status=None, limit=None, offset=0):
+    def jobs(self, archived=False, project_id=None, status=None, limit=None, offset=0, batch_id=None):
         clauses=["kind='jobs'", "COALESCE(json_extract(body,'$.deleted_at'),'')=''", "COALESCE(json_extract(body,'$.archived_at'),'') "+("!=''" if archived else "=''")]
         arguments=[]
-        for field,value in (('project_id',project_id),('status',status)):
+        for field,value in (('project_id',project_id),('status',status),('batch_id',batch_id)):
             if value:
                 clauses.append(f"json_extract(body,'$.{field}')=?");arguments.append(value)
         where=' AND '.join(clauses)

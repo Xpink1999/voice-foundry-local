@@ -161,6 +161,9 @@
       const button=document.createElement('button');button.type='button';button.innerHTML=icon(item.dataset.page)+`<span>${e(label)}</span>`;
       button.onclick=()=>{dialog.close();navigate(item.dataset.page);};jumpResults.append(button);
     }
+    if(value)for(const [key,pane,aliases] of [['参考片段库','references','reference clips 参考 参照 참조'],['人物音色库','library','voice library 人物 音色 목소리'],['文字设计声音','design','voice design 声音设计 音声設計 디자인'],['按人物整理','processing','speakers tracking 人物分离 話者 화자']]){
+      const label=tr(key);if(!(label+' '+aliases).toLocaleLowerCase().includes(value))continue;const button=document.createElement('button');button.type='button';button.innerHTML=icon('voices')+`<span>${e(label)}</span>`;button.onclick=()=>{dialog.close();navigate('voices');window.voiceWorkspace.showPane(pane);};jumpResults.append(button);
+    }
     if(!jumpResults.children.length){const message=document.createElement('p');message.className='empty';message.textContent=tr('没有匹配的工作区');jumpResults.append(message);}
   }
   function openJump(){jumpOrigin=compact.matches&&sidebar.contains(document.activeElement)?menu:document.activeElement===document.body?(compact.matches?menu:jump):document.activeElement;closeMenu();search.value='';renderJump();dialog.showModal();search.focus();}

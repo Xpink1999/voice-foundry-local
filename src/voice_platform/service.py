@@ -95,7 +95,7 @@ class Platform:
                 interrupt()
 
     def models(self):
-        return [dict(id=k, label=self.config["engines"][k].get("label", k), loaded=k == self.loaded_engine(),
+        return [dict(id=k, label=self.config["engines"][k].get("label", k), is_default=k == self.config['default_engine'], loaded=k == self.loaded_engine(),
                      readiness=getattr(e,'readiness',lambda:dict(available=True,check='adapter_not_declared'))(),
                      capabilities=e.capabilities(), identity=e.identity()) for k, e in self.engines.items()]
 

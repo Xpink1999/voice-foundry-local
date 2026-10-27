@@ -2,10 +2,12 @@
   const scope=document.createElement('p');scope.className='hint';
   scope.append(document.createTextNode(tr('这里查看普通配音任务；长文进度保存在作品内。')+' '));
   const longform=document.createElement('button');longform.type='button';longform.className='text-link';longform.textContent=tr('打开长文作品');longform.onclick=()=>{navigate('longform');window.longformUI?.library();};scope.append(longform);$('page-tasks').querySelector('.page-heading').after(scope);
-  const queue={archived:false,page:0,size:50,items:[],selected:new Set(),sequence:0,signature:''};
+  const queue={archived:false,batch:null,page:0,size:50,items:[],selected:new Set(),sequence:0,signature:''};
+  const batchScope=document.createElement('div');batchScope.className='toolbar queue-batch-scope';batchScope.hidden=true;
+  batchScope.innerHTML=`<span id="task-batch-scope" role="status"></span><button type="button" id="task-batch-review" class="primary">${tr('试听本批候选')}</button><button type="button" id="task-batch-clear" class="text-link">${tr('查看全部批次')}</button>`;
   const toolbar=document.createElement('div');toolbar.className='queue-archive-toolbar';
   toolbar.innerHTML=("<div class=\"toolbar\"><label>"+tr("任务视图")+"<select id=\"task-archive-view\"><option value=\"current\">"+tr("当前队列")+"</option><option value=\"archived\">"+tr("已归档")+"</option></select></label><button id=\"task-select-page\" class=\"secondary\">"+tr("全选本页已结束任务")+"</button><button id=\"task-archive-selected\" class=\"secondary\" disabled>"+tr("归档所选")+"</button><span id=\"task-selection-count\" class=\"hint\">"+tr("已选择 0 项")+"</span></div><p id=\"task-archive-policy\" class=\"hint\"></p>");
-  $('job-list').before(toolbar);
+  $('job-list').before(batchScope,toolbar);
   const pages=document.createElement('div');pages.className='toolbar queue-pages';pages.innerHTML=("<button id=\"task-prev\" class=\"secondary\" disabled>"+tr("上一页")+"</button><span id=\"task-page-info\" class=\"hint\"></span><button id=\"task-next\" class=\"secondary\" disabled>"+tr("下一页")+"</button>");
   $('job-list').after(pages);
   function selection(){const count=queue.selected.size;$('task-selection-count').textContent=tr("已选择 {0} 项", [count]);$('task-archive-selected').disabled=!count;$('task-archive-selected').textContent=queue.archived?tr("恢复所选"):tr("归档所选");}
@@ -15,19 +17,22 @@
       const params=new URLSearchParams({archived:String(queue.archived),limit:String(queue.size),offset:String(queue.page*queue.size)});
       if($('task-project').value)params.set('project_id',$('task-project').value);
       if($('task-status').value)params.set('status',$('task-status').value);
+      if(queue.batch)params.set('batch_id',queue.batch);
       const result=await api('/jobs/page?'+params);if(sequence!==queue.sequence)return;
       if(queue.page&&queue.page*queue.size>=result.total){queue.page=Math.max(0,Math.ceil(result.total/queue.size)-1);return load();}
       queue.items=result.items;
       const allowed=new Set(queue.items.filter(j=>['succeeded','failed','cancelled'].includes(j.status)).map(j=>j.id));
       queue.selected=new Set([...queue.selected].filter(id=>allowed.has(id)));
-      const signature=JSON.stringify([queue.items,[...queue.selected],queue.archived]);
+      const signature=JSON.stringify([queue.items,[...queue.selected],queue.archived,queue.batch,state.projects]);
       if(signature!==queue.signature){queue.signature=signature;$('job-list').innerHTML=queue.items.map(j=>jobHTML(j,true)).join('')||empty(queue.archived?tr("还没有归档任务"):tr("队列空闲"),queue.archived?tr("已结束任务归档后会显示在这里，可随时恢复。"):tr("新的配音任务会显示在这里，旧任务可归档整理。"));}
       const totalPages=Math.max(1,Math.ceil(result.total/queue.size));$('task-page-info').textContent=tr("{0} {1} 项 · 第 {2} / {3} 页 · 每页 {4} 项", [queue.archived?tr("归档"):tr("当前"),result.total,queue.page+1,totalPages,queue.size]);
       $('task-prev').disabled=queue.page===0;$('task-next').disabled=queue.page+1>=totalPages;
       $('task-archive-policy').textContent=(result.task_archive_after_days?tr("已结束任务 {0} 天后自动归档。", [result.task_archive_after_days]):tr("自动归档已关闭，可手动整理。"))+tr("归档保留音频、审核及导出记录；恢复后重新计时。可在“模型与系统”调整。");selection();
+      batchScope.hidden=!queue.batch;if(queue.batch)$('task-batch-scope').textContent=tr('本批任务');
     }catch(error){if(sequence===queue.sequence)toast(error.message,true);}
   }
-  function reset(){queue.page=0;queue.selected.clear();load();}
+  function reset(){window.closeTaskDetail?.();queue.page=0;queue.selected.clear();return load();}
+  function setBatch(batchId){queue.batch=batchId||null;if(queue.batch){queue.archived=false;$('task-archive-view').value='current';$('task-project').value='';$('task-status').value='';}batchScope.hidden=!queue.batch;if(queue.batch)$('task-batch-scope').textContent=tr('本批任务');window.dispatchEvent(new Event('voice-context-change'));return reset();}
   async function change(ids,restore){
     if(!ids.length)return;
     await api('/jobs/'+(restore?'restore':'archive'),{method:'POST',body:{job_ids:ids}});queue.selected.clear();
@@ -40,6 +45,8 @@
   $('task-archive-selected').onclick=async()=>{try{await change([...queue.selected],queue.archived);}catch(error){toast(error.message,true);}};
   document.addEventListener('change',event=>{const id=event.target.dataset.jobSelect;if(!id)return;if(event.target.checked)queue.selected.add(id);else queue.selected.delete(id);selection();});
   document.addEventListener('click',async event=>{const button=event.target.closest('[data-job-archive]');if(!button)return;try{await change([button.dataset.id],button.dataset.jobArchive==='restore');}catch(error){toast(error.message,true);}});
-  window.jobArchiveUI={refresh:load,isSelected:id=>queue.selected.has(id)};
+  $('task-batch-clear').onclick=()=>setBatch(null);
+  $('task-batch-review').onclick=()=>{if(queue.batch)window.openReviewScope({batch:queue.batch});};
+  window.jobArchiveUI={refresh:load,setBatch,context:()=>({batch:queue.batch}),isSelected:id=>queue.selected.has(id)};
   load();setInterval(()=>{if(state.page==='tasks')load();},2500);
 })();

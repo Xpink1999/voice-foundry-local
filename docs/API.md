@@ -187,3 +187,9 @@ MCP 工具名称以 voice_ 开头。接口不依赖 Codex；其他 MCP 客户端
 CLI：`voice track-speakers RECORDING_ID --speakers 2`、`voice tracking-summary PROCESSING_ID --limit 30 --offset 0`、`voice name-speaker PROCESSING_ID SPEAKER_ID NAME`。`assign-clip ID request.json OUTPUT_ID`、`compose-reference ID request.json`、`save-composite ID request.json` 和 `save-tracked ID request.json` 的 JSON 与上表一致。命令名使用英文，不读取当前游戏工程。
 
 MCP：`voice_track_speakers`、`voice_tracking_summary`、`voice_name_speaker`、`voice_assign_clip`、`voice_compose_reference`、`voice_save_composite`、`voice_save_tracked_clips`。传入的确认必须来自用户实际试听，工具不能代替听审。已有 `voice_process_recording` 增加 speaker_count/source_processing_id，默认走人物整理；显式双路 separate 保留为旧匿名轨道工具。
+
+### 工作区范围与导入配置
+
+`GET /api/v1/jobs` 和 `/api/v1/jobs/page` 支持可选 `batch_id`，与项目、状态及归档筛选共同生效，先筛选再分页。
+
+`POST /api/v1/longform/books` 的 multipart 字段新增可选 `reference_id`、`engine`、`language`（默认 `auto`）、`seed`（0–2147483647）。这些选择在导入时冻结，后续人物修改不会替换作品快照。作品详情返回 `engine` 与当前 `readiness`；续作在开始前再次校验模型，不影响既有音频读取。

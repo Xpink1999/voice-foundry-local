@@ -117,8 +117,8 @@ def create_app(config=None):
         return platform.longform.db.books(limit,offset)
 
     @app.post('/api/v1/longform/books',status_code=202)
-    async def import_book(file:UploadFile=File(...),title:str=Form('',max_length=100),encoding:str=Form('auto'),voice_id:str=Form(''),project_id:str=Form(''),style:str=Form('',max_length=1000),clone_mode:str=Form('reference')):
-        request=GenerationInput(text='长文配音配置',voice_id=voice_id or None,project_id=project_id or None,style=style,clone_mode=clone_mode,max_retries=0)
+    async def import_book(file:UploadFile=File(...),title:str=Form('',max_length=100),encoding:str=Form('auto'),voice_id:str=Form(''),project_id:str=Form(''),style:str=Form('',max_length=1000),clone_mode:str=Form('reference'),reference_id:str=Form(''),engine:str=Form(''),language:str=Form('auto'),seed:int|None=Form(None,ge=0,le=2147483647)):
+        request=GenerationInput(text='长文配音配置',voice_id=voice_id or None,project_id=project_id or None,reference_id=reference_id or None,engine=engine or None,language=language,seed=seed,style=style,clone_mode=clone_mode,max_retries=0)
         return await platform.longform.upload(file,title,encoding,request)
 
     @app.get('/api/v1/longform/books/{identity}')
@@ -456,14 +456,14 @@ def create_app(config=None):
         return dict(batch_id=jobs[0]["batch_id"], jobs=jobs)
 
     @app.get("/api/v1/jobs")
-    def jobs(project_id: str | None = None, archived: bool = False):
+    def jobs(project_id: str | None = None, archived: bool = False, batch_id: str | None = None):
         platform.archive_due()
-        return platform.store.jobs(archived=archived,project_id=project_id)['items']
+        return platform.store.jobs(archived=archived,project_id=project_id,batch_id=batch_id)['items']
 
     @app.get('/api/v1/jobs/page')
-    def job_page(archived:bool=False, project_id:str|None=None, status:str|None=None, limit:int=Query(default=50,ge=1,le=200),offset:int=Query(default=0,ge=0)):
+    def job_page(archived:bool=False, project_id:str|None=None, status:str|None=None, limit:int=Query(default=50,ge=1,le=200),offset:int=Query(default=0,ge=0),batch_id:str|None=None):
         platform.archive_due()
-        return dict(platform.store.jobs(archived,project_id,status,limit,offset),limit=limit,offset=offset,archived=archived,task_archive_after_days=config.get('task_archive_after_days',7))
+        return dict(platform.store.jobs(archived,project_id,status,limit,offset,batch_id=batch_id),limit=limit,offset=offset,archived=archived,batch_id=batch_id,task_archive_after_days=config.get('task_archive_after_days',7))
 
     @app.post('/api/v1/jobs/archive')
     def archive_jobs(request:ArchiveJobsInput):

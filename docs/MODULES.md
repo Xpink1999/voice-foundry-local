@@ -71,3 +71,6 @@
 - SQLite 只增加 `event_sequence`、`lf_segment_issues` 和相关索引；长文生产文本修订保存在不可变 generation profile，原文切片校验保留。
 
 工作流与四语说明：[参考整理与配音](WORKFLOW_GUIDE.md)。
+
+- `web/export-library-ui.js`：导出历史搜索、包内清单、来源回看与折叠新建设置。
+- `web/workflow.js`：按项目解析批量角色，统一模型就绪判定及批次／所选范围路由。

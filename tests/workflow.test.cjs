@@ -4,6 +4,50 @@ const {parseBatch, selectionSummary, decodeRoute, decodeText} = require('../web/
 const voices = [{id:'global',name:'Narrator',status:'draft'}, {id:'private',name:'Hero',project_id:'project-a',status:'active'}];
 const projects = [{id:'project-a'}, {id:'project-b'}];
 
+test('role resolution excludes archived and out-of-project voices and exposes remapping', () => {
+  for (const unusable of [{id:'old',name:'Actor',status:'archived'}, {id:'private-b',name:'Actor',project_id:'project-b'}]) {
+    const result=parseBatch('Line | Actor | Hello',{voices:[unusable,...voices],projects,defaults:{project_id:'project-a'}});
+    assert.equal(result.items[0].voice_id,null);
+    assert.equal(result.roleBindings[0].resolved,false);
+    assert.equal(result.errors[0].code,'role');
+    const key=result.roleBindings[0].key;
+    const remapped=parseBatch('Line | Actor | Hello',{voices:[unusable,...voices],projects,defaults:{project_id:'project-a'},roles:{[key]:'global'}});
+    assert.deepEqual(remapped.errors,[]);assert.equal(remapped.items[0].voice_id,'global');
+  }
+});
+
+test('identical role names in different projects have independent valid bindings', () => {
+  const {roleKey}=require('../web/workflow.js');
+  const rows=[{text:'A',role:'Actor',project_id:'project-a'},{text:'B',role:'Actor',project_id:'project-b'}];
+  const result=parseBatch(JSON.stringify(rows),{voices,projects,roles:{[roleKey('project-a','Actor')]:'private',[roleKey('project-b','Actor')]:'global'}});
+  assert.deepEqual(result.errors,[]);assert.deepEqual(result.items.map(row=>row.voice_id),['private','global']);
+  assert.equal(result.roleBindings.length,2);
+});
+
+test('casting a different voice does not reuse the default characters scene reference or engine',()=>{
+  const result=parseBatch('Narrator line | Narrator | Hello\nHero line | Hero | Go',{voices,projects,defaults:{voice_id:'global',project_id:'project-a',reference_id:'narrator-scene',engine:'narrator-engine'}});
+  assert.equal(result.items[0].reference_id,'narrator-scene');
+  assert.equal(result.items[1].reference_id,null);assert.equal(result.items[1].engine,null);
+  const explicit=parseBatch('[{"text":"Hero","voice_id":"private","reference_id":"hero-scene","engine":"hero-engine"}]',{voices,projects,defaults:{project_id:'project-a',voice_id:'global',reference_id:'narrator-scene'}});
+  assert.equal(explicit.items[0].reference_id,'hero-scene');assert.equal(explicit.items[0].engine,'hero-engine');
+});
+
+test('model blockers use row engine, voice engine and declared default without loading weights', () => {
+  const {modelBlockers}=require('../web/workflow.js');
+  const models=[{id:'secondary',readiness:{available:false,reason:'missing secondary'}},{id:'default',is_default:true,readiness:{available:true}}];
+  assert.deepEqual(modelBlockers([{}],models,[]),[]);
+  assert.equal(modelBlockers([{voice_id:'voice'}],models,[{id:'voice',engine:'secondary'}])[0].reason,'missing secondary');
+  assert.equal(modelBlockers([{engine:'secondary'},{engine:'secondary'}],models,[]).length,1);
+  assert.equal(modelBlockers([{engine:'default',voice_id:'voice'}],models,[{id:'voice',engine:'secondary'}]).length,1);
+  models[0].readiness.available=true;
+  assert.deepEqual(modelBlockers([{engine:'secondary'}],models,[]),[]);
+});
+
+test('batch queue and candidate routes preserve the batch identity', () => {
+  assert.deepEqual(decodeRoute('#tasks/batch/batch-1'),{page:'tasks',batch:'batch-1'});
+  assert.deepEqual(decodeRoute('#review/batch/batch-1'),{page:'review',batch:'batch-1'});
+});
+
 test('line roles resolve by name or explicit user mapping without speaking the role fields', () => {
   const result = parseBatch('Opening | Narrator | Hello | world\nHero line | Actor | Go!', {voices, projects, roles:{Actor:'private'}, defaults:{project_id:'project-a',candidates:2}});
   assert.deepEqual(result.errors, []);
