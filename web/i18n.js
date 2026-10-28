@@ -97,7 +97,10 @@
       page: document.querySelector('.page.active')?.id.replace(/^page-/, '') || 'studio',
       pane: document.querySelector('[data-voice-pane][aria-selected="true"]')?.dataset.voicePane,
       selected: typeof state !== 'undefined' ? [...state.selected] : [],
-      dirtyForms: ['settings-form', 'voice-form'].filter(id => document.getElementById(id)?.dataset?.dirty),
+      editing: typeof state !== 'undefined' ? state.editing : null,
+      voiceReferences: window.referenceUI ? {ids:window.referenceUI.selectedIDs(),scenes:window.referenceUI.scenarios()} : null,
+      referenceEditing:window.referenceLibrary?.context?.()||null,
+      dirtyForms: ['settings-form', 'voice-form','reference-metadata-form','reference-transcript-form'].filter(id => document.getElementById(id)?.dataset?.dirty),
       savedAt: Date.now()
     };
   }
@@ -106,6 +109,8 @@
     if (!['system', ...supported].includes(mode)) return;
     const next = mode === 'system' ? detect() : mode;
     const hasFiles = [...document.querySelectorAll('input[type="file"]')].some(input => input.files?.length);
+    const transient=document.querySelector('#reference-metadata-form[data-dirty],#reference-transcript-form[data-dirty],[data-unsaved]');
+    if(next!==locale&&transient&&!window.confirm(translate('参考编辑尚未保存。请先保存，或确认放弃这些修改后切换语言。'))){document.getElementById('ui-language').value=preference;return;}
     if (next !== locale && hasFiles && !window.confirm(translate('切换语言会刷新界面。未提交的文本会保留，但文件需要重新选择。继续吗？'))) {
       document.getElementById('ui-language').value = preference;
       return;
@@ -132,6 +137,12 @@
     if (!draft) return;
     restoringDraft = true;
     try {
+    // Keep draft ownership: restoring an edit must never turn it into a new person.
+    if(draft.editing&&typeof state!=='undefined'&&state.voices.some(v=>v.id===draft.editing)){
+      state.editing=draft.editing;document.getElementById('voice-editor').hidden=false;
+      document.getElementById('voice-editor-title').textContent=translate('编辑音色 · 保存将创建新版本');
+    }
+    if(draft.referenceEditing)window.referenceLibrary?.edit(draft.referenceEditing);
     // Run after data-backed selectors have been populated, then restore text last.
     for (const [id, value] of Object.entries(draft.fields)) {
       const field = document.getElementById(id);
@@ -152,12 +163,14 @@
     if (draft.page === 'voices' && ['quick', 'library', 'references', 'design', 'processing'].includes(draft.pane))
       document.querySelector(`[data-voice-pane="${draft.pane}"]`)?.click();
     document.getElementById('gen-text')?.dispatchEvent(new Event('input'));
-    for (const id of ['settings-form', 'voice-form']) {
+    for (const id of ['settings-form', 'voice-form','reference-metadata-form','reference-transcript-form']) {
       const form = document.getElementById(id);
       if (!form?.dataset) continue;
       if (draft.dirtyForms?.includes(id)) form.dataset.dirty = 'true';
       else delete form.dataset.dirty;
     }
+    if(draft.voiceReferences&&window.referenceUI)window.referenceUI.refreshBindings({reference_ids:draft.voiceReferences.ids,reference_scenarios:draft.voiceReferences.scenes});
+    if(draft.dirtyForms?.includes('reference-transcript-form')){const confirmed=document.getElementById('reference-detail-confirmed');if(confirmed)confirmed.checked=false;}
     const unsaved = document.getElementById('settings-unsaved');
     if (unsaved) unsaved.hidden = !document.getElementById('settings-form')?.dataset?.dirty;
     draft = null;

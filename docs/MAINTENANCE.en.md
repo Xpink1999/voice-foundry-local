@@ -83,3 +83,9 @@ Core tests use synthetic test waveforms to check service contracts. Real-model o
 ## Reference and narration workflow
 
 [Reference and narration workflow](WORKFLOW_GUIDE.en.md)
+
+## Models and encoding tools
+
+Models & settings distinguishes unavailable, load-on-demand and loaded models. Missing models show a reason. Run `install-voice.cmd` in the installation folder, then choose Check models again. Existing audio does not need regeneration. Expand Diagnostic logs when needed.
+
+Export checks FFmpeg availability. Without it, WAV files can be packaged at their original sample rate and channel count. Conversion, resampling, loudness and silence processing require encoding tools. Use original WAV settings in advanced export disables post-processing.

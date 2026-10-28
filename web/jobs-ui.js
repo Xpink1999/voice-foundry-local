@@ -27,7 +27,7 @@
       if(signature!==queue.signature){queue.signature=signature;$('job-list').innerHTML=queue.items.map(j=>jobHTML(j,true)).join('')||empty(queue.archived?tr("还没有归档任务"):tr("队列空闲"),queue.archived?tr("已结束任务归档后会显示在这里，可随时恢复。"):tr("新的配音任务会显示在这里，旧任务可归档整理。"));}
       const totalPages=Math.max(1,Math.ceil(result.total/queue.size));$('task-page-info').textContent=tr("{0} {1} 项 · 第 {2} / {3} 页 · 每页 {4} 项", [queue.archived?tr("归档"):tr("当前"),result.total,queue.page+1,totalPages,queue.size]);
       $('task-prev').disabled=queue.page===0;$('task-next').disabled=queue.page+1>=totalPages;
-      $('task-archive-policy').textContent=(result.task_archive_after_days?tr("已结束任务 {0} 天后自动归档。", [result.task_archive_after_days]):tr("自动归档已关闭，可手动整理。"))+tr("归档保留音频、审核及导出记录；恢复后重新计时。可在“模型与系统”调整。");selection();
+      $('task-archive-policy').textContent=(result.task_archive_after_days?tr("已结束任务 {0} 天后自动归档。", [result.task_archive_after_days]):tr("自动归档已关闭，可手动整理。"))+' '+tr("归档保留音频、审核及导出记录；恢复后重新计时。可在“模型与系统”调整。");selection();
       batchScope.hidden=!queue.batch;if(queue.batch)$('task-batch-scope').textContent=tr('本批任务');
     }catch(error){if(sequence===queue.sequence)toast(error.message,true);}
   }

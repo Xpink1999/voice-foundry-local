@@ -59,9 +59,9 @@
   window.addEventListener('beforeunload', event => {
     saveDraft();
     if (window.VoiceI18n.changingLanguage) return;
-    if ($('settings-form').dataset.dirty || $('voice-form').dataset.dirty || [...document.querySelectorAll('input[type="file"]')].some(input => input.files?.length && !input.form?.dataset.uploaded)) {event.preventDefault(); event.returnValue = '';}
+    if (document.querySelector('form[data-dirty]') || document.querySelector('[data-unsaved]') || [...document.querySelectorAll('input[type="file"]')].some(input => input.files?.length && !input.form?.dataset.uploaded)) {event.preventDefault(); event.returnValue = '';}
   });
-  document.addEventListener('workflow-form-success', event => {event.target.dataset.uploaded = 'true'; if (event.target.id === 'settings-form') {delete event.target.dataset.dirty; $('settings-unsaved').hidden = true;}});
+  document.addEventListener('workflow-form-success', event => {event.target.dataset.uploaded = 'true'; if (event.target.id === 'settings-form'&&!event.target.dataset.changedWhilePending) {delete event.target.dataset.dirty; $('settings-unsaved').hidden = true;}});
   document.addEventListener('change', event => {if (event.target.type === 'file' && event.target.form) delete event.target.form.dataset.uploaded;});
   function route() {
     let path = state.page;

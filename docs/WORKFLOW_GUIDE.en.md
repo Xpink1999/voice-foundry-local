@@ -56,3 +56,13 @@ Batch roles match only available, unarchived voices in the row’s project. Choo
 Opening candidates from a project or task resets stale filters and preserves explicit selections, including a count of hidden selections. Search export history by project, title or filename, expand its contents and return to surviving source candidates. Deleted sources are marked unavailable. Refreshing preserves unchanged selection details.
 
 Missing models block batch submission, book continuation and retakes with a specific reason. Playback and export of existing audio remain available.
+
+## Editing, recovery and export
+
+- Open Details and transcript in Reference clips to listen, name the clip, inspect its source and permission, and correct its transcript. Editing clears the confirmation. Saved changes affect future tasks only.
+- Hidden selections are counted across filters and pages. Inspect the selected list or clear it before adding clips to a voice.
+- Reloading restores the latest voice-design sample task in this tab. Standard candidates can also be saved as voice references. Listening and approval remain manual.
+- Edit archived voices and return them to Draft before generating. Using a clip directly chooses a cloning model and clears the previous voice’s delivery description.
+- Models & settings shows missing-model reasons and installation instructions. Choose Check models again after installation. Diagnostic logs start collapsed.
+- Without FFmpeg, WAV export must keep the original sample rate and channels. Choose Use original WAV settings in advanced export. Conversion, resampling, loudness and silence processing require encoding tools.
+- Old responses cannot replace a newly selected voice, book, chapter or asset category. Changes made during saving remain unsaved drafts.

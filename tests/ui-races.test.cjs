@@ -56,8 +56,9 @@ test('delete preview responses remain tied to the latest requested asset selecti
 
 test('chapter playback ignores a first-audio response after navigation', async () => {
   const source=read('longform-ui.js'),line=source.split('\n').find(line=>line.includes("$('lf-play-chapter').onclick="));
-  const request=deferred(),button={},view={sequence:1,book:'book',chapter:1},state={page:'longform'};
-  vm.runInNewContext(line,{view,state,$:()=>button,action:fn=>fn,api:()=>request.promise,playSegment:()=>assert.fail('stale chapter played'),tr:label=>label});
+  const request=deferred(),button={isConnected:true},view={sequence:1,book:'book',chapter:1,signatures:{}},state={page:'longform'};
+  const start=source.indexOf(' const pendingActions='),end=source.indexOf(" $('lf-resume').onclick=",start);
+  vm.runInNewContext(source.slice(start,end)+line,{view,state,$:()=>button,api:()=>request.promise,sync:async()=>{},toast:()=>assert.fail('unexpected error'),playSegment:()=>assert.fail('stale chapter played'),tr:label=>label});
   const pending=button.onclick();state.page='studio';request.resolve({item:{no:1}});await pending;
 });
 

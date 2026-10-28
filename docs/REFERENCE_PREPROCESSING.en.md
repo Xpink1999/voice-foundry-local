@@ -111,3 +111,9 @@ The script creates `runtime/diarization-env`, reuses the platform's compatible P
 ## Reference and narration workflow
 
 [Reference and narration workflow](WORKFLOW_GUIDE.en.md)
+
+## Correct transcripts in the library
+
+Open Details and transcript to listen, change names and scenarios, inspect source permission and correct the transcript for Hi-Fi. Metadata and transcripts save separately. Editing a transcript clears its confirmation. Save reference edits before changing language, or explicitly discard them.
+
+Selections hidden by filters or other pages are counted. Inspect the selected list before attaching clips, creating a voice or deleting. Clear selection also clears hidden items. Failed audio processing can be retried with the same settings; originals and earlier results remain available.

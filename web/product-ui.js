@@ -208,5 +208,6 @@
   window.addEventListener('voice-context-change',refreshTabs);refreshTabs();
   window.addEventListener('voice-data-ready',()=>{updateReferenceVisibility();decorateEmpty();syncSelectionDock();});
   document.addEventListener('workflow-form-settled',decorateEmpty);
+  const log=$('system-logs');if(log){const section=log.closest('.panel');if(section){const fold=document.createElement('details');fold.className='panel diagnostics-fold';const summary=document.createElement('summary');summary.textContent=tr('诊断日志');fold.append(summary,log);section.replaceWith(fold);}}
   decorateEmpty();
 })();

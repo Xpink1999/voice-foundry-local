@@ -131,5 +131,7 @@
   window.addEventListener('voice-page-change', event => {if (event.detail.page !== 'review') stopComparison();});
   window.addEventListener('pagehide',stopComparison);
   window.reviewPlayback = {stop: stopComparison};
+  const renderWithReferences=renderResults;renderResults=function(){renderWithReferences();document.querySelectorAll('#result-list [data-result]').forEach(card=>{const button=document.createElement('button');button.type='button';button.className='text-link';button.dataset.resultReference=card.dataset.result;button.textContent=tr('保存为人物参考');card.querySelector('.result-buttons').append(button);});};
+  document.addEventListener('click',async event=>{const button=event.target.closest('[data-result-reference]');if(!button||button.disabled)return;button.disabled=true;try{await window.voiceWorkspace.createFromResult(button.dataset.resultReference);}catch(error){toast(error.message,true);}finally{button.disabled=false;}});
   counts(); approvalButtons();
 })();

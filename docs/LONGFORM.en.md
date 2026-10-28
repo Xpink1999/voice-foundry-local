@@ -123,3 +123,7 @@ Online database backups include the long-form indexes and recycle-bin metadata. 
 ## Reference and narration workflow
 
 [Reference and narration workflow](WORKFLOW_GUIDE.en.md)
+
+## Switching books and retrying
+
+Retry, resume, issue handling and review stay attached to the book and chapter selected when clicked. Old responses cannot replace a newly opened book. Failed version-page requests leave the last successful page available for another attempt. Switching books clears old issue rows, preventing actions on another book’s segment with the same number.

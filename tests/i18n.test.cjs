@@ -5,7 +5,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 const web = path.join(__dirname, '../web');
 
-function page({languages = ['zh-CN'], saved, blocked = false, fields = [], files = [], confirm = true, forms = {}, initialDraft} = {}) {
+function page({languages = ['zh-CN'], saved, blocked = false, fields = [], files = [], confirm = true, forms = {}, initialDraft, appState} = {}) {
   const handlers = {}, values = new Map(saved ? [['voice-foundry-language', saved]] : []);
   const session = new Map(initialDraft ? [['voice-foundry-language-draft', JSON.stringify(initialDraft)]] : []);
   const storage = map => ({
@@ -22,7 +22,7 @@ function page({languages = ['zh-CN'], saved, blocked = false, fields = [], files
   };
   const window = {addEventListener(name, callback) {handlers[name] = callback;}, confirm: () => confirm};
   const context = vm.createContext({window, document, navigator: {languages}, location,
-    localStorage: storage(values), sessionStorage: storage(session), URL, URLSearchParams, Event});
+    ...(appState?{state:appState,updateSelection(){}}:{}),localStorage: storage(values), sessionStorage: storage(session), URL, URLSearchParams, Event});
   vm.runInContext(fs.readFileSync(path.join(web, 'translations.js'), 'utf8'), context);
   vm.runInContext(fs.readFileSync(path.join(web, 'i18n.js'), 'utf8'), context);
   return {i18n: window.VoiceI18n, values, session, location, handlers};
@@ -171,4 +171,15 @@ test('all four catalogs have matching nonempty messages and placeholders', () =>
     for (const match of source.matchAll(/\btr\(("(?:[^"\\]|\\.)*")/g))
       assert.ok(Object.hasOwn(catalogs['zh-CN'], JSON.parse(match[1])), `${filename}: ${match[1]}`);
   }
+});
+
+
+test('language switch keeps voice draft ownership so editing cannot create a duplicate person',()=>{
+ const field={id:'voice-name',type:'text',tagName:'INPUT',value:'Unsaved name'};
+ const appState={editing:'voice-a',voices:[{id:'voice-a'}],results:[],selected:new Set()};
+ const captured=page({saved:'en',fields:[field],forms:{'voice-form':{dataset:{dirty:'true'}}},appState});captured.i18n.changeLanguage('ja');
+ const draft=JSON.parse(captured.session.get('voice-foundry-language-draft'));assert.equal(draft.editing,'voice-a');assert.equal(draft.fields['voice-name'],'Unsaved name');
+ const restoredState={editing:null,voices:[{id:'voice-a'}],results:[],selected:new Set()},editor={hidden:true},title={};
+ const restored=page({saved:'ja',fields:[{...field,value:'Old name'}],forms:{'voice-form':{dataset:{}},'voice-editor':editor,'voice-editor-title':title},initialDraft:draft,appState:restoredState});restored.handlers['voice-data-ready']();
+ assert.equal(restoredState.editing,'voice-a');assert.equal(editor.hidden,false);assert.match(title.textContent,/新しい|新|版/);
 });

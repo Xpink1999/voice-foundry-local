@@ -74,3 +74,5 @@
 
 - `web/export-library-ui.js`：导出历史搜索、包内清单、来源回看与折叠新建设置。
 - `web/workflow.js`：按项目解析批量角色，统一模型就绪判定及批次／所选范围路由。
+
+- `web/export-support-ui.js`：查询编码工具可用性，约束转换选项并提供原始 WAV 设置；不读取或修改模型。

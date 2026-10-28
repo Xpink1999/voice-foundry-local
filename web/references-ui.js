@@ -8,7 +8,9 @@
  let editingReference=null,generationVoice=null;
  const refName=r=>tr("{0} · {1} 秒{2}", [r.name||r.source_label||r.original_name,r.duration.toFixed(1),r.transcript?.text?' · '+r.transcript.text.slice(0,18)+(r.transcript.text.length>18?'…':''):'']);
  function refreshBindings(voice){
-  const specified=voice!==undefined,previous=specified?[...(voice?.reference_ids||[]),voice?.reference_id].filter(Boolean):[...binding.querySelectorAll('[data-bound-ref]:checked')].map(el=>el.dataset.boundRef);
+  const specified=voice!==undefined,signature=JSON.stringify([state.references,$('voice-reference').value]);
+  if(!specified&&binding._referenceSignature===signature)return;binding._referenceSignature=signature;
+  const previous=specified?[...(voice?.reference_ids||[]),voice?.reference_id].filter(Boolean):[...binding.querySelectorAll('[data-bound-ref]:checked')].map(el=>el.dataset.boundRef);
   const main=$('voice-reference').value;if(main&&!previous.includes(main))previous.push(main);
   const scenes=specified?(voice?.reference_scenarios||{}):Object.fromEntries([...binding.querySelectorAll('[data-ref-scene]')].map(el=>[el.dataset.refScene,el.value]));
   const query=binding.querySelector('[data-binding-search]')?.value||'';
@@ -19,7 +21,7 @@
  function updateGeneration(voice){
   const select=$('gen-reference'),voiceID=voice?.id||'',old=generationVoice===voiceID?select.value:'';generationVoice=voiceID;const allowed=voice?new Set([...(voice.reference_ids||[]),voice.reference_id].filter(Boolean)):null;
   const refs=state.references.filter(r=>!allowed||allowed.has(r.id));
-  select.innerHTML=("<option value=\"\">"+tr("自动使用人物默认参考")+"</option>")+refs.map(r=>`<option value="${r.id}">${e([voice?.reference_scenarios?.[r.id]||r.scenario,refName(r)].filter(Boolean).join(' · '))}</option>`).join('');if(refs.some(r=>r.id===old))select.value=old;
+  setOptions(select,refs.map(r=>({id:r.id,name:[voice?.reference_scenarios?.[r.id]||r.scenario,refName(r)].filter(Boolean).join(' · ')})),tr('自动使用人物默认参考'));select.value=refs.some(r=>r.id===old)?old:'';
   const caps=state.models.find(m=>m.id===$('gen-engine').value)?.capabilities;$('gen-clone-mode').querySelector('[value="hifi"]').disabled=!caps?.hifi_cloning;if(!caps?.hifi_cloning)$('gen-clone-mode').value='reference';updateNote();
  }
  function updateNote(){
@@ -28,6 +30,7 @@
   const hifiOption=$('gen-clone-mode').querySelector('[value=hifi]');hifiOption.disabled=!caps?.hifi_cloning||!ref;if(hifiOption.disabled&&$('gen-clone-mode').value==='hifi')$('gen-clone-mode').value='reference';const hifi=$('gen-clone-mode').value==='hifi'&&!caps?.hifi_style_control;$('gen-style').disabled=hifi||!caps?.voice_design;document.querySelectorAll('[data-style]').forEach(b=>b.disabled=$('gen-style').disabled);
   $('gen-reference-note').textContent=ref?`${refName(ref)}。${ref.transcript?.text?(ref.transcript.confirmed?tr("转写已确认。"):tr("转写为草稿，请校对。")):tr("极致克隆需要参考音频的精确转写。")}`:tr("选择人物主参考，或即兴设计新声音。");if(!hifi&&ref)$('gen-reference-note').textContent+=tr(" 可在声音与演绎描述中输入情绪、语速或风格，效果为近似控制。");if(hifi)$('gen-reference-note').textContent+=tr(" 极致克隆沿用参考演绎，不叠加风格指令；需控制语气时切换可控声音克隆。");
  }
+ $('gen-reference-transcript').addEventListener('input',()=>{$('gen-reference-transcript-confirmed').checked=false;});
  $('gen-save-transcript').onclick=async()=>{if(!editingReference)return;try{await api('/references/'+editingReference+'/transcript',{method:'PUT',body:{text:$('gen-reference-transcript').value,confirmed:$('gen-reference-transcript-confirmed').checked}});$('gen-transcript-status').textContent=tr("本次参考转写已保存；已提交的长文和任务仍保留原版本。");await refresh(true);}catch(error){$('gen-transcript-status').textContent=error.message;}};
  $('gen-reference').onchange=updateNote;$('gen-clone-mode').onchange=updateNote;$('gen-engine').addEventListener('change',()=>updateGeneration(state.voices.find(v=>v.id===$('gen-voice').value)));
  window.referenceUI={refreshBindings,updateGeneration,selectedIDs:()=>[...binding.querySelectorAll('[data-bound-ref]:checked')].map(el=>el.dataset.boundRef),scenarios:()=>Object.fromEntries([...binding.querySelectorAll('[data-bound-ref]:checked')].map(el=>[el.dataset.boundRef,binding.querySelector(`[data-ref-scene="${el.dataset.boundRef}"]`).value]).filter(([,v])=>v.trim()))};
